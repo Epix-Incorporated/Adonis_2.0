@@ -35,14 +35,14 @@ local Root = {
 
 --// Client Loading Process
 do
+	--// Set variables
+	local start = os.clock();
+	
 	--// Set parent
 	repeat wait(0.01); script.Parent = nil; until script.Parent == nil
 	
 	--// Begin loading
 	warn("Loading packages...");
-
-	--// Set variables
-	local start = os.clock();
 
 	--// Get all packages
 	addRange(Root.Packages, script.Packages:GetChildren());
