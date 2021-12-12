@@ -238,13 +238,12 @@ local Utilities = {
 			return tim:FormatUniversalTime(formatString, "en-gb") -- Always show UTC in 24 hour format
 		else
 			local locale = self.Services.Players.LocalPlayer.LocaleId
-			local succes,err = pcall(function()
+			local success, res = xpcall(function()
 				return tim:FormatLocalTime(formatString, locale) -- Show in player's local timezone and format
+			end, function()
+				return tim:FormatLocalTime(formatString, "en-gb") -- show UTC in 24 hour format because player's local timezone is not available in DateTimeLocaleConfigs		
 			end)
-			
-			if err then
-				return tim:FormatLocalTime(formatString, "en-gb") -- show UTC in 24 hour format because player's local timezone is not available in DateTimeLocaleConfigs
-			end
+			return res
 		end
 	end,
 	
