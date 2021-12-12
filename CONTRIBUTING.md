@@ -6,7 +6,7 @@ Adonis is an ever expanding, frequently updated, slightly complicated, system. I
 
 Anything within reason! Contributions can be to Adonis itself or the wiki (or both!) As long as your addition is useful and doesn't break something, and makes sense (while not violating ROBLOX's rules) it will *probably* be merged, however occasionally I might deem something unneccessary or incomplete, at which point I'll *probably* comment on the request for you to respond (or just so you know my reasoning.)
 
-## What can't I contribute?
+## What can't I contribute? 
 
 Anything that violates ROBLOX's rules (as in, anything that could get me/Adonis in trouble) is not allowed for obvious reasons. Also, please do not submit obfuscated code. If I cannot see/read/understand your contribution, I can't be sure it's not doing anything malicious (and can't debug it later if something happens) and will just close the request.
 
