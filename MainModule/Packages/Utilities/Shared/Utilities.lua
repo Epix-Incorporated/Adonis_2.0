@@ -3,7 +3,7 @@
 	Description: Various utility items and methods used by both the client and server.
 	Author: Sceleratis
 	Date: 12/04/2021
-	
+
 --]]
 
 local Root = {}
@@ -54,7 +54,7 @@ local ObjectMethods = {
 			end
 		end;
 	},
-	
+
 	Task = {
 		Trigger = function(self, ...)
 			self.Event:Fire(...)
@@ -163,13 +163,13 @@ local Tasks = table.freeze{
 local Utilities = {
 	Tasks = Tasks,
 	RandomString = RandomString,
-	
+
 	Services = table.freeze(setmetatable({}, {
 		__index = function(self, ind)
 			return Cache.KnownServices[ind] or game:GetService(ind);
 		end,
 	})),
-	
+
 	Events = table.freeze(setmetatable({},{
 		__index = function(self, EventName)
 			local methods = ObjectMethods.Event;
@@ -181,10 +181,10 @@ local Utilities = {
 			}
 		end
 	})),
-	
+
 	CreateInstance = function(self, ClassName, Properties)
 		local newObj = Instance.new(ClassName);
-		
+
 		if Properties then
 			if typeof(Properties) == "Instance" then
 				newObj.Parent = Properties;
@@ -192,15 +192,15 @@ local Utilities = {
 				local parent = Properties.Parent;
 				local events = Properties.Events;
 				local children = Properties.Children;
-				
+
 				Properties.Parent = nil;
 				Properties.Events = nil;
 				Properties.Children = nil;
-				
+
 				for prop,value in pairs(Properties) do
 					newObj[prop] = value
 				end
-				
+
 				if children then
 					for i,child in pairs(children) do
 						child.Parent = newObj;
@@ -210,7 +210,7 @@ local Utilities = {
 				if parent then
 					newObj.Parent = parent;
 				end
-				
+
 				if events then
 					for name,func in pairs(events) do
 						newObj[name]:Connect(func);
@@ -218,14 +218,14 @@ local Utilities = {
 				end
 			end
 		end
-		
+
 		return newObj;
 	end,
-	
+
 	IsServer = function(self)
 		return self.Services.RunService:IsServer();
 	end,
-	
+
 	GetTime = function(self)
 		return os.time();
 	end,
@@ -233,7 +233,7 @@ local Utilities = {
 	GetFormattedTime = function(self, optTime, withDate)
 		local formatString = withDate and "L LT" or "LT"
 		local tim = DateTime.fromUnixTimestamp(optTime or self.GetTime())
-		
+
 		if self:IsServer() then
 			return tim:FormatUniversalTime(formatString, "en-gb") -- Always show UTC in 24 hour format
 		else
@@ -241,32 +241,32 @@ local Utilities = {
 			local success, res = xpcall(function()
 				return tim:FormatLocalTime(formatString, locale) -- Show in player's local timezone and format
 			end, function()
-				return tim:FormatLocalTime(formatString, "en-gb") -- show UTC in 24 hour format because player's local timezone is not available in DateTimeLocaleConfigs		
+				return tim:FormatLocalTime(formatString, "en-gb") -- show UTC in 24 hour format because player's local timezone is not available in DateTimeLocaleConfigs
 			end)
 			return res
 		end
 	end,
-	
+
 	AddRange = function(self, tab, ...)
-		table.foreachi(table.pack(...), function(i,t)
-			table.foreachi(t, function(k,v)
+		for i,t in ipairs(table.pack(...))) do
+			for k,v in ipairs(t) do
 				table.insert(tab, v)
-			end)
-		end)
-		
-		return tab;
-	end,
-	
-	MergeTables = function(self, tab, ...)
-		table.foreachi(table.pack(...), function(i,t)
-			table.foreachi(t, function(k,v)
-				tab[k] = v
-			end)
-		end)
+			end
+		end
 
 		return tab;
 	end,
-	
+
+	MergeTables = function(self, tab, ...)
+		for i,t in ipairs(table.pack(...))) do
+			for k,v in pairs(t) do
+				tab[k] = v
+			end
+		end
+
+		return tab;
+	end,
+
 	Encrypt = function(self, str, key, cache)
 		cache = cache or Cache.Encrypt
 
@@ -290,7 +290,7 @@ local Utilities = {
 			endStr = table.concat(endStr)
 			cache[key] = keyCache
 			keyCache[str] = endStr
-			
+
 			return endStr
 		end
 	end;
@@ -317,7 +317,7 @@ local Utilities = {
 			endStr = table.concat(endStr)
 			cache[key] = keyCache
 			keyCache[str] = endStr
-			
+
 			return endStr
 		end
 	end;
@@ -333,7 +333,7 @@ return table.freeze {
 		else
 			Root.Utilities = Utilities;
 		end
-		
+
 		Root.Events = Utilities.Events;
 		Root.Services = Utilities.Services;
 	end;
