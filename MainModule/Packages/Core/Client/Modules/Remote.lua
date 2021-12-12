@@ -89,7 +89,7 @@ local Remote = {
 		end
 	end,
 
-	Get = function(self, cmd, ...)
+	Get = function(self, cmd, ...) 
 		local curEvent = self:WaitForEvent();
 		if curEvent then
 			local cmd = Utilities:Encrypt(cmd, self.SharedKey);
