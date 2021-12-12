@@ -9,6 +9,12 @@
 
 local Root, Utilities, Service, Package;
 
+local RemoteCommands = {
+	GUI = function(...)
+		return Root.UI:NewElement(...);
+	end;
+}
+
 local UI = {
 	DeclaredThemes = {};
 	ActiveObjects = {};
@@ -53,6 +59,7 @@ local UI = {
 				if configMod and configMod:IsA("ModuleScript") then
 					local config = require(configMod);
 					if config and type(config) == "table" then
+						--// Todo
 					end
 				else
 					Root.Warn("Config not found for:", uiName);
@@ -74,6 +81,7 @@ return {
 
 		--// Do init
 		Root.UI = UI
+		Utilities.MergeTables(Root.Remote.Commands, RemoteCommands)
 	end;
 
 	AfterInit = function(Root, Package)
