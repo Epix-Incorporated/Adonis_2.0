@@ -32,7 +32,7 @@ local Bytecode = {
 	end,
 	
 	--// Load bytecode
-	LoadBytecode = function(self, bytecode: string, envData: table)
+	LoadBytecode = function(self, bytecode: string, envData: {})
 		local fiOneMod = Package.SharedAssets.FiOne:Clone();
 		local fiOne = require(fiOneMod);
 		

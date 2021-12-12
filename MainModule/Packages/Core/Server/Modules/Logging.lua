@@ -55,7 +55,7 @@ local Logging = {
 }
 
 return {
-	Init = function(cRoot: table, cPackage: Folder)
+	Init = function(cRoot: {}, cPackage: Folder)
 		Root = cRoot
 		Package = cPackage
 		Utilities = Root.Utilities

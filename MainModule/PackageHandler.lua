@@ -65,7 +65,7 @@ end
 
 --// For a given folder, returns a list of all packages within that folder which are intended to be ran by the server
 --// Result table format: {[name .. "==" .. version] = package }
-local function GetServerPackages(Packages: table)
+local function GetServerPackages(Packages: {})
 	local found = {}
 
 	debug("GET SERVER PACKAGES")
@@ -94,7 +94,7 @@ end
 
 --// For a given folder, returns a list of all packages within that folder which are intended to be ran by the client
 --// Result table format: {[name .. "==" .. version] = package }
-local function GetClientPackages(Packages: table)
+local function GetClientPackages(Packages: {})
 	local found = {}
 	for i,v in ipairs(Packages) do
 		if v:FindFirstChild("Client") then
@@ -113,7 +113,7 @@ end
 
 --// Given a list of packages, this method will remove anything matching the provided "Remove" string and return a list of package clones without the removed object
 --// This is primarily used to strip the "Server" folder from packages which are shared by the server and client before sending said packages to the client
-local function StripPackages(Packages: table, Remove: string)
+local function StripPackages(Packages: {}, Remove: string)
 	local found = {}
 	for i,v in pairs(Packages) do
 		local metadata = GetMetadata(v)
@@ -137,7 +137,7 @@ end
 --// Given a list of packages (Packages), a package name (DepedencyName), and a package version (DepdencyVersion)
 --// Checks if any packages in the provided package list match the provided name and version
 --// This is used during dependency resolution
-local function FindDependency(Packages: table, DependencyName: string, DependencyVersion) 
+local function FindDependency(Packages: {}, DependencyName: string, DependencyVersion) 
 	debug("FIND DEPENDENCY: ", Packages, DependencyName, DependencyVersion)
 
 	for pkgString, pkg in pairs(Packages) do
@@ -158,7 +158,7 @@ end
 
 --// Given a list of packages (Packages) and a package (Package) checks if the package's depdencies are in the given package list
 --// This is used when loading packages to check if a given package's dependencies were correctly resolved and loaded before attempting to load the package that needs them
-local function CheckDependencies(Packages: table, Package: Folder)
+local function CheckDependencies(Packages: {}, Package: Folder)
 	local metadata = GetMetadata(Package)
 	local dependencies = metadata.Dependencies
 	
@@ -183,7 +183,7 @@ local function CheckDependencies(Packages: table, Package: Folder)
 end
 
 --// Given an ordered table of packages, checks if any packages match PackageName and PackageVersion
-local function CheckResults(Ready: table, PackageName: string, PackageVersion)
+local function CheckResults(Ready: {}, PackageName: string, PackageVersion)
 	for i,package in ipairs(Ready) do
 		local metadata = GetMetadata(package)
 		if metadata.Name == PackageName and (not PackageVersion or metadata.Version == PackageVersion) then
@@ -194,7 +194,7 @@ local function CheckResults(Ready: table, PackageName: string, PackageVersion)
 end
 
 --// Recursively handles dependency resolution
-local Resolve; Resolve = function(Packages: table, ResultList: table, Package: Folder, Chain)
+local Resolve; Resolve = function(Packages: {}, ResultList: {}, Package: Folder, Chain)
 	debug("RESOLVING: ", Package, Chain)
 
 	local metadata = GetMetadata(Package)
@@ -243,7 +243,7 @@ end
 
 --// Given a table of packages (Packages), Resolves package dependencies and produces an ordered list the places packages after all of their dependencies
 --// The results of this method determine load order, based on depedency resolution
-local function GetOrderedPackageList(Packages: table)
+local function GetOrderedPackageList(Packages: {})
 	local ResultList = {}
 	
 	debugLine()
@@ -284,7 +284,7 @@ local function InitPackage(Package: Folder, PackageType: string, ...)
 end
 
 --// Given a table of packages, performs dependency resolution and loads all packages provided matching PackageType in order.
-local function LoadPackages(Packages: table, PackageType: string, ...)
+local function LoadPackages(Packages: {}, PackageType: string, ...)
 	local initFuncs = {}
 	local loadedPackages = {}
 	

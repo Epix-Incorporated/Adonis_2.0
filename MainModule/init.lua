@@ -1,5 +1,5 @@
 --[[
-	
+
 	Description: Responsible for initializing server-side packages
 	Author: Sceleratis
 	Date: 12/05/2021
@@ -40,7 +40,7 @@ local Root = {
 }
 
 --// Returns to the loader
-return function(Loader: table, Settings: table, Packages: Folder)
+return function(Loader: {}, Settings: {}, Packages: Folder)
 	--// Begin loading
 	warn("Loading packages...");
 
@@ -49,7 +49,7 @@ return function(Loader: table, Settings: table, Packages: Folder)
 
 	--// Get PackageHandler
 	local PackageHandler = require(Root.PackageHandlerModule);
-	
+
 	--// Set Root table variables
 	Root.PackageHandler = PackageHandler;
 	Root.Settings = Settings;
@@ -57,15 +57,15 @@ return function(Loader: table, Settings: table, Packages: Folder)
 
 	--// Get all packages
 	addRange(Root.Packages, script.Packages:GetChildren(), Packages:GetChildren());
-	
+
 	--// Get server packages
 	local Packages = PackageHandler.GetServerPackages(Root.Packages);
-	
+
 	--// Load server packages
 	PackageHandler.LoadPackages(Packages, "Server", Root, Packages);
-	
+
 	--// Loading complete
 	warn("Loading complete; Elapsed:", os.clock() - start);
-	
+
 	return true;
 end
