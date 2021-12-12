@@ -193,7 +193,7 @@ local Remote = {
 					local returnedData = nil;
 
 					--// Run it in a pcall, if it errors, it's probably no good
-					local ran,returnedRData = pcall(function()
+					local ran,returnedData = pcall(function()
 						return table.unpack(self.CurrentEvent.RemoteFunction:InvokeServer(cmd, {rawValue}))
 					end)
 

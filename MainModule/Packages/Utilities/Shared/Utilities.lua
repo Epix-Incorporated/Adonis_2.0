@@ -225,7 +225,7 @@ local Utilities = {
 	IsServer = function(self): boolean
 		return self.Services.RunService:IsServer();
 	end,
-		
+
 	IsClient = function(self): boolean
 		return self.Services.RunService:IsClient();
 	end,
@@ -252,7 +252,7 @@ local Utilities = {
 	end,
 
 	AddRange = function(self, tab, ...)
-		for i,t in ipairs(table.pack(...))) do
+		for i,t in ipairs(table.pack(...)) do
 			for k,v in ipairs(t) do
 				table.insert(tab, v)
 			end
@@ -262,7 +262,7 @@ local Utilities = {
 	end,
 
 	MergeTables = function(self, tab, ...)
-		for i,t in ipairs(table.pack(...))) do
+		for i,t in ipairs(table.pack(...)) do
 			for k,v in pairs(t) do
 				tab[k] = v
 			end
@@ -354,7 +354,7 @@ local Utilities = {
 			success, result = pcall(func, triesMade)
 			if not success then task.wait(timeBeforeRetry or 0) end
 		until success or triesMade >= tries
-		if not success and errAction then 
+		if not success and errAction then
 			result = errAction(result)
 		elseif success and sucessAction then
 			result = sucessAction(result)

@@ -29,6 +29,10 @@ local oWarn = warn;
 
 local function warn(...)
 	oWarn(":: Adonis Client ::", ...)
+
+	if RootTable and RootTable.Utilities then
+		RootTable.Utilities.Events.Warning:Fire(...)
+	end
 end
 
 local function debug(...)
@@ -69,6 +73,7 @@ return {
 		RootTable = Root
 		Verbose = if Root.Verbose ~= nil then Root.Verbose else Verbose
 		Root.DebugWarn = debug
+		Root.Warn = warn
 
 		--// Load modules
 		for i,module in ipairs(Package.Modules:GetChildren()) do

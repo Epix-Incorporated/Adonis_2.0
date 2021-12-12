@@ -11,7 +11,7 @@ local PackageFolder = script.Parent.Parent
 local Package = {
 	Package = PackageFolder;
 	Metadata = require(PackageFolder.Metadata);
-	
+
 	Server = PackageFolder.Server;
 	Client = PackageFolder.Client;
 	Shared = PackageFolder.Shared;
@@ -26,7 +26,11 @@ local InitFunctions = {}
 local oWarn = warn;
 
 local function warn(...)
-	oWarn(":: Adonis ::", ...)
+	if RootTable and RootTable.Warn then
+		RootTable.Warn(...)
+	else
+		oWarn(":: Adonis ::", ...)
+	end
 end
 
 local function debug(...)
@@ -36,7 +40,7 @@ local function debug(...)
 end
 
 --// Runs the given function and outputs any errors
-local function RunFunction(Function, ...) 
+local function RunFunction(Function, ...)
 	xpcall(Function, function(err)
 		warn("Error while running function; Expand for more info", {Error = tostring(err), Raw = err})
 	end, ...)
@@ -46,7 +50,7 @@ end
 --// If a table is returned, assume deferred execution
 local function LoadModule(Module: ModuleScript, ...)
 	local ran,func = pcall(require, Module)
-	
+
 	if ran then
 		if type(func) == "function" then
 			RunFunction(func, ...)
@@ -62,27 +66,27 @@ end
 return {
 	Init = function(Root, Packages)
 		debug("INIT " .. Package.Metadata.Name .. " PACKAGE")
-		
+
 		--// Init
 		RootTable = Root
 		Verbose = if Root.Verbose ~= nil then Root.Verbose else Verbose
-		
+
 		--// Load shared modules
 		for i,module in ipairs(Package.Shared:GetChildren()) do
 			LoadModule(module, Root, Package)
 		end
-		
+
 		--// Run init methods
 		for i,t in ipairs(InitFunctions) do
 			if t.Init then
 				RunFunction(t.Init, Root, Package)
 			end
 		end
-		
+
 		debug("INIT " .. Package.Metadata.Name .. " PACKAGE FINISHED")
 	end;
-	
+
 	AfterInit = function(Root, Packages)
-		
+
 	end;
 }

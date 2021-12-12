@@ -25,7 +25,11 @@ local InitFunctions = {}
 local oWarn = warn;
 
 local function warn(...)
-	oWarn(":: Adonis Client ::", ...)
+	if RootTable and RootTable.Warn then
+		RootTable.Warn(...)
+	else
+		oWarn(":: Adonis Client ::", ...)
+	end
 end
 
 local function debug(...)

@@ -34,6 +34,10 @@ local oWarn = warn;
 
 local function warn(...)
 	oWarn(":: Adonis ::", ...)
+
+	if RootTable and RootTable.Utilities then
+		RootTable.Utilities.Events.Warning:Fire(...)
+	end
 end
 
 local function debug(...)

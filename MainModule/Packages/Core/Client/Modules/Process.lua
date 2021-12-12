@@ -26,18 +26,12 @@ local Process = {
 		Events.PlayerAdded:Fire(p);
 	end,
 
-	PlayerReady = function(self, p)
-		Events.PlayerReady:Fire(p);
-	end,
-
 	PlayerRemoving = function(self, p)
 		Events.PlayerRemoving:Fire(p);
 	end,
 
 	PlayerRemoved = function(self, p)
-		if p and p:IsA("Player") then
-			Events.PlayerRemoved:Fire(p);
-		end
+		Events.PlayerRemoved:Fire(p);
 	end,
 
 	CharacterAdded = function(self, p, c)
@@ -46,14 +40,6 @@ local Process = {
 
 	CharacterRemoving = function(self, p, c)
 		Events.CharacterRemoving:Fire(p, c);
-	end,
-
-	NetworkAdded = function(self, cli)
-		Events.NetworkAdded:Fire(cli);
-	end,
-
-	NetworkRemoved = function(self, cli)
-		Events.NetworkRemoved:Fire(cli);
 	end,
 
 	LogMessage = function(self, msg, msgType, ...)
@@ -74,21 +60,14 @@ local function PlayerRemoving(...)
 end
 
 local function PlayerRemoved(...)
-	Process:PlayerRemoved(...);
-end
-
-local function NetworkAdded(...)
-	Process:NetworkAdded(...);
-end
-
-local function NetworkRemoved(...)
-	Process:NetworkRemoved(...);
+	if p and p:IsA("Player") then
+		Process:PlayerRemoved(...);
+	end
 end
 
 local function LogMessage(...)
-	Process:LogMessage(...)
+	Process:LogMessage(...);
 end
-
 
 return {
 	Init = function(cRoot, cPackage)
@@ -107,10 +86,5 @@ return {
 		EventConnections.PlayerRemoving = Service.Players.PlayerRemoving:Connect(PlayerRemoving);
 		EventConnections.PlayerRemoved = Service.Players.ChildRemoved:Connect(PlayerRemoved);
 		EventConnections.LogMessage = Service.LogService.MessageOut:Connect(LogMessage);
-
-		if Service.NetworkServer then
-			EventConnections.NetworkAdded = Service.NetworkServer.ChildAdded:Connect(NetworkAdded);
-			EventConnections.NetworkRemoving = Service.NetworkServer.ChildRemoved:Connect(NetworkRemoved);
-		end
 	end;
 }
