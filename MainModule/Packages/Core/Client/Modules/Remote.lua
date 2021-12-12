@@ -9,9 +9,9 @@
 
 local Package;
 local Utilities;
+local Service;
 local Root;
 
-local service;
 
 local GettingEvent = false;
 local PlayerData = {};
@@ -155,7 +155,7 @@ local Remote = {
 			local rEvent = curEvent.RemoteEvent;
 			local rFunction = curEvent.RemoteFunction;
 
-			if c == "OnClientInvoke" or (rEvent.Parent ~= service.ReplicatedStorage or rFunction.Parent ~= service.ReplicatedStorage) then
+			if c == "OnClientInvoke" or (rEvent.Parent ~= Service.ReplicatedStorage or rFunction.Parent ~= Service.ReplicatedStorage) then
 				self:SetupRemote();
 			elseif rEvent.Name ~= self.EventObjectsName or rFunction.Name ~= self.EventObjectsName then
 				rEvent.Name = self.EventObjectsName;
@@ -177,7 +177,7 @@ local Remote = {
 			repeat
 
 				--// Scan for our RemoteEvent and RemoteFunction
-				for i,child in ipairs(service.ReplicatedStorage:GetChildren()) do
+				for i,child in ipairs(Service.ReplicatedStorage:GetChildren()) do
 					if child.Name == self.EventObjectsName and not objBlacklist[child] then
 						if child:IsA("RemoteEvent") then
 							self.CurrentEvent.RemoteEvent = child
@@ -243,12 +243,10 @@ local Remote = {
 
 return {
 	Init = function(cRoot, cPackage)
-
 		Root = cRoot
 		Package = cPackage
 		Utilities = Root.Utilities
-
-		service = Utilities.Services
+		Service = Utilities.Services
 
 		Root.Remote = Remote;
 	end;
@@ -259,8 +257,8 @@ return {
 
 		Remote.EventObjectsName = objNameValue.Value;
 		Remote.SharedKey = sharedKeyValue.Value;
-		Remote:SetupRemote();
 
+		Remote:SetupRemote();
 		Remote:Send("ClientReady");
 
 		Utilities.Events.ClientReady:Fire();
