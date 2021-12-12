@@ -8,7 +8,6 @@
 
 			"Adonis2.0_Rojo": {
 				"$className": "Folder",
-
 				"MainModule": {
 					"$path": "MainModule"
 				},
