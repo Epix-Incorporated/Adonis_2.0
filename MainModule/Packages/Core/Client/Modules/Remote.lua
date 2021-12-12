@@ -12,7 +12,6 @@ local Utilities;
 local Service;
 local Root;
 
-
 local GettingEvent = false;
 local PlayerData = {};
 local Sessions = {};
@@ -28,12 +27,11 @@ local RemoteCommands = {
 				end
 			end
 		end
-	end;
+	end,
 
 	LoadCode = function(str, ...)
 		return Root.Bytecode:LoadBytecode(str, nil)(...);
 	end,
-
 }
 
 --// Methods
