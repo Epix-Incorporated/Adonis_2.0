@@ -1,6 +1,6 @@
 --[[
 
-	Description: Responsible for initializing the server portion of the 'Utilities' package.
+	Description: Responsible for initializing the client portion of the 'Utilities' package.
 	Author: Sceleratis
 	Date: 12/05/2021
 
