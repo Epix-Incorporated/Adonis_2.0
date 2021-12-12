@@ -11,7 +11,7 @@ local EventObjects = {}
 local TrackedTasks = {}
 local TaskSchedulers = {}
 
-local function RandomString()
+local function RandomString(): string
 	return string.char(math.random(65, 90)) .. math.random(100000000, 999999999)
 end
 
@@ -182,7 +182,7 @@ local Utilities = {
 		end
 	})),
 
-	CreateInstance = function(self, ClassName, Properties)
+	CreateInstance = function(self, ClassName: string, Properties: Instance|{[string]:any}): Instance
 		local newObj = Instance.new(ClassName);
 
 		if Properties then
@@ -222,15 +222,19 @@ local Utilities = {
 		return newObj;
 	end,
 
-	IsServer = function(self)
+	IsServer = function(self): boolean
 		return self.Services.RunService:IsServer();
 	end,
+		
+	IsClient = function(self): boolean
+		return self.Services.RunService:IsClient();
+	end,
 
-	GetTime = function(self)
+	GetTime = function(self): number
 		return os.time();
 	end,
 
-	GetFormattedTime = function(self, optTime, withDate)
+	GetFormattedTime = function(self, optTime: number?, withDate: boolean?)
 		local formatString = withDate and "L LT" or "LT"
 		local tim = DateTime.fromUnixTimestamp(optTime or self.GetTime())
 
@@ -320,6 +324,57 @@ local Utilities = {
 
 			return endStr
 		end
+	end;
+
+Attempt = function(self, tries: number?, func: (number)->any, errAction: (any)->any, sucessAction: (any)->any, timeBeforeRetry: number?): (boolean, any)
+		tries = tries or 3
+		local triesMade = 0
+		local success, result
+		repeat
+			triesMade += 1
+			success, result = pcall(func, triesMade)
+			if not success then task.wait(timeBeforeRetry or 0) end
+		until success or triesMade >= tries
+		if not success and errAction then 
+			result = errAction(result)
+		elseif success and sucessAction then
+			result = sucessAction(result)
+		end
+		return success, result
+	end;
+
+	MakeLoop = function(self, exeDelay: number?, func: (number)->(), dontStart: boolean?)
+		local loop = coroutine.wrap(function()
+			local run: number = 0
+			while task.wait(exeDelay or 0) do
+				run += 1
+				if func(run) then break end
+			end
+		end)
+		if not dontStart then loop() end
+		return loop
+	end;
+
+	Iterate = function(self, tab: {any}|Instance, func: (any, number)->any, deep: boolean?): any?
+		if deep and type(tab) == "table" then
+			local function iterate(subtable)
+				for ind, val in ipairs(subtable) do
+					if type(val) == "table" then
+						iterate(val)
+					else
+						local res = func(val, ind)
+						if res then return res end
+					end
+				end
+			end
+			return iterate(tab)
+		else
+			for i, v in ipairs(if type(tab) == "table" then tab elseif deep then tab:GetDescendants() else tab:GetChildren()) do
+				local res = func(v, i)
+				if res then return res end
+			end
+		end
+		return nil
 	end;
 }
 
