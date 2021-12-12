@@ -271,6 +271,25 @@ local Utilities = {
 		return tab;
 	end,
 
+	CountTable = function(tab: {}, excludeNumIndices: boolean?): number
+		local n = 0
+		for i, v in pairs(tab) do
+			if (not excludeNumIndices) or type(i) ~= "number" then
+				n += 1
+			end
+		end
+		return n
+	end,
+
+	ReverseTable = function(array: {[number]:any}): {[number]:any}
+		local len: number = #array
+		local reversed = {}
+		for i = 1, len do
+			reversed[len-i] = array[i]
+		end
+		return reversed
+	end,
+
 	Encrypt = function(self, str, key, cache)
 		cache = cache or Cache.Encrypt
 
@@ -326,7 +345,7 @@ local Utilities = {
 		end
 	end;
 
-Attempt = function(self, tries: number?, func: (number)->any, errAction: (any)->any, sucessAction: (any)->any, timeBeforeRetry: number?): (boolean, any)
+	Attempt = function(self, tries: number?, func: (number)->any, errAction: (any)->any, sucessAction: (any)->any, timeBeforeRetry: number?): (boolean, any)
 		tries = tries or 3
 		local triesMade = 0
 		local success, result
@@ -345,7 +364,7 @@ Attempt = function(self, tries: number?, func: (number)->any, errAction: (any)->
 
 	MakeLoop = function(self, exeDelay: number?, func: (number)->(), dontStart: boolean?)
 		local loop = coroutine.wrap(function()
-			local run: number = 0
+			local run = 0
 			while task.wait(exeDelay or 0) do
 				run += 1
 				if func(run) then break end
