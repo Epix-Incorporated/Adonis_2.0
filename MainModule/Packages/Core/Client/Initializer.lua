@@ -11,7 +11,7 @@ local PackageFolder = script.Parent.Parent
 local Package = {
 	Package = PackageFolder;
 	Metadata = require(PackageFolder.Metadata);
-	
+
 	Client = PackageFolder.Client;
 	Shared = PackageFolder.Shared;
 	SharedAssets = PackageFolder.Shared.Assets;
@@ -43,7 +43,7 @@ local function debug(...)
 end
 
 --// Runs the given function and outputs any errors
-local function RunFunction(Function, ...) 
+local function RunFunction(Function, ...)
 	xpcall(Function, function(err)
 		warn("Error while running function; Expand for more info", {Error = tostring(err), Raw = err})
 	end, ...)
@@ -74,7 +74,7 @@ return {
 		RootTable = Root
 		Verbose = if Root.Verbose ~= nil then Root.Verbose else Verbose
 		Root.DebugWarn = debug
-		
+
 		--// Load modules
 		for i,name in ipairs(LoadOrder) do
 			local module = Package.Modules:FindFirstChild(name)
