@@ -1,0 +1,23 @@
+{
+	"name": "Adonis_2.0",
+	"tree": {
+		"$className": "DataModel",
+
+		"ServerScriptService": {
+			"$className": "ServerScriptService",
+
+			"Adonis2.0_Rojo": {
+				"$className": "Folder",
+
+				"MainModule": {
+					"$path": "MainModule"
+				},
+
+				"Adonis2.0_Loader": {
+					"$className": "Model",
+					"$path": "Loader"
+				}
+			}
+		}
+	}
+}
