@@ -11,7 +11,7 @@ local PackageFolder = script.Parent.Parent
 local Package = {
 	Package = PackageFolder;
 	Metadata = require(PackageFolder.Metadata);
-	
+
 	Client = PackageFolder.Client;
 	Shared = PackageFolder.Shared;
 }
@@ -35,7 +35,7 @@ local function debug(...)
 end
 
 --// Runs the given function and outputs any errors
-local function RunFunction(Function, ...) 
+local function RunFunction(Function, ...)
 	xpcall(Function, function(err)
 		warn("Error while running function; Expand for more info", {Error = tostring(err), Raw = err})
 	end, ...)
@@ -82,6 +82,11 @@ return {
 	end;
 
 	AfterInit = function(Root, Packages)
-
+		--// Run afterinit methods
+		for i,t in ipairs(InitFunctions) do
+			if t.AfterInit then
+				RunFunction(t.AfterInit, Root, Package)
+			end
+		end
 	end;
 }
