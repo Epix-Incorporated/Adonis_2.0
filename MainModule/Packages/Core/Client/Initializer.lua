@@ -23,11 +23,6 @@ local Package = {
 local RootTable;
 local Verbose = true;
 local InitFunctions = {}
-local LoadOrder = {
-	"Core",
-	"Remote",
-	"Bytecode",
-}
 
 --// Output
 local oWarn = warn;
@@ -76,9 +71,8 @@ return {
 		Root.DebugWarn = debug
 
 		--// Load modules
-		for i,name in ipairs(LoadOrder) do
-			local module = Package.Modules:FindFirstChild(name)
-			if module and module:IsA("ModuleScript") then
+		for i,module in ipairs(Package.Modules:GetChildren()) do
+			if module:IsA("ModuleScript") then
 				LoadModule(module, Root, Package)
 			end
 		end
