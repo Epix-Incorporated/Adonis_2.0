@@ -182,72 +182,88 @@ local Utilities = {
 		end
 	})),
 
-	CreateInstance = function(self, ClassName: string, Properties: Instance|{[string]:any}): Instance
-		local newObj = Instance.new(ClassName);
+	CreateInstance = function(self, class: string, properties: Instance|{[string]:any}): (Instance, {[string]:RBXScriptConnection})
+		local newObj = Instance.new(class)
+		local connections = {}
 
-		if Properties then
-			if typeof(Properties) == "Instance" then
-				newObj.Parent = Properties;
-			elseif typeof(Properties) == "table" then
-				local parent = Properties.Parent;
-				local events = Properties.Events;
-				local children = Properties.Children;
+		if properties then
+			if typeof(properties) == "Instance" then
+				newObj.Parent = properties
+			elseif typeof(properties) == "table" then
+				local parent = properties.Parent
+				local events = properties.Events
+				local children = properties.Children
+				local attributes = properties.Attributes
+				local tags = properties.Tags
 
-				Properties.Parent = nil;
-				Properties.Events = nil;
-				Properties.Children = nil;
+				properties.Parent = nil
+				properties.Events = nil
+				properties.Children = nil
+				properties.Attributes = nil
+				properties.Tags = nil
 
-				for prop,value in pairs(Properties) do
+				for prop, value in pairs(properties) do
 					newObj[prop] = value
 				end
 
 				if children then
-					for i,child in pairs(children) do
-						child.Parent = newObj;
+					for _, child in ipairs(children) do
+						child.Parent = newObj
+					end
+				end
+					
+				if attributes then
+					for attrib, value in pairs(attributes) do
+						newObj:SetAttribute(attrib, value)
+					end
+				end
+					
+				if tags then
+					for _, tag in ipairs(tags) do
+						self.Services.CollectionService:AddTag(newObj, tag)
 					end
 				end
 
 				if parent then
-					newObj.Parent = parent;
+					newObj.Parent = parent
 				end
 
 				if events then
-					for name,func in pairs(events) do
-						newObj[name]:Connect(func);
+					for event, func in pairs(events) do
+						connections[event] = newObj[event]:Connect(func)
 					end
 				end
 			end
 		end
 
-		return newObj;
+		return newObj, connections
 	end,
 
 	IsServer = function(self): boolean
-		return self.Services.RunService:IsServer();
+		return self.Services.RunService:IsServer()
 	end,
 
 	IsClient = function(self): boolean
-		return self.Services.RunService:IsClient();
+		return self.Services.RunService:IsClient()
 	end,
 
 	GetTime = function(self): number
-		return os.time();
+		return os.time()
 	end,
 
-	GetFormattedTime = function(self, optTime: number?, withDate: boolean?)
+	GetFormattedTime = function(self, optTime: number?, withDate: boolean?): string
 		local formatString = withDate and "L LT" or "LT"
-		local tim = DateTime.fromUnixTimestamp(optTime or self.GetTime())
+		local tim = DateTime.fromUnixTimestamp(optTime or self:GetTime())
 
 		if self:IsServer() then
-			return tim:FormatUniversalTime(formatString, "en-gb") -- Always show UTC in 24 hour format
+			return tim:FormatUniversalTime(formatString, "en-gb") --// Always show UTC in 24 hour format
 		else
 			local locale = self.Services.Players.LocalPlayer.LocaleId
-			local success, res = xpcall(function()
-				return tim:FormatLocalTime(formatString, locale) -- Show in player's local timezone and format
+			return select(2, xpcall(function()
+				return tim:FormatLocalTime(formatString, locale) --// Show in player's local timezone and format
 			end, function()
-				return tim:FormatLocalTime(formatString, "en-gb") -- show UTC in 24 hour format because player's local timezone is not available in DateTimeLocaleConfigs
-			end)
-			return res
+				return tim:FormatLocalTime(formatString, "en-gb") --// Show UTC in 24 hour format because player's local timezone is not available in DateTimeLocaleConfigs
+			end))
 		end
 	end,
 
@@ -258,7 +274,7 @@ local Utilities = {
 			end
 		end
 
-		return tab;
+		return tab
 	end,
 
 	MergeTables = function(self, tab, ...)
@@ -268,13 +284,13 @@ local Utilities = {
 			end
 		end
 
-		return tab;
+		return tab
 	end,
 
-	CountTable = function(tab: {}, excludeNumIndices: boolean?): number
+	CountTable = function(tab: {[any]:any}, excludeNumIndices: boolean?): number
 		local n = 0
 		for i, v in pairs(tab) do
-			if (not excludeNumIndices) or type(i) ~= "number" then
+			if not excludeNumIndices or type(i) ~= "number" then
 				n += 1
 			end
 		end
@@ -290,7 +306,7 @@ local Utilities = {
 		return reversed
 	end,
 
-	Encrypt = function(self, str, key, cache)
+	Encrypt = function(self, str: string, key: string, cache: {}?): string
 		cache = cache or Cache.Encrypt
 
 		if not key or not str then
@@ -318,7 +334,7 @@ local Utilities = {
 		end
 	end;
 
-	Decrypt = function(self, str, key, cache)
+	Decrypt = function(self, str: string, key: string, cache: {}?): string
 		cache = cache or Cache.Decrypt
 
 		if not key or not str then
@@ -345,7 +361,7 @@ local Utilities = {
 		end
 	end;
 
-	Attempt = function(self, tries: number?, func: (number)->any, errAction: (any)->any, sucessAction: (any)->any, timeBeforeRetry: number?): (boolean, any)
+	Attempt = function(self, tries: number?, timeBeforeRetry: number?, func: (number)->any, errAction: (string)->any, sucessAction: (any)->any): (boolean, any)
 		tries = tries or 3
 		local triesMade = 0
 		local success, result
