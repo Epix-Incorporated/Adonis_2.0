@@ -202,9 +202,7 @@ local Utilities = {
 				properties.Attributes = nil
 				properties.Tags = nil
 
-				for prop, value in pairs(properties) do
-					newObj[prop] = value
-				end
+				self:EditInstance(newObj, properties)
 
 				if children then
 					for _, child in ipairs(children) do
@@ -237,6 +235,14 @@ local Utilities = {
 		end
 
 		return newObj, connections
+	end,
+
+	EditInstance = function(self, object: Instance, properties: {[string]:any}?): Instance
+		if not properties then return object end
+		for prop, value in pairs(properties) do
+			object[prop] = value
+		end
+		return object
 	end,
 
 	IsServer = function(self): boolean
