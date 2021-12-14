@@ -6,10 +6,7 @@
 
 --]]
 
-local Root;
-local Package;
-local Utilities;
-local Service;
+local Root, Package, Utilities, Service
 
 local Logging = {
 	Core = {};
@@ -17,11 +14,11 @@ local Logging = {
 	Connection = {};
 	Error = {};
 	
-	AddLog = function(self, Type: string, Log: {}, ...)
-		local logTab = self[Type];
+	AddLog = function(self, Type: string, Log: {}|string, ...)
+		local logTab = self[Type]
 		if logTab then
-			local newLog = Log;
-			local format = table.pack(...);
+			local newLog = Log
+			local format = table.pack(...)
 			
 			if type(newLog) == "string" then
 				newLog = {
@@ -31,25 +28,27 @@ local Logging = {
 			end
 			
 			if #format > 0 then
-				newLog.Text = string.format(newLog.Text, table.unpack(format));
+				newLog.Text = string.format(newLog.Text, table.unpack(format))
 			end
 			
-			if not newLog.Time then
-				newLog.Time = Utilities:GetTime();
+			if not newLog.Time and not newLog.NoTime then
+				newLog.Time = Utilities:GetTime()
 			end
 			
 			if Type == "Error" then
-				warn("[Error Log] ", newLog.Text);
+				warn("[Error Log] ", newLog.Text)
 			end
 			
-			table.insert(logTab, newLog);
+			table.insert(logTab, newLog)
+		else
+			warn("Unknown Log", Type)
 		end
 	end,
 	
 	GetLogs = function(self, Type: string)
 		local logTab = self[Type];
 		if logTab and type(logTab) == "table" then
-			return logTab;
+			return logTab
 		end
 	end,
 }
@@ -65,6 +64,6 @@ return {
 	end;
 
 	AfterInit = function(Root, Package)
-		Logging:AddLog("Script", "[%s] Logging module loaded", Package.Name);
+		Logging:AddLog("Script", "[%s] Logging module loaded", Package.Name)
 	end;
 }
