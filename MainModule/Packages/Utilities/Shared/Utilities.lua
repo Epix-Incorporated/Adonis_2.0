@@ -62,11 +62,11 @@ local ObjectMethods = {
 
 		Delete = function(self)
 			if not self.Properties.Temporary then
-				TaskSchedulers[self.Name] = nil;
+				TaskSchedulers[self.Name] = nil
 			end
 
-			self.Running = false;
-			self.Event:Disconnect();
+			self.Running = false
+			self.Event:Disconnect()
 		end;
 	}
 }
@@ -75,7 +75,7 @@ local ObjectMethods = {
 --// Tasks
 local Tasks = table.freeze{
 	TrackTask = function(self, name, func, ...)
-		local index = RandomString();
+		local index = RandomString()
 		local isThread = string.sub(name, 1, 7) == "Thread:"
 
 		local data = {
@@ -122,7 +122,7 @@ local Tasks = table.freeze{
 	end;
 
 	TaskScheduler = function(self, taskName, props)
-		local props = props or {};
+		local props = props or {}
 		if not props.Temporary and TaskSchedulers[taskName] then return TaskSchedulers[taskName] end
 
 		local new = {
@@ -136,9 +136,8 @@ local Tasks = table.freeze{
 		}
 
 		new.Event = new.RunnerEvent.Event:Connect(function(...)
-			for i,v in pairs(new.LinkedTasks) do
-				local ran,result = pcall(v);
-				if result then
+			for i, v in pairs(new.LinkedTasks) do
+				if select(2, pcall(v)) then
 					table.remove(new.LinkedTasks, i);
 				end
 			end
@@ -146,15 +145,15 @@ local Tasks = table.freeze{
 
 		if props.Interval then
 			while wait(props.Interval) and new.Running do
-				new:Trigger(os.time());
+				new:Trigger(os.time())
 			end
 		end
 
 		if not props.Temporary then
-			TaskSchedulers[taskName] = new;
+			TaskSchedulers[taskName] = new
 		end
 
-		return new;
+		return new
 	end;
 }
 
@@ -166,19 +165,19 @@ local Utilities = {
 
 	Services = table.freeze(setmetatable({}, {
 		__index = function(self, ind)
-			return Cache.KnownServices[ind] or game:GetService(ind);
+			return Cache.KnownServices[ind] or game:GetService(ind)
 		end,
 	})),
 
 	Events = table.freeze(setmetatable({},{
 		__index = function(self, EventName)
-			local methods = ObjectMethods.Event;
-			return table.freeze {
+			local methods = ObjectMethods.Event
+			return table.freeze({
 				EventName = EventName;
 				Fire = methods.Fire;
 				Wait = methods.Wait;
 				Connect = methods.Connect;
-			}
+			})
 		end
 	})),
 
@@ -194,13 +193,11 @@ local Utilities = {
 				local events = properties.Events
 				local children = properties.Children
 				local attributes = properties.Attributes
-				local tags = properties.Tags
 
 				properties.Parent = nil
 				properties.Events = nil
 				properties.Children = nil
 				properties.Attributes = nil
-				properties.Tags = nil
 
 				self:EditInstance(newObj, properties)
 
@@ -213,12 +210,6 @@ local Utilities = {
 				if attributes then
 					for attrib, value in pairs(attributes) do
 						newObj:SetAttribute(attrib, value)
-					end
-				end
-					
-				if tags then
-					for _, tag in ipairs(tags) do
-						self.Services.CollectionService:AddTag(newObj, tag)
 					end
 				end
 
@@ -303,7 +294,7 @@ local Utilities = {
 		return n
 	end,
 
-	ReverseTable = function(array: {[number]:any}): {[number]:any}
+	ReverseArray = function(array: {[number]:any}): {[number]:any}
 		local len: number = #array
 		local reversed = {}
 		for i = 1, len do
@@ -427,10 +418,10 @@ return table.freeze {
 				Root.Utilities[ind] = val
 			end
 		else
-			Root.Utilities = Utilities;
+			Root.Utilities = Utilities
 		end
 
-		Root.Events = Utilities.Events;
-		Root.Services = Utilities.Services;
+		Root.Events = Utilities.Events
+		Root.Services = Utilities.Services
 	end;
 }
