@@ -36,30 +36,30 @@ local Root = {
 --// Client Loading Process
 do
 	--// Set variables
-	local start = os.clock();
+	local start = os.clock()
 	
 	--// Set parent
-	repeat wait(0.01); script.Parent = nil; until script.Parent == nil
+	repeat task.wait(0.01); script.Parent = nil; until script.Parent == nil
 	
 	--// Begin loading
-	warn("Loading packages...");
+	warn("Loading packages...")
 
 	--// Get all packages
-	addRange(Root.Packages, script.Packages:GetChildren());
+	addRange(Root.Packages, script.Packages:GetChildren())
 
 	--// Get PackageHandler
-	local PackageHandler = require(Root.PackageHandlerModule);
+	local PackageHandler = require(Root.PackageHandlerModule)
 	
 	--// Set root variables
-	Root.PackageHandler = PackageHandler;
+	Root.PackageHandler = PackageHandler
 
 	--// Get server packages
-	local Packages = PackageHandler.GetClientPackages(Root.Packages);
+	local Packages = PackageHandler.GetClientPackages(Root.Packages)
 
 	--// Load server packages
-	PackageHandler.LoadPackages(Packages, "Client", Root, Packages);
+	PackageHandler.LoadPackages(Packages, "Client", Root, Packages)
 
 	--// Loading complete
-	warn("Loading complete; Elapsed:", os.clock() - start);
+	warn("Loading complete; Elapsed:", os.clock() - start)
 
 end
