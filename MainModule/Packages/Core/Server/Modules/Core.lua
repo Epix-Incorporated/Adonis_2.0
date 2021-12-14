@@ -6,10 +6,7 @@
 
 --]]
 
-local Root
-local Package
-local Utilities
-local Service
+local Root, Package, Utilities, Service
 
 local Core = {
 	DeclaredSettings = {},
