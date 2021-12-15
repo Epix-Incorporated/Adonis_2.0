@@ -229,9 +229,10 @@ local Utilities = {
 	end,
 
 	EditInstance = function(self, object: Instance, properties: {[string]:any}?): Instance
-		if not properties then return object end
-		for prop, value in pairs(properties) do
-			object[prop] = value
+		if properties then
+			for prop, value in pairs(properties) do
+				object[prop] = value
+			end
 		end
 		return object
 	end,
@@ -262,6 +263,12 @@ local Utilities = {
 				return tim:FormatLocalTime(formatString, "en-gb") --// Show UTC in 24 hour format because player's local timezone is not available in DateTimeLocaleConfigs
 			end))
 		end
+	end,
+		
+	FormatPlayer = function(self, plr: Player, withUserId: boolean?): string
+		local str = if plr.DisplayName == plr.Name then "@"..plr.Name else string.format("%s (@%s)", plr.DisplayName, plr.Name)
+		if withUserId then str ..= string.format(" [%d]", plr.UserId) end
+		return str
 	end,
 
 	AddRange = function(self, tab, ...)
