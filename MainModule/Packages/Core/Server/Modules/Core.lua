@@ -9,7 +9,46 @@
 local Root, Package, Utilities, Service
 
 local Core = {
-	DeclaredSettings = {},
+	PlayerData = {};
+	DeclaredSettings = {};
+	DeclaredDefaultPlayerData = {};
+	DefaultPlayerDataTable = {};
+
+	DeclareDefaultPlayerData = function(self, ind, defaultValue)
+		if self.DeclaredDefaultPlayerData[ind] then
+			Root.Warn("DefaultPlayerData \"".. ind .."\" already delcared. Overwriting.")
+		end
+
+		self.DeclaredDefaultPlayerData[ind] = defaultValue
+	end,
+
+	DefaultPlayerData = function(self, p)
+		local newData = {}
+
+		--// Merge default data table into new data table
+		Utilities:MergeTables(newData, self.DefaultPlayerDataTable)
+
+		for ind, value in pairs(self.DeclaredDefaultPlayerData) do
+			if type(value) == "function" then
+				Utilities:RunFunction(value, p, newData)
+			else
+				newData[ind] = value
+			end
+		end
+
+		--// Fire an event letting all modules know that we are getting default player data so they can add anything they need
+		Utilities.Events.SetDefaultPlayerData:Fire(p, newData)
+
+		return newData
+	end,
+
+	GetPlayerData = function(self, p)
+		if not self.PlayerData[p.UserId] then
+			self.PlayerData[p.UserId] = self:DefaultPlayerData(p)
+		end
+
+		return self.PlayerData[p.UserId]
+	end,
 
 	--// Declare new settings, their default value, and their description
 	DeclareSetting = function(self, setting, defaultValue, description)
@@ -34,6 +73,21 @@ local Core = {
 	end,
 }
 
+local function PlayerAdded(p)
+	local data = Core:GetPlayerData(p)
+	Root.Logging:AddLog("Connections", "%s joined", p.Name)
+end
+
+local function PlayerRemoved(p)
+	wait(0.5);
+	Core.PlayerData[p.UserId] = nil;
+	Root.Logging:AddLog("Connections", "%s left", p.Name);
+end
+
+local function PlayerError(p: Player, msg, ...)
+	Root.Logging:AddLog("Error", "PlayerError: %s :: %s", p.Name, msg);
+end
+
 return {
 	Init = function(cRoot, cPackage)
 		Root = cRoot
@@ -49,9 +103,18 @@ return {
 		});
 
 		Root.Core = Core
+
+		Core:DeclareDefaultPlayerData("Leaving", false)
+		Core:DeclareDefaultPlayerData("ClientReady", false)
+		Core:DeclareDefaultPlayerData("ObtainedKeys", false)
+		Core:DeclareDefaultPlayerData("EncryptionKey", function(p, newData)
+			newData.EncryptionKey = Utilities:RandomString();
+		end);
 	end;
 
 	AfterInit = function(Root, Package)
-
+		Utilities.Events.PlayerAdded:Connect(PlayerAdded)
+		Utilities.Events.PlayerRemoved:Connect(PlayerRemoved)
+		Utilities.Events.PlayerError:Connect(PlayerError)
 	end;
 }

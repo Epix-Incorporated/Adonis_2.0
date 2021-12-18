@@ -82,6 +82,7 @@ local Remote = {
 		if curEvent then
 			local cmd = Utilities:Encrypt(cmd, self.SharedKey)
 
+			Root.DebugWarn("SENDING", cmd, ...)
 			curEvent.RemoteEvent:FireServer(cmd, table.pack(...))
 		end
 	end,
@@ -91,6 +92,7 @@ local Remote = {
 		if curEvent then
 			local cmd = Utilities:Encrypt(cmd, self.SharedKey);
 
+			Root.DebugWarn("GETTING", cmd, ...)
 			return table.unpack(curEvent.RemoteFuncton:InvokeServer(cmd, table.pack(...)))
 		end
 	end,
@@ -128,10 +130,15 @@ local Remote = {
 		local cmd = Utilities:Decrypt(cmd, self.SharedKey)
 		local command = self.Commands[cmd]
 
+		if type(args) ~= "table" then
+			args = {args}
+		end
+
 		Utilities.Events.ReceivedRemoteCommand:Fire(cmd, if type(args) == "table" then table.unpack(args) else args)
 
+		Root.DebugWarn("GOT", cmd, args)
 		if command then
-			return table.pack(command(if type(args) == "table" then table.unpack(args) else args))
+			return table.pack(command(table.unpack(args)))
 		end
 	end,
 

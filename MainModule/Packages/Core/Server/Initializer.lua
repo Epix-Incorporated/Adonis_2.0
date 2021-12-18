@@ -114,6 +114,13 @@ return {
 			end
 		end
 
+		--// Run DelayedAfterSetup methods
+		for i,t in ipairs(InitFunctions) do
+			if t.DelayedAfterSetup then
+				RunFunction(t.DelayedAfterSetup, Root, Package)
+			end
+		end
+
 		Root.Logging:AddLog("Script", "Core Loaded")
 		debug("AFTERINIT " .. Package.Metadata.Name .. " PACKAGE FINISHED")
 	end;

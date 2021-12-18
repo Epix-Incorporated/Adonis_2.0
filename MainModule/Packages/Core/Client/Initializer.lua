@@ -67,6 +67,7 @@ end
 --// Initializer functions
 return {
 	Init = function(Root, Packages)
+		warn("DOING INIT????")
 		debug("INIT " .. Package.Metadata.Name .. " PACKAGE")
 
 		--// Init

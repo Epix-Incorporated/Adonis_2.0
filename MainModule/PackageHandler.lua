@@ -3,11 +3,11 @@
 	Description: Responsible for resolving package dependency resolution and package initialization.
 	Author: Sceleratis
 	Date: 11/20/2021
-	
+
 --]]
 
 local oWarn = warn;
-local Verbose = false;
+local Verbose = true;
 
 --// Warn
 local function warn(...)
@@ -37,12 +37,12 @@ local function FormatError(...)
 end
 
 --// Runs the given function and calls FormatError for any errors
-local function RunFunction(Function, ...) 
+local function RunFunction(Function, ...)
 	--//xpcall(Function, function(err)
 	--//	FormatError("Loading Error: %s", err)
 	--//end, ...)
 	local ran,err = pcall(Function, ...)
-	
+
 	if not ran then
 		FormatError("Loading Error: %s", err)
 	end
@@ -69,19 +69,19 @@ local function GetServerPackages(Packages: {})
 	local found = {}
 
 	debug("GET SERVER PACKAGES")
-	
+
 	for i,v in ipairs(Packages) do
 		debug("CHECK PACKAGE FOR SERVER", v)
-		
+
 		if v:FindFirstChild("Server") then
 			debug("IS SERVER PACKAGE", v)
-			
+
 			local metadata = GetMetadata(v)
 			local pkgString = metadata.Name .. "==" .. metadata.Version
-			
+
 			debug("METADATA: ", metadata)
 			debug("PKGSTRING: ", pkgString)
-			
+
 			if not found[pkgString] then
 				found[pkgString] = v
 			else
@@ -96,7 +96,11 @@ end
 --// Result table format: {[name .. "==" .. version] = package }
 local function GetClientPackages(Packages: {})
 	local found = {}
+
+	debug("GET CLIENT PACKAGES")
+
 	for i,v in ipairs(Packages) do
+		debug("FOUND PACKAGE", v)
 		if v:FindFirstChild("Client") then
 			local metadata = GetMetadata(v)
 			local pkgString = metadata.Name .. "==" .. metadata.Version
@@ -118,13 +122,13 @@ local function StripPackages(Packages: {}, Remove: string)
 	for i,v in pairs(Packages) do
 		local metadata = GetMetadata(v)
 		local pkgString = metadata.Name .. "==" .. metadata.Version
-		
+
 		local new = v:Clone()
 		local remove = new:FindFirstChild(Remove)
 		if remove then
 			remove:Destroy()
 		end
-		
+
 		if not found[pkgString] then
 			found[pkgString] = new
 		else
@@ -137,7 +141,7 @@ end
 --// Given a list of packages (Packages), a package name (DepedencyName), and a package version (DepdencyVersion)
 --// Checks if any packages in the provided package list match the provided name and version
 --// This is used during dependency resolution
-local function FindDependency(Packages: {}, DependencyName: string, DependencyVersion) 
+local function FindDependency(Packages: {}, DependencyName: string, DependencyVersion)
 	debug("FIND DEPENDENCY: ", Packages, DependencyName, DependencyVersion)
 
 	for pkgString, pkg in pairs(Packages) do
@@ -161,7 +165,7 @@ end
 local function CheckDependencies(Packages: {}, Package: Folder)
 	local metadata = GetMetadata(Package)
 	local dependencies = metadata.Dependencies
-	
+
 	debug("Checking package depdencies", Package)
 	if dependencies then
 		for i,depString in pairs(dependencies) do
@@ -174,7 +178,7 @@ local function CheckDependencies(Packages: {}, Package: Folder)
 				return false
 			end
 		end
-		
+
 		debug("Dependency check passed")
 		return true
 	else
@@ -245,16 +249,16 @@ end
 --// The results of this method determine load order, based on depedency resolution
 local function GetOrderedPackageList(Packages: {})
 	local ResultList = {}
-	
+
 	debugLine()
 	debug("GETTING ORDERED PACKAGE LIST", Packages)
-	
+
 	for i,v in pairs(Packages) do
 		debug("RESOLVE PACKAGE: ", v)
 		Resolve(Packages, ResultList, v)
 		debugLine()
 	end
-	
+
 	return ResultList
 end
 
@@ -287,12 +291,12 @@ end
 local function LoadPackages(Packages: {}, PackageType: string, ...)
 	local initFuncs = {}
 	local loadedPackages = {}
-	
+
 	--// Organize packages according to their depdendencies
 	local ordered = GetOrderedPackageList(Packages)
-	
+
 	debug("GOT ORDERED LIST", ordered)
-	
+
 	--// Load all packages
 	for i, package in pairs(ordered) do
 		if CheckDependencies(loadedPackages, package) then
@@ -307,9 +311,9 @@ local function LoadPackages(Packages: {}, PackageType: string, ...)
 			elseif res and type(res) == "table" then
 				local metadata = GetMetadata(package)
 				local pkgString = metadata.Name .. "==" .. metadata.Version
-				
+
 				loadedPackages[pkgString] = package
-				
+
 				table.insert(initFuncs, {
 					Package = package;
 					Init = res.Init;
@@ -320,7 +324,7 @@ local function LoadPackages(Packages: {}, PackageType: string, ...)
 			warn("Package dependency check failed", package)
 		end
 	end
-	
+
 	--// Initialize packages
 	for i,v in ipairs(initFuncs) do
 		debug("INIT", v)
@@ -334,7 +338,7 @@ local function LoadPackages(Packages: {}, PackageType: string, ...)
 			})
 		end
 	end
-	
+
 	--// After all packages are initialized
 	for i,v in ipairs(initFuncs) do
 		debug("AFTERINIT", v)

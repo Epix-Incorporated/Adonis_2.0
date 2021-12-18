@@ -25,17 +25,19 @@ local function warn(...)
 end
 
 local function addRange(tab, ...)
-	table.foreachi(table.pack(...), function(i,t)
-		table.foreachi(t, function(k,v)
+	for i,t in ipairs(table.pack(...)) do
+		for k,v in ipairs(t) do
 			table.insert(tab, v)
-		end)
-	end)
+		end
+	end
+	return tab
 end
 
 --// Table shared with all packages which acts as the root table for all others
 local Root = {
 	Verbose = true;
 	Packages = {};
+	Globals = {};
 	PackageHandlerModule = script.PackageHandler;
 }
 

@@ -10,9 +10,25 @@ local Root = {}
 local EventObjects = {}
 local TrackedTasks = {}
 local TaskSchedulers = {}
+local CreatedItems = setmetatable({}, {__mode = "v"})
+local Wrappers = setmetatable({}, {__mode = "kv"})
+local ParentTester = Instance.new("Folder")
 
 local function RandomString(): string
 	return string.char(math.random(65, 90)) .. math.random(100000000, 999999999)
+end
+
+local function PropertyCheck(obj, prop)
+	return obj[prop]
+end
+
+local oWarn = warn
+local function warn(...)
+	if Root and Root.Warn then
+		Root.Warn(...)
+	else
+		oWarn(":: Adonis ::", ...)
+	end
 end
 
 --// Cache
@@ -22,8 +38,10 @@ local Cache = {
 	Decrypt = {},
 }
 
---// Methods
+--// Utility Object Methods
 local ObjectMethods = {
+
+	--// Event methods
 	Event = {
 		Connect = function(self, func)
 			local eventObject = EventObjects[self.EventName]
@@ -55,6 +73,7 @@ local ObjectMethods = {
 		end;
 	},
 
+	--// Task methods
 	Task = {
 		Trigger = function(self, ...)
 			self.Event:Fire(...)
@@ -67,6 +86,34 @@ local ObjectMethods = {
 
 			self.Running = false
 			self.Event:Disconnect()
+		end;
+	},
+
+	--// Instance wrapper methods
+	Wrapper = {
+		GetMetatable = function(self)
+			return self.__NewMeta
+		end;
+
+		AddToCache = function(self)
+			Wrappers[self.__Object] = self.__Proxy;
+		end;
+
+		RemoveFromCache = function(self)
+			Wrappers[self.__Object] = nil
+		end;
+
+		GetObject = function(self)
+			return self.__Object
+		end;
+
+		Clone = function(self, raw)
+			local new = self.__Object:Clone()
+			return
+				if raw or not Root or not Root.Utilities or not Root.Utilities.Wrapping then
+					new
+				else
+					Root.Utilities.Wrapping:Wrap(new)
 		end;
 	}
 }
@@ -158,17 +205,126 @@ local Tasks = table.freeze{
 }
 
 
+--// Wrapping
+local Wrapping = {
+
+	--// Determines equality between two objects with wrapper support
+	RawEqual = function(self, obj1, obj2)
+		return self:UnWrap(obj1) == self:UnWrap(obj2)
+	end;
+
+	--// Returns a metatable for the supplied table with __metatable set to "Ignore", indicating this should not be wrapped
+	WrapIgnore = function(self, tab)
+		return setmetatable(tab, {__metatable = "Ignore"})
+	end;
+
+	--// Returns true if the supplied object is a wrapper proxy object
+	IsWrapped = function(self, object)
+		return getmetatable(object) == "Adonis_Proxy"
+	end;
+
+	--// UnWraps the supplied object (if wrapped)
+	UnWrap = function(self, object)
+		local OBJ_Type = typeof(object)
+
+		if OBJ_Type == "Instance" then
+			return object
+		elseif OBJ_Type == "table" then
+			local UnWrap = self.UnWrap
+			local tab = {}
+			for i, v in pairs(object) do
+				tab[i] = UnWrap(self, v)
+			end
+			return tab
+		elseif self:IsWrapped(object) then
+			return object:GetObject()
+		else
+			return object
+		end
+	end;
+
+	--// Wraps the supplied object in a new proxy
+	Wrap = function(self, object)
+		if getmetatable(object) == "Ignore" or getmetatable(object) == "ReadOnly_Table" then
+			return object
+		elseif Wrappers[object] then
+			return Wrappers[object]
+		elseif type(object) == "table" then
+			local Wrap = self.Wrap
+			local tab = setmetatable({	}, {
+				__eq = function(tab,val)
+					return object
+				end
+			})
+
+			for i,v in pairs(object) do
+				tab[i] = Wrap(self, v)
+			end
+
+			return tab
+		elseif (type(object) == "userdata") and not self:IsWrapped(object) then
+			local newObj = newproxy(true)
+			local newMeta = getmetatable(newObj)
+			local custom; custom = {
+				__NewMeta = newMeta,
+				__Proxy = newObj,
+				__Object = object,
+
+				SetSpecial = function(self, name, val)
+					custom[name] = val
+					return self
+				end;
+			}
+
+			for i,v in pairs(ObjectMethods.Wrapper) do
+				custom[i] = v
+			end
+
+			newMeta.__index = function(tab, ind)
+				local special = custom[ind]
+				local target = if special then special else object[ind]
+
+				if special then
+					return special
+				elseif type(target) == "function" then
+					return function(self, ...)
+						return target(self.__Object, ...)
+					end
+				else
+					return target
+				end
+			end
+
+			newMeta.__newindex = function(tab, ind, val)
+				object[ind] = self:UnWrap(val)
+			end
+
+			newMeta.__eq = function(obj1, obj2) return self:RawEqual(obj1, obj2) end
+			newMeta.__tostring = function() return custom.ToString or tostring(object) end
+			newMeta.__metatable = "Adonis_Proxy"
+
+			return newObj
+		else
+			return object
+		end
+	end;
+}
+
+
 --// Utilities
 local Utilities = {
 	Tasks = Tasks,
+	Wrapping = Wrapping,
 	RandomString = RandomString,
 
+	--// Caches and returns Roblox services retrieved via game:GetService()
 	Services = table.freeze(setmetatable({}, {
 		__index = function(self, ind)
 			return Cache.KnownServices[ind] or game:GetService(ind)
 		end,
 	})),
 
+	--// Responsible for all non-Roblox system events
 	Events = table.freeze(setmetatable({},{
 		__index = function(self, EventName)
 			local methods = ObjectMethods.Event
@@ -181,7 +337,7 @@ local Utilities = {
 		end
 	})),
 
-	CreateInstance = function(self, class: string, properties: Instance|{[string]:any}): (Instance, {[string]:RBXScriptConnection})
+	CreateInstance = function(self, class: string, properties: {})
 		local newObj = Instance.new(class)
 		local connections = {}
 
@@ -202,11 +358,11 @@ local Utilities = {
 				self:EditInstance(newObj, properties)
 
 				if children then
-					for _, child in ipairs(children) do
+					for _, child in pairs(children) do
 						child.Parent = newObj
 					end
 				end
-					
+
 				if attributes then
 					for attrib, value in pairs(attributes) do
 						newObj:SetAttribute(attrib, value)
@@ -237,14 +393,17 @@ local Utilities = {
 		return object
 	end,
 
+	--// Returns true if this is running on the server
 	IsServer = function(self): boolean
 		return self.Services.RunService:IsServer()
 	end,
 
+	--// Returns true if this is running on the client
 	IsClient = function(self): boolean
 		return self.Services.RunService:IsClient()
 	end,
 
+	--// Returns os.time()
 	GetTime = function(self): number
 		return os.time()
 	end,
@@ -264,13 +423,14 @@ local Utilities = {
 			end))
 		end
 	end,
-		
+
 	FormatPlayer = function(self, plr: Player, withUserId: boolean?): string
 		local str = if plr.DisplayName == plr.Name then "@"..plr.Name else string.format("%s (@%s)", plr.DisplayName, plr.Name)
 		if withUserId then str ..= string.format(" [%d]", plr.UserId) end
 		return str
 	end,
 
+	--// Inserts elements from supplied ordered tables into the first table
 	AddRange = function(self, tab, ...)
 		for i,t in ipairs(table.pack(...)) do
 			for k,v in ipairs(t) do
@@ -281,6 +441,8 @@ local Utilities = {
 		return tab
 	end,
 
+	--// Merges tables into the first table
+	--// Each subsequent table will overwrite keys in/from the tables that came before it
 	MergeTables = function(self, tab, ...)
 		for i,t in ipairs(table.pack(...)) do
 			for k,v in pairs(t) do
@@ -301,7 +463,8 @@ local Utilities = {
 		return n
 	end,
 
-	ReverseArray = function(array: {[number]:any}): {[number]:any}
+	--// Reverses the supplied table
+	ReverseTable = function(array: {[number]:any}): {[number]:any}
 		local len: number = #array
 		local reversed = {}
 		for i = 1, len do
@@ -310,6 +473,7 @@ local Utilities = {
 		return reversed
 	end,
 
+	--// Weak encryption used mainly for trust checks
 	Encrypt = function(self, str: string, key: string, cache: {}?): string
 		cache = cache or Cache.Encrypt
 
@@ -338,6 +502,7 @@ local Utilities = {
 		end
 	end;
 
+	--// Decrypts a string encrypted with Utilities.Encrypt
 	Decrypt = function(self, str: string, key: string, cache: {}?): string
 		cache = cache or Cache.Decrypt
 
@@ -414,6 +579,34 @@ local Utilities = {
 			end
 		end
 		return nil
+	end;
+
+	--// Runs the given function and outputs any errors
+	RunFunction = function(self, Function, ...)
+		xpcall(Function, function(err)
+			warn("Error while running function; Expand for more info", {Error = tostring(err), Raw = err})
+		end, ...)
+	end;
+
+	--// Checks if a given object has the given property
+	CheckProperty = function(self, obj, prop)
+		return pcall(PropertyCheck, obj, prop)
+	end;
+
+	--// Checks if the given object has been destroyed by looking for an error when attempting to change the object's parent
+	--// Only suitable for instances with a parent property that can be changed
+	IsDestroyed = function(self, object)
+		if type(object) == "userdata" and self:CheckProperty(object, "Parent") then
+			if object.Parent == nil then
+				local ran,err = pcall(function() object.Parent = ParentTester object.Parent = nil end)
+				if not ran then
+					if err and string.match(err, "^The Parent property of .* is locked") then
+						return true
+					end
+				end
+			end
+		end
+		return false
 	end;
 }
 

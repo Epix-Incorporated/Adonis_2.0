@@ -1,5 +1,5 @@
 --[[
-	
+
 	Description: Responsible for logging
 	Author: Sceleratis
 	Date: 12/11/2021
@@ -9,48 +9,51 @@
 local Root, Package, Utilities, Service
 
 local Logging = {
-	Core = {};
-	Script = {};
-	Connection = {};
-	Error = {};
-	
-	AddLog = function(self, Type: string, Log: {}|string, ...)
-		local logTab = self[Type]
-		if logTab then
-			local newLog = Log
-			local format = table.pack(...)
-			
+	Logs = {};
+
+	AddLog = function(self, Type: string, Log: {}, ...)
+		local logTab = self.Logs[Type];
+
+		if not logTab then
+			self.Logs[Type] = {}
+			logTab = self.Logs[Type]
+		end
+
+		if logTab and type(logTab) == "table" then
+			local newLog = Log;
+			local format = table.pack(...);
+
 			if type(newLog) == "string" then
 				newLog = {
 					Text = Log;
 					Desc = Log;
 				}
 			end
-			
+
 			if #format > 0 then
 				newLog.Text = string.format(newLog.Text, table.unpack(format))
 			end
-			
+
 			if not newLog.Time and not newLog.NoTime then
 				newLog.Time = Utilities:GetTime()
 			end
-			
+
 			if Type == "Error" then
 				warn("[Error Log] ", newLog.Text)
 			end
-			
-			table.insert(logTab, newLog)
+
+			table.insert(logTab, newLog);
 		else
-			warn("Unknown Log", Type)
+			Root.Warn("Invalid LogType Supplied", Type)
 		end
-	end,
-	
+	end;
+
 	GetLogs = function(self, Type: string)
-		local logTab = self[Type];
+		local logTab = self.Logs[Type];
 		if logTab and type(logTab) == "table" then
 			return logTab
 		end
-	end,
+	end;
 }
 
 return {
@@ -59,7 +62,7 @@ return {
 		Package = cPackage
 		Utilities = Root.Utilities
 		Service = Root.Utilities.Services
-		
+
 		Root.Logging = Logging
 	end;
 

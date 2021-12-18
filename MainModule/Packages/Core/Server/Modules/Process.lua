@@ -9,6 +9,8 @@
 
 local Root, Utilities, Package, Service, Events
 
+local SetupComplete = false
+local ExistingPlayers = {}
 local EventConnections = {}
 
 local Process = {
@@ -65,8 +67,11 @@ local Process = {
 	end,
 }
 
-local function PlayerAdded(...)
-	Process:PlayerAdded(...)
+local function PlayerAdded(p, ...)
+	--// Check ExistingPlayers so we don't accidentally (somehow) fire twice for this player during setup
+	if SetupComplete or (not SetupComplete and not ExistingPlayers[p]) then
+		Process:PlayerAdded(p, ...)
+	end
 end
 
 local function PlayerRemoving(...)
@@ -89,7 +94,6 @@ local function LogMessage(...)
 	Process:LogMessage(...)
 end
 
-
 return {
 	Init = function(cRoot, cPackage)
 		Root = cRoot
@@ -102,6 +106,11 @@ return {
 	end;
 
 	AfterInit = function(Root, Package)
+		--// Grab all players present before we hooked up the PlayerAdded event so we can fire it for them when setup is finished
+		for i,player in ipairs(Service.Players:GetPlayers()) do
+			ExistingPlayers[player] = true
+		end
+
 		--// Event hookups
 		EventConnections.PlayerAdded = Service.Players.PlayerAdded:Connect(PlayerAdded)
 		EventConnections.PlayerRemoving = Service.Players.PlayerRemoving:Connect(PlayerRemoving)
@@ -112,5 +121,18 @@ return {
 			EventConnections.NetworkAdded = Service.NetworkServer.ChildAdded:Connect(NetworkAdded)
 			EventConnections.NetworkRemoving = Service.NetworkServer.ChildRemoved:Connect(NetworkRemoved)
 		end
+	end;
+
+	DelayedAfterSetup = function(Root, Package)
+		--// Handle players present before we hooked up PlayerAdded so they aren't just ignored
+		for player in pairs(ExistingPlayers) do
+			if player and player.Parent == Service.Players then
+				pcall(Process.PlayerAdded, Process, player, true)
+			end
+
+			ExistingPlayers[player] = nil
+		end
+
+		SetupComplete = true
 	end;
 }
