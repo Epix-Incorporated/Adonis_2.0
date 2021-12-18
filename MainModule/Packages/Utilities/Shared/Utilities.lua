@@ -62,11 +62,11 @@ local ObjectMethods = {
 
 		Delete = function(self)
 			if not self.Properties.Temporary then
-				TaskSchedulers[self.Name] = nil;
+				TaskSchedulers[self.Name] = nil
 			end
 
-			self.Running = false;
-			self.Event:Disconnect();
+			self.Running = false
+			self.Event:Disconnect()
 		end;
 	}
 }
@@ -75,7 +75,7 @@ local ObjectMethods = {
 --// Tasks
 local Tasks = table.freeze{
 	TrackTask = function(self, name, func, ...)
-		local index = RandomString();
+		local index = RandomString()
 		local isThread = string.sub(name, 1, 7) == "Thread:"
 
 		local data = {
@@ -122,7 +122,7 @@ local Tasks = table.freeze{
 	end;
 
 	TaskScheduler = function(self, taskName, props)
-		local props = props or {};
+		local props = props or {}
 		if not props.Temporary and TaskSchedulers[taskName] then return TaskSchedulers[taskName] end
 
 		local new = {
@@ -136,9 +136,8 @@ local Tasks = table.freeze{
 		}
 
 		new.Event = new.RunnerEvent.Event:Connect(function(...)
-			for i,v in pairs(new.LinkedTasks) do
-				local ran,result = pcall(v);
-				if result then
+			for i, v in pairs(new.LinkedTasks) do
+				if select(2, pcall(v)) then
 					table.remove(new.LinkedTasks, i);
 				end
 			end
@@ -146,15 +145,15 @@ local Tasks = table.freeze{
 
 		if props.Interval then
 			while wait(props.Interval) and new.Running do
-				new:Trigger(os.time());
+				new:Trigger(os.time())
 			end
 		end
 
 		if not props.Temporary then
-			TaskSchedulers[taskName] = new;
+			TaskSchedulers[taskName] = new
 		end
 
-		return new;
+		return new
 	end;
 }
 
@@ -166,89 +165,110 @@ local Utilities = {
 
 	Services = table.freeze(setmetatable({}, {
 		__index = function(self, ind)
-			return Cache.KnownServices[ind] or game:GetService(ind);
+			return Cache.KnownServices[ind] or game:GetService(ind)
 		end,
 	})),
 
 	Events = table.freeze(setmetatable({},{
 		__index = function(self, EventName)
-			local methods = ObjectMethods.Event;
-			return table.freeze {
+			local methods = ObjectMethods.Event
+			return table.freeze({
 				EventName = EventName;
 				Fire = methods.Fire;
 				Wait = methods.Wait;
 				Connect = methods.Connect;
-			}
+			})
 		end
 	})),
 
-	CreateInstance = function(self, ClassName: string, Properties: Instance|{[string]:any}): Instance
-		local newObj = Instance.new(ClassName);
+	CreateInstance = function(self, class: string, properties: Instance|{[string]:any}): (Instance, {[string]:RBXScriptConnection})
+		local newObj = Instance.new(class)
+		local connections = {}
 
-		if Properties then
-			if typeof(Properties) == "Instance" then
-				newObj.Parent = Properties;
-			elseif typeof(Properties) == "table" then
-				local parent = Properties.Parent;
-				local events = Properties.Events;
-				local children = Properties.Children;
+		if properties then
+			if typeof(properties) == "Instance" then
+				newObj.Parent = properties
+			elseif typeof(properties) == "table" then
+				local parent = properties.Parent
+				local events = properties.Events
+				local children = properties.Children
+				local attributes = properties.Attributes
 
-				Properties.Parent = nil;
-				Properties.Events = nil;
-				Properties.Children = nil;
+				properties.Parent = nil
+				properties.Events = nil
+				properties.Children = nil
+				properties.Attributes = nil
 
-				for prop,value in pairs(Properties) do
-					newObj[prop] = value
-				end
+				self:EditInstance(newObj, properties)
 
 				if children then
-					for i,child in pairs(children) do
-						child.Parent = newObj;
+					for _, child in ipairs(children) do
+						child.Parent = newObj
+					end
+				end
+					
+				if attributes then
+					for attrib, value in pairs(attributes) do
+						newObj:SetAttribute(attrib, value)
 					end
 				end
 
 				if parent then
-					newObj.Parent = parent;
+					newObj.Parent = parent
 				end
 
 				if events then
-					for name,func in pairs(events) do
-						newObj[name]:Connect(func);
+					for event, func in pairs(events) do
+						connections[event] = newObj[event]:Connect(func)
 					end
 				end
 			end
 		end
 
-		return newObj;
+		return newObj, connections
+	end,
+
+	EditInstance = function(self, object: Instance, properties: {[string]:any}?): Instance
+		if properties then
+			for prop, value in pairs(properties) do
+				object[prop] = value
+			end
+		end
+		return object
 	end,
 
 	IsServer = function(self): boolean
-		return self.Services.RunService:IsServer();
+		return self.Services.RunService:IsServer()
 	end,
 
 	IsClient = function(self): boolean
-		return self.Services.RunService:IsClient();
+		return self.Services.RunService:IsClient()
 	end,
 
 	GetTime = function(self): number
-		return os.time();
+		return os.time()
 	end,
 
-	GetFormattedTime = function(self, optTime: number?, withDate: boolean?)
+	GetFormattedTime = function(self, optTime: number?, withDate: boolean?): string
 		local formatString = withDate and "L LT" or "LT"
-		local tim = DateTime.fromUnixTimestamp(optTime or self.GetTime())
+		local tim = DateTime.fromUnixTimestamp(optTime or self:GetTime())
 
 		if self:IsServer() then
-			return tim:FormatUniversalTime(formatString, "en-gb") -- Always show UTC in 24 hour format
+			return tim:FormatUniversalTime(formatString, "en-gb") --// Always show UTC in 24 hour format
 		else
 			local locale = self.Services.Players.LocalPlayer.LocaleId
-			local success, res = xpcall(function()
-				return tim:FormatLocalTime(formatString, locale) -- Show in player's local timezone and format
+			return select(2, xpcall(function()
+				return tim:FormatLocalTime(formatString, locale) --// Show in player's local timezone and format
 			end, function()
-				return tim:FormatLocalTime(formatString, "en-gb") -- show UTC in 24 hour format because player's local timezone is not available in DateTimeLocaleConfigs
-			end)
-			return res
+				return tim:FormatLocalTime(formatString, "en-gb") --// Show UTC in 24 hour format because player's local timezone is not available in DateTimeLocaleConfigs
+			end))
 		end
+	end,
+		
+	FormatPlayer = function(self, plr: Player, withUserId: boolean?): string
+		local str = if plr.DisplayName == plr.Name then "@"..plr.Name else string.format("%s (@%s)", plr.DisplayName, plr.Name)
+		if withUserId then str ..= string.format(" [%d]", plr.UserId) end
+		return str
 	end,
 
 	AddRange = function(self, tab, ...)
@@ -258,7 +278,7 @@ local Utilities = {
 			end
 		end
 
-		return tab;
+		return tab
 	end,
 
 	MergeTables = function(self, tab, ...)
@@ -268,20 +288,20 @@ local Utilities = {
 			end
 		end
 
-		return tab;
+		return tab
 	end,
 
-	CountTable = function(tab: {}, excludeNumIndices: boolean?): number
+	CountTable = function(tab: {[any]:any}, excludeNumIndices: boolean?): number
 		local n = 0
 		for i, v in pairs(tab) do
-			if (not excludeNumIndices) or type(i) ~= "number" then
+			if not excludeNumIndices or type(i) ~= "number" then
 				n += 1
 			end
 		end
 		return n
 	end,
 
-	ReverseTable = function(array: {[number]:any}): {[number]:any}
+	ReverseArray = function(array: {[number]:any}): {[number]:any}
 		local len: number = #array
 		local reversed = {}
 		for i = 1, len do
@@ -290,7 +310,7 @@ local Utilities = {
 		return reversed
 	end,
 
-	Encrypt = function(self, str, key, cache)
+	Encrypt = function(self, str: string, key: string, cache: {}?): string
 		cache = cache or Cache.Encrypt
 
 		if not key or not str then
@@ -318,7 +338,7 @@ local Utilities = {
 		end
 	end;
 
-	Decrypt = function(self, str, key, cache)
+	Decrypt = function(self, str: string, key: string, cache: {}?): string
 		cache = cache or Cache.Decrypt
 
 		if not key or not str then
@@ -345,7 +365,7 @@ local Utilities = {
 		end
 	end;
 
-	Attempt = function(self, tries: number?, func: (number)->any, errAction: (any)->any, sucessAction: (any)->any, timeBeforeRetry: number?): (boolean, any)
+	Attempt = function(self, tries: number?, timeBeforeRetry: number?, func: (number)->any, errAction: (string)->any, sucessAction: (any)->any): (boolean, any)
 		tries = tries or 3
 		local triesMade = 0
 		local success, result
@@ -405,10 +425,10 @@ return table.freeze {
 				Root.Utilities[ind] = val
 			end
 		else
-			Root.Utilities = Utilities;
+			Root.Utilities = Utilities
 		end
 
-		Root.Events = Utilities.Events;
-		Root.Services = Utilities.Services;
+		Root.Events = Utilities.Events
+		Root.Services = Utilities.Services
 	end;
 }

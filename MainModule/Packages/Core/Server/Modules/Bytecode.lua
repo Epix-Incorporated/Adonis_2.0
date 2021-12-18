@@ -6,37 +6,34 @@
 	
 --]]
 
-local Root;
-local Package;
-local Utilities;
-local Service;
+local Root, Package, Utilities, Service;
 
 local Bytecode = {
 	
 	--// Get loadstring function
 	GetLoadstring = function(self)
-		local module = Package.Assets.Loadstring:Clone();
-		local fiOne = Package.SharedAssets.FiOne:Clone();
+		local module = Package.Assets.Loadstring:Clone()
+		local fiOne = Package.SharedAssets.FiOne:Clone()
 		
-		fiOne.Parent = module;
+		fiOne.Parent = module
 		
-		return require(module);
+		return require(module)
 	end,
 	
 	--// Get bytecode for str
 	GetBytecode = function(self, str: string)
-		local loadstring = self.Loadstring or self:GetLoadstring();
-		local f, buff = loadstring(str);
+		local loadstring = self.Loadstring or self:GetLoadstring()
+		local f, buff = loadstring(str)
 		
-		return buff;
+		return buff
 	end,
 	
 	--// Load bytecode
 	LoadBytecode = function(self, bytecode: string, envData: {})
-		local fiOneMod = Package.SharedAssets.FiOne:Clone();
-		local fiOne = require(fiOneMod);
+		local fiOneMod = Package.SharedAssets.FiOne:Clone()
+		local fiOne = require(fiOneMod)
 		
-		return fiOne(bytecode, envData);
+		return fiOne(bytecode, envData)
 	end,
 	
 }
@@ -48,10 +45,10 @@ return {
 		Utilities = Root.Utilities
 		Service = Root.Utilities.Services
 		
-		Root.Bytecode = Bytecode;
+		Root.Bytecode = Bytecode
 	end;
 	
 	AfterInit = function(Root, Package)
-		Bytecode.Loadstring = Bytecode:GetLoadstring();
+		Bytecode.Loadstring = Bytecode:GetLoadstring()
 	end;
 }

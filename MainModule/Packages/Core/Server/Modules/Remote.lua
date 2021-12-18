@@ -7,61 +7,59 @@
 --]]
 
 
-local Package;
-local Utilities;
-local Root; 
+local Package, Utilities, Root
 
-local Service;
+local Service
 
-local MakingEvent = false;
-local PlayerData = {};
-local Sessions = {};
+local MakingEvent = false
+local PlayerData = {}
+local Sessions = {}
 
 --// Remote (client-to-server) commands
 local RemoteCommands = {
-	GetKeys = function(p, ...)
-		local data = Root.Remote:GetPlayerData(p);
+	GetKeys = function(p: Player, ...)
+		local data = Root.Remote:GetPlayerData(p)
 		if data then
 			if not data.ObtainedKeys then
-				data.ObtainedKeys = true;
-				Root.DebugWarn("Player Obtained Keys", p, ...);
+				data.ObtainedKeys = true
+				Root.DebugWarn("Player Obtained Keys", p, ...)
 				
-				return data.EncryptionKey;
+				return data.EncryptionKey
 			else
-				Utilities.Events.PlayerError:Fire(p, "Player attempted to re-obtain keys");
+				Utilities.Events.PlayerError:Fire(p, "Player attempted to re-obtain keys")
 			end
 		else
-			Utilities.Events.PlayerError:Fire(p, "GetKeys failed (no player data found)");
+			Utilities.Events.PlayerError:Fire(p, "GetKeys failed (no player data found)")
 		end
 	end,
 	
-	VerifyRemote = function(p, t, ...)
+	VerifyRemote = function(p: Player, t, ...)
 		return {
 			Value = Utilities:Encrypt(t, Root.Remote.SharedKey);
 			Event = Root.Remote.CurrentEvent.RemoteEvent;
 		}
 	end,
 	
-	FinishedLoading = function(p, ...)
+	FinishedLoading = function(p: Player, ...)
 		local data = Root.Remote:GetPlayerData(p);
 		if data then
 			if not data.ClientReady then
-				data.ClientReady = true;
-				Utilities.Events.PlayerReady:Fire(p, data);
-				Root.DebugWarn("Player Finished Loading", p, ...);
+				data.ClientReady = true
+				Utilities.Events.PlayerReady:Fire(p, data)
+				Root.DebugWarn("Player Finished Loading", p, ...)
 				
-				return true;
+				return true
 			end
 		else
-			Utilities.Events.PlayerError:Fire(p, "GetKeys failed (no player data found)");
+			Utilities.Events.PlayerError:Fire(p, "GetKeys failed (no player data found)")
 		end
 	end,
 	
-	SessionData = function(p, sessionKey, ...)
-		local session = if sessionKey then Root.Remote:GetSession(sessionKey) else nil;
+	SessionData = function(p: Player, sessionKey, ...)
+		local session = if sessionKey then Root.Remote:GetSession(sessionKey) else nil
 
 		if session and session.Users[p] then
-			session:FireEvent(p, ...);
+			session:FireEvent(p, ...)
 		end
 	end;
 }
@@ -69,105 +67,105 @@ local RemoteCommands = {
 --// Methods
 local Methods = {
 	Session = {
-		AddUser = function(self, p, defaultData)
+		AddUser = function(self, p: Player, defaultData)
 			assert(not self.Ended, "Cannot add user to session: Session Ended")
 			if not self.Users[p] then
-				self.Users[p] = defaultData or {};
-				self.NumUsers = self.NumUsers + 1;
+				self.Users[p] = defaultData or {}
+				self.NumUsers += 1
 			end
 		end;
 
-		RemoveUser = function(self, p)
+		RemoveUser = function(self, p: Player)
 			assert(not self.Ended, "Cannot remove user from session: Session Ended")
 			if self.Users[p] then
-				self.Users[p] = nil;
-				self.NumUsers = self.NumUsers - 1;
+				self.Users[p] = nil
+				self.NumUsers -= 1
 				
-				self:RemoveActiveUser(p);
-				self:SendToUser(p, "RemovedFromSession");
+				self:RemoveActiveUser(p)
+				self:SendToUser(p, "RemovedFromSession")
 
 				if self.NumUsers == 0 then
-					self:FireEvent(nil, "LastUserRemoved");
+					self:FireEvent(nil, "LastUserRemoved")
 				else
-					self:FireEvent(p, "RemovedFromSession");
+					self:FireEvent(p, "RemovedFromSession")
 				end
 			end
 		end;
 		
-		SetActiveUser = function(self, p)
+		SetActiveUser = function(self, p: Player)
 			if not self.ActiveUsers[p] then
-				self.NumActiveUsers = self.NumActiveUsers + 1;
-				self.ActiveUsers[p] = true;
+				self.NumActiveUsers += 1
+				self.ActiveUsers[p] = true
 			end
 		end,
 		
-		RemoveActiveUser = function(self, p)
+		RemoveActiveUser = function(self, p: Player)
 			if self.ActiveUsers[p] then
-				self.NumActiveUsers = self.NumActiveUsers - 1;
-				self.ActiveUsers[p] = nil;
+				self.NumActiveUsers -= 1
+				self.ActiveUsers[p] = nil
 				
 				if self.NumActiveUsers == 0 then
-					self:FireEvent(nil, "LastUserLeft");
+					self:FireEvent(nil, "LastUserLeft")
 				end
 			end
 		end,
 
 		SendToUsers = function(self, ...)
 			if not self.Ended then
-				for p in next,self.ActiveUsers do
-					self:SendToUser(p, ...);
-				end;
+				for p in pairs(self.ActiveUsers) do
+					self:SendToUser(p, ...)
+				end
 			end
 		end;
 		
 		SendToAllUsers = function(self, ...)
 			if not self.Ended then
-				for p in next,self.Users do
+				for p in pairs(self.Users) do
 					self:SendToUser(p, ...);
-				end;
+				end
 			end
 		end;
 
-		SendToUser = function(self, p, ...)
+		SendToUser = function(self, p: Player, ...)
 			if not self.Ended and self.Users[p] then
-				Root.Remote:Send(p, "SessionData", self.SessionKey, ...);
+				Root.Remote:Send(p, "SessionData", self.SessionKey, ...)
 			end
 		end;
 
 		FireEvent = function(self, ...)
 			if not self.Ended then
-				self.SessionEvent:Fire(...);
+				self.SessionEvent:Fire(...)
 			end
 		end;
 
 		End = function(self)
 			if not self.Ended then
-				for t,event in next,self.Events do
-					event:Disconnect();
-					self.Events[t] = nil;
+				for t, event in pairs(self.Events) do
+					event:Disconnect()
+					self.Events[t] = nil
 				end
 
-				self:SendToUsers("SessionEnded");
+				self:SendToUsers("SessionEnded")
 
-				self.NumUsers = 0;
-				self.NumActiveUsers = 0;
+				self.NumUsers = 0
+				self.NumActiveUsers = 0
 				
-				self.Users = {};
-				self.ActiveUsers = {};
-				self.SessionEvent:Destroy();
+				self.Users = {}
+				self.ActiveUsers = {}
+				self.SessionEvent:Destroy()
 
-				self.Ended = true;
-				Sessions[self.SessionKey] = nil;
+				self.Ended = true
+				Sessions[self.SessionKey] = nil
 			end
 		end;
 
 		ConnectEvent = function(self, func)
 			assert(not self.Ended, "Cannot connect session event: Session Ended")
 
-			local connection = self.SessionEvent.Event:Connect(func);
+			local connection = self.SessionEvent.Event:Connect(func)
 			table.insert(self.Events, connection)
 
-			return connection;
+			return connection
 		end;
 	}
 }
@@ -180,7 +178,7 @@ local Remote = {
 	Sessions = Sessions;
 	
 	--// Player-related methods
-	DefaultPlayerData = function(self, p)
+	DefaultPlayerData = function(self, p: Player)
 		return {
 			EncryptionKey = Utilities:RandomString();
 			ObtainedKeys = false;
@@ -189,7 +187,7 @@ local Remote = {
 		}
 	end,
 	
-	GetPlayerData = function(self, p)
+	GetPlayerData = function(self, p: Player)
 		if not PlayerData[p.UserId] then
 			PlayerData[p.UserId] = self:DefaultPlayerData(p);
 		end
@@ -197,7 +195,7 @@ local Remote = {
 		return PlayerData[p.UserId];
 	end,
 	
-	Send = function(self, p, cmd, ...)
+	Send = function(self, p: Player, cmd, ...)
 		local curEvent = self:WaitForEvent();
 		if curEvent then
 			local cmd = Utilities:Encrypt(cmd, self.SharedKey);
@@ -206,7 +204,7 @@ local Remote = {
 		end
 	end,
 	
-	Get = function(self, p, cmd, ...)
+	Get = function(self, p: Player, cmd, ...)
 		local curEvent = self:WaitForEvent();
 		if curEvent then
 			local cmd = Utilities:Encrypt(cmd, self.SharedKey);
@@ -247,51 +245,51 @@ local Remote = {
 			SetActiveUser = Methods.Session.SetActiveUser;
 		};
 		
-		session.Events.PlayerRemoving = Utilities.Events.PlayerRemoving:Connect(function(p)
+		session.Events.PlayerRemoving = Utilities.Events.PlayerRemoving:Connect(function(p: Player)
 			session:RemoveActiveUser(p)
 		end)
 		
 		session:Connect(function(p, cmd, ...)
 			if not session.Ended then
 				if cmd == "LeftSession" then
-					session:RemoveActiveUser(p);
+					session:RemoveActiveUser(p)
 				elseif session.Users[p] and cmd == "JoinedSession" then
-					session:SetActiveUser(p);
+					session:SetActiveUser(p)
 				end
 			end
 		end)
 
-		Sessions[session.SessionKey] = session;
+		Sessions[session.SessionKey] = session
 
-		return session;
+		return session
 	end;
 
 	--// Process remote commands
-	ProcessRemoteCommand = function(self, p, cmd, args)
-		local cmd = Utilities:Decrypt(cmd, self.SharedKey);
-		local command = self.Commands[cmd];
+	ProcessRemoteCommand = function(self, p: Player, cmd, args)
+		local cmd = Utilities:Decrypt(cmd, self.SharedKey)
+		local command = self.Commands[cmd]
 		
 		Root.DebugWarn(p, cmd, args)
 		
 		Utilities.Events.ReceivedRemoteCommand:Fire(p, cmd, if type(args) == "table" then table.unpack(args) else args)
 		
 		if command then
-			return table.pack(command(p, if type(args) == "table" then table.unpack(args) else args));
+			return table.pack(command(p, if type(args) == "table" then table.unpack(args) else args))
 		end
 	end,
 	
 	--// Handle player client setup
 	WaitForEvent = function(self)
 		while not self.CurrentEvent or not self.CurrentEvent.RemoteEvent or not self.CurrentEvent.RemoteFunction or MakingEvent do
-			wait(0.05);
+			Utilities.Services.RunService.Heartbeat:Wait()
 		end
 
-		return self.CurrentEvent;
+		return self.CurrentEvent
 	end,
 	
-	SetupClient = function(self, p)
-		local handler = Package.Handlers.ClientHandler:Clone();
-		local packageHandler = Root.PackageHandlerModule:Clone();
+	SetupClient = function(self, p: Player)
+		local handler = Package.Handlers.ClientHandler:Clone()
+		local packageHandler = Root.PackageHandlerModule:Clone()
 		local cliPackageFolder = Utilities:CreateInstance("Folder", {
 			Parent = handler;
 			Name = "Packages";
@@ -306,39 +304,39 @@ local Remote = {
 		packageHandler.Parent = handler;
 		
 		repeat
-			local parentTo = p:FindFirstChildOfClass("PlayerScripts") or p:FindFirstChildOfClass("PlayerGui");
+			local parentTo = p:FindFirstChildOfClass("PlayerScripts") or p:FindFirstChildOfClass("PlayerGui")
 			if parentTo then
-				handler.Parent = parentTo;
+				handler.Parent = parentTo
 			end
-		until handler.Parent ~= nil or not wait(0.15)
+		until handler.Parent ~= nil or not task.wait(0.15)
 		
-		handler.Disabled = false;
+		handler.Disabled = false
 	end,
 	
 	--// Event setup
 	EventChangeDetected = function(self, c)
-		local curEvent = self.CurrentEvent;
+		local curEvent = self.CurrentEvent
 		if curEvent and not MakingEvent then
-			local rEvent = curEvent.RemoteEvent;
-			local rFunction = curEvent.RemoteFunction;
+			local rEvent = curEvent.RemoteEvent
+			local rFunction = curEvent.RemoteFunction
 			
 			if c == "OnServerInvoke" or (rEvent.Parent ~= Service.ReplicatedStorage or rFunction.Parent ~= Service.ReplicatedStorage) then
-				self:SetupRemote();
+				self:SetupRemote()
 			elseif rEvent.Name ~= self.EventObjectsName or rFunction.Name ~= self.EventObjectsName then
-				rEvent.Name = self.EventObjectsName;
-				rFunction.Name = self.EventObjectsName;
+				rEvent.Name = self.EventObjectsName
+				rFunction.Name = self.EventObjectsName
 			end
 		end
 	end,
 	
 	SetupRemote = function(self)
 		if not MakingEvent then
-			MakingEvent = true;
+			MakingEvent = true
 
 			if self.CurrentEvent then
-				self.CurrentEvent.RemoteEvent:Destroy();
-				self.CurrentEvent.RemoteFunction:Destroy();
-				self.CurrentEvent = nil;
+				self.CurrentEvent.RemoteEvent:Destroy()
+				self.CurrentEvent.RemoteFunction:Destroy()
+				self.CurrentEvent = nil
 			end
 			
 			self.CurrentEvent = {
@@ -373,24 +371,24 @@ local Remote = {
 				})
 			}
 			
-			MakingEvent = false;
+			MakingEvent = false
 		end
 	end,
 }
 
-local function PlayerAdded(p)
-	Remote:SetupClient(p);
+local function PlayerAdded(p: Player)
+	Remote:SetupClient(p)
 	Root.Logging:AddLog("Connections", "%s joined", p.Name)
 end
 
-local function PlayerRemoved(p)
-	wait(0.5);
-	PlayerData[p.UserId] = nil;
-	Root.Logging:AddLog("Connections", "%s left", p.Name);
+local function PlayerRemoved(p: Player)
+	task.wait(0.5)
+	PlayerData[p.UserId] = nil
+	Root.Logging:AddLog("Connections", "%s left", p.Name)
 end
 
 local function PlayerError(p: Player, msg, ...)
-	Root.Logging:AddLog("Error", "PlayerError: %s :: %s", p.Name, msg);
+	Root.Logging:AddLog("Error", "PlayerError: %s :: %s", p.Name, msg)
 end
 
 return {
@@ -401,22 +399,22 @@ return {
 		Utilities = Root.Utilities
 		Service = Utilities.Services
 		
-		Root.Remote = Remote;
+		Root.Remote = Remote
 	end;
 
 	AfterInit = function(Root, Package)
-		local objNameValue = Package.Shared.EventObjectName;
-		local sharedKeyValue = Package.Shared.SharedKey;
+		local objNameValue = Package.Shared.EventObjectName
+		local sharedKeyValue = Package.Shared.SharedKey
 		
-		objNameValue.Value = Utilities:RandomString();
-		sharedKeyValue.Value = Utilities:RandomString();
+		objNameValue.Value = Utilities:RandomString()
+		sharedKeyValue.Value = Utilities:RandomString()
 		
-		Remote.EventObjectsName = objNameValue.Value;
-		Remote.SharedKey = sharedKeyValue.Value;
-		Remote:SetupRemote();
+		Remote.EventObjectsName = objNameValue.Value
+		Remote.SharedKey = sharedKeyValue.Value
+		Remote:SetupRemote()
 		
-		Utilities.Events.PlayerAdded:Connect(PlayerAdded);
-		Utilities.Events.PlayerRemoved:Connect(PlayerRemoved);
+		Utilities.Events.PlayerAdded:Connect(PlayerAdded)
+		Utilities.Events.PlayerRemoved:Connect(PlayerRemoved)
 		
 		Utilities.Events.PlayerError:Connect(PlayerError)
 	end;

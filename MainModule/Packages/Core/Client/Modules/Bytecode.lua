@@ -6,19 +6,16 @@
 	
 --]]
 
-local Root;
-local Package;
-local Utilities;
-local Service;
+local Root, Package, Utilities, Service
 
 local Bytecode = {
 	
 	--// Load bytecode
 	LoadBytecode = function(self, bytecode: string, envData: {})
-		local fiOneMod = Package.SharedAssets.FiOne:Clone();
-		local fiOne = require(fiOneMod);
+		local fiOneMod = Package.SharedAssets.FiOne:Clone()
+		local fiOne = require(fiOneMod)
 
-		return fiOne(bytecode, envData);
+		return fiOne(bytecode, envData)
 	end,
 	
 }
@@ -30,7 +27,7 @@ return {
 		Utilities = Root.Utilities
 		Service = Root.Utilities.Services
 		
-		Root.Bytecode = Bytecode;
+		Root.Bytecode = Bytecode
 	end;
 
 	AfterInit = function(Root, Package)
