@@ -179,7 +179,7 @@ local UI = {
 Methods.gTable = {
 	Ready = function(self)
 		Root.DebugWarn("SETTING GUI READY")
-		
+
 		local ran,err = pcall(function()
 			local obj = self.Object;
 			if obj and (obj:IsA("ScreenGui") or obj:IsA("GuiMain")) then
@@ -202,6 +202,8 @@ Methods.gTable = {
 	end,
 
 	BindEvent = function(self, event, func)
+		Root.DebugWarn("BINDING EVENT", event)
+
 		local signal = event:Connect(func)
 		local origDisc = signal.Disconnect
 		local Events = self.Events
@@ -226,6 +228,8 @@ Methods.gTable = {
 	end,
 
 	ClearEvents = function(self)
+		Root.DebugWarn("CLEAR EVENTS")
+
 		for i,v in pairs(self.Events) do
 			pcall(function() v.Signal:Disconnect() end)
 			self.Events[i] = nil
@@ -233,6 +237,8 @@ Methods.gTable = {
 	end,
 
 	Destroy = function(self)
+		Root.DebugWarn("DESTROY GUI")
+
 		pcall(function()
 			if self.CustomDestroy then
 				self:CustomDestroy()
@@ -252,6 +258,8 @@ Methods.gTable = {
 	end,
 
 	UnRegister = function(self)
+		Root.DebugWarn("UNREGISTER GUI")
+
 		if UI.ActiveObjects[self.Index] then
 			UI.ActiveObjects[self.Index] = nil
 
@@ -266,6 +274,8 @@ Methods.gTable = {
 	end,
 
 	Register = function(self, gui)
+		Root.DebugWarn("REGISTER GUI", gui)
+		
 		local checking = false
 
 		if self.AncestryEvent then

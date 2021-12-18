@@ -193,7 +193,7 @@ local Remote = {
 			local cmd = Utilities:Encrypt(cmd, self.SharedKey);
 
 			Root.DebugWarn("GETTING", p, cmd, ...)
-			return table.unpack(curEvent.RemoteFuncton:InvokeClient(p, cmd, table.pack(...)));
+			return table.unpack(curEvent.RemoteFunction:InvokeClient(p, cmd, table.pack(...)));
 		end
 	end,
 

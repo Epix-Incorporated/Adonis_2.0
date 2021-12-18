@@ -66,19 +66,6 @@ return {
 	end;
 
 	AfterInit = function(Root, Package)
-		local function test(p)
-			Root.DebugWarn("TESTING UI WINDOW CREATION")
-			Root.Remote:MakeGui(p, "Window", {
-				Title = "TESTING",
-				Name = "TESTING_WINDOW",
-				Ready = true
-			})
-		end
-		Utilities.Events.PlayerReady:Connect(function(p)
-			test(p)
-			Utilities.Events.CharacterAdded:Connect(function(p)
-				test(p)
-			end)
-		end)
+		
 	end;
 }
