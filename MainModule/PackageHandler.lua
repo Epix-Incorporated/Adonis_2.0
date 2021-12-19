@@ -7,7 +7,7 @@
 --]]
 
 local oWarn = warn;
-local Verbose = true;
+local Verbose = false;
 
 --// Warn
 local function warn(...)
@@ -85,7 +85,7 @@ local function GetServerPackages(Packages: {})
 			if not found[pkgString] then
 				found[pkgString] = v
 			else
-				FormatOut("Warning! Conflicting Name and Version for Package {} found!", pkgString)
+				FormatOut("Warning! Conflicting Name and Version for Package %s found!", pkgString)
 			end
 		end
 	end
@@ -108,7 +108,7 @@ local function GetClientPackages(Packages: {})
 			if not found[pkgString] then
 				found[pkgString] = v
 			else
-				FormatOut("Warning! Conflicting Name and Version for Package {} found!", pkgString)
+				FormatOut("Warning! Conflicting Name and Version for Package %s found!", pkgString)
 			end
 		end
 	end
@@ -132,7 +132,7 @@ local function StripPackages(Packages: {}, Remove: string)
 		if not found[pkgString] then
 			found[pkgString] = new
 		else
-			FormatOut("Warning! Conflicting Name and Version for Package {} found!", pkgString)
+			FormatOut("Warning! Conflicting Name and Version for Package %s found!", pkgString)
 		end
 	end
 	return found

@@ -33,7 +33,7 @@ local Process = {
 	end,
 
 	PlayerRemoving = function(self, p: Player)
-		Events.PlayerRemoving:Fire(p)
+		Events.PlayerRemoving:Fire(p, data)
 	end,
 
 	PlayerRemoved = function(self, p: Player?)

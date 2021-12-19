@@ -62,7 +62,6 @@ return {
 
 		--// Declare default playerdata (add a func to run on new playerdata grab)
 		Root.Core:DeclareDefaultPlayerData("UI", SetDefaultPlayerData)
-		Root.Core:DeclareSetting("Theme", "Default", "Default UI Theme");
 	end;
 
 	AfterInit = function(Root, Package)

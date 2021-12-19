@@ -1,28 +1,24 @@
 --[[
 
-	Description: Responsible for initializing the server portion of the 'Core' package.
-	Author: Sceleratis
-	Date: 11/20/2021
+	Description:
+	Author:
+	Date:
 
 --]]
 
+
 --// Package data
 local PackageFolder = script.Parent.Parent
-local Metadata = require(PackageFolder.Metadata)
 local Package = {
-	Folder = PackageFolder;
-	Metadata = Metadata;
-	Name = Metadata.Name;
+	Package = PackageFolder;
+	Metadata = require(PackageFolder.Metadata);
 
-	Server = PackageFolder.Server;
 	Client = PackageFolder.Client;
 	Shared = PackageFolder.Shared;
-	Assets = PackageFolder.Server.Assets;
-	SharedAssets = PackageFolder.Shared.Assets;
 
-	Modules = PackageFolder.Server.Modules;
-	Handlers = PackageFolder.Server.Handlers;
+	Modules = PackageFolder.Client.Modules;
 }
+
 
 --// Misc loading variables
 local RootTable;
@@ -33,10 +29,10 @@ local InitFunctions = {}
 local oWarn = warn;
 
 local function warn(...)
-	oWarn(":: Adonis ::", ...)
-
-	if RootTable and RootTable.Utilities then
-		RootTable.Utilities.Events.Warning:Fire(...)
+	if RootTable and RootTable.Warn then
+		RootTable.Warn(...)
+	else
+		oWarn(":: Adonis Client ::", ...)
 	end
 end
 
@@ -76,8 +72,6 @@ return {
 
 		--// Init
 		RootTable = Root
-		Root.DebugWarn = debug;
-		Root.Warn = warn;
 		Verbose = if Root.Verbose ~= nil then Root.Verbose else Verbose
 
 		--// Load modules
@@ -114,14 +108,6 @@ return {
 			end
 		end
 
-		--// Run DelayedAfterSetup methods
-		for i,t in ipairs(InitFunctions) do
-			if t.DelayedAfterSetup then
-				RunFunction(t.DelayedAfterSetup, Root, Package)
-			end
-		end
-
-		Root.Logging:AddLog("Script", "Core Loaded")
 		debug("AFTERINIT " .. Package.Metadata.Name .. " PACKAGE FINISHED")
 	end;
 }

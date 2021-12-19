@@ -8,10 +8,7 @@
 
 local Root = {}
 local EventObjects = {}
-local TrackedTasks = {}
-local TaskSchedulers = {}
-local CreatedItems = setmetatable({}, {__mode = "v"})
-local Wrappers = setmetatable({}, {__mode = "kv"})
+local InitFunctions = {}
 local ParentTester = Instance.new("Folder")
 
 local function RandomString(): string
@@ -73,248 +70,50 @@ local ObjectMethods = {
 		end;
 	},
 
-	--// Task methods
-	Task = {
-		Trigger = function(self, ...)
-			self.Event:Fire(...)
-		end;
-
-		Delete = function(self)
-			if not self.Properties.Temporary then
-				TaskSchedulers[self.Name] = nil
+	--// MemoryCache
+	MemoryCache = {
+		CleanCache = function(self)
+			for ind,data in pairs(self.__Cache) do
+				if os.time() - data.CacheTime > data.Timeout then
+					self.__Cache[ind] = nil
+				end
 			end
+		end,
 
-			self.Running = false
-			self.Event:Disconnect()
-		end;
-	},
+		SetData = function(self, key, value, data)
+			self:CleanCache()
+			self.__Cache[key] = if value ~= nil then {
+				Value = value,
+				Timeout = (data and data.Timeout) or self.__DefaultTimeout,
+				AccessResetsTimer = if data and data.AccessResetsTimer ~= nil then data.AccessResetsTimer else self.__AccessResetsTimer,
+				CacheTime = os.time()
+			} else nil
+		end,
 
-	--// Instance wrapper methods
-	Wrapper = {
-		GetMetatable = function(self)
-			return self.__NewMeta
-		end;
+		GetData = function(self, key)
+			local found = self.__Cache[key]
+			if found and os.time() - found.CacheTime <= found.Timeout then
+				if found.AccessResetsTimer then
+					found.CacheTime = os.time()
+				end
+				return found.Value
+			elseif found then
+				self.__Cache[key] = nil
+			end
+		end,
 
-		AddToCache = function(self)
-			Wrappers[self.__Object] = self.__Proxy;
-		end;
+		__index = function(self, ind)
+			return self:GetData(ind)
+		end,
 
-		RemoveFromCache = function(self)
-			Wrappers[self.__Object] = nil
-		end;
-
-		GetObject = function(self)
-			return self.__Object
-		end;
-
-		Clone = function(self, raw)
-			local new = self.__Object:Clone()
-			return
-				if raw or not Root or not Root.Utilities or not Root.Utilities.Wrapping then
-					new
-				else
-					Root.Utilities.Wrapping:Wrap(new)
-		end;
+		__newindex = function(self, ind, value)
+			self:SetData(ind, value)
+		end
 	}
 }
 
-
---// Tasks
-local Tasks = table.freeze{
-	TrackTask = function(self, name, func, ...)
-		local index = RandomString()
-		local isThread = string.sub(name, 1, 7) == "Thread:"
-
-		local data = {
-			Name = name;
-			Status = "Waiting";
-			Function = func;
-			isThread = isThread;
-			Created = os.time();
-			Index = index;
-		}
-
-		local function taskFunc(...)
-			TrackedTasks[index] = data
-			data.Status = "Running"
-			data.Returns = {pcall(func, ...)}
-
-			if not data.Returns[1] then
-				data.Status = "Errored"
-			else
-				data.Status = "Finished"
-			end
-
-			TrackedTasks[index] = nil
-			return unpack(data.Returns)
-		end
-
-		if isThread then
-			data.Thread = coroutine.create(taskFunc)
-			return coroutine.resume(data.Thread, ...) --select(2, coroutine.resume(data.Thread, ...))
-		else
-			return taskFunc(...)
-		end
-	end;
-
-	EventTask = function(self, name, func)
-		local newTask = self.TrackTask
-		return function(...)
-			return newTask(name, func, ...)
-		end
-	end;
-
-	GetTasks = function()
-		return TrackedTasks
-	end;
-
-	TaskScheduler = function(self, taskName, props)
-		local props = props or {}
-		if not props.Temporary and TaskSchedulers[taskName] then return TaskSchedulers[taskName] end
-
-		local new = {
-			Name = taskName;
-			Running = true;
-			Properties = props;
-			LinkedTasks = {};
-			RunnerEvent = Instance.new("BindableEvent");
-			Trigger = ObjectMethods.Task.Trigger;
-			Delete = ObjectMethods.Task.Delete;
-		}
-
-		new.Event = new.RunnerEvent.Event:Connect(function(...)
-			for i, v in pairs(new.LinkedTasks) do
-				if select(2, pcall(v)) then
-					table.remove(new.LinkedTasks, i);
-				end
-			end
-		end)
-
-		if props.Interval then
-			while wait(props.Interval) and new.Running do
-				new:Trigger(os.time())
-			end
-		end
-
-		if not props.Temporary then
-			TaskSchedulers[taskName] = new
-		end
-
-		return new
-	end;
-}
-
-
---// Wrapping
-local Wrapping = {
-
-	--// Determines equality between two objects with wrapper support
-	RawEqual = function(self, obj1, obj2)
-		return self:UnWrap(obj1) == self:UnWrap(obj2)
-	end;
-
-	--// Returns a metatable for the supplied table with __metatable set to "Ignore", indicating this should not be wrapped
-	WrapIgnore = function(self, tab)
-		return setmetatable(tab, {__metatable = "Ignore"})
-	end;
-
-	--// Returns true if the supplied object is a wrapper proxy object
-	IsWrapped = function(self, object)
-		return getmetatable(object) == "Adonis_Proxy"
-	end;
-
-	--// UnWraps the supplied object (if wrapped)
-	UnWrap = function(self, object)
-		local OBJ_Type = typeof(object)
-
-		if OBJ_Type == "Instance" then
-			return object
-		elseif OBJ_Type == "table" then
-			local UnWrap = self.UnWrap
-			local tab = {}
-			for i, v in pairs(object) do
-				tab[i] = UnWrap(self, v)
-			end
-			return tab
-		elseif self:IsWrapped(object) then
-			return object:GetObject()
-		else
-			return object
-		end
-	end;
-
-	--// Wraps the supplied object in a new proxy
-	Wrap = function(self, object)
-		if getmetatable(object) == "Ignore" or getmetatable(object) == "ReadOnly_Table" then
-			return object
-		elseif Wrappers[object] then
-			return Wrappers[object]
-		elseif type(object) == "table" then
-			local Wrap = self.Wrap
-			local tab = setmetatable({	}, {
-				__eq = function(tab,val)
-					return object
-				end
-			})
-
-			for i,v in pairs(object) do
-				tab[i] = Wrap(self, v)
-			end
-
-			return tab
-		elseif (type(object) == "userdata") and not self:IsWrapped(object) then
-			local newObj = newproxy(true)
-			local newMeta = getmetatable(newObj)
-			local custom; custom = {
-				__NewMeta = newMeta,
-				__Proxy = newObj,
-				__Object = object,
-
-				SetSpecial = function(self, name, val)
-					custom[name] = val
-					return self
-				end;
-			}
-
-			for i,v in pairs(ObjectMethods.Wrapper) do
-				custom[i] = v
-			end
-
-			newMeta.__index = function(tab, ind)
-				local special = custom[ind]
-				local target = if special then special else object[ind]
-
-				if special then
-					return special
-				elseif type(target) == "function" then
-					return function(self, ...)
-						return target(self.__Object, ...)
-					end
-				else
-					return target
-				end
-			end
-
-			newMeta.__newindex = function(tab, ind, val)
-				object[ind] = self:UnWrap(val)
-			end
-
-			newMeta.__eq = function(obj1, obj2) return self:RawEqual(obj1, obj2) end
-			newMeta.__tostring = function() return custom.ToString or tostring(object) end
-			newMeta.__metatable = "Adonis_Proxy"
-
-			return newObj
-		else
-			return object
-		end
-	end;
-}
-
-
 --// Utilities
 local Utilities = {
-	Tasks = Tasks,
-	Wrapping = Wrapping,
 	RandomString = RandomString,
 
 	--// Caches and returns Roblox services retrieved via game:GetService()
@@ -337,6 +136,23 @@ local Utilities = {
 		end
 	})),
 
+	--// Handles data caching
+	MemoryCache = function(self, data)
+		return setmetatable({
+			__Cache = (data and data.Cache) or {},
+			__DefaultTimeout = (data and data.Timeout) or 0,
+			__AccessResetsTimer = if data and data.AccessResetsTimer ~= nil then data.AccessResetsTimer else false,
+
+			CleanCache = ObjectMethods.MemoryCache.CleanCache,
+			SetData = ObjectMethods.MemoryCache.SetData,
+			GetData = ObjectMethods.MemoryCache.GetData
+		}, {
+			__index = ObjectMethods.MemoryCache.__index,
+			__newindex = ObjectMethods.MemoryCache.__newindex
+		})
+	end,
+
+	--// Instance creation
 	CreateInstance = function(self, class: string, properties: {})
 		local newObj = Instance.new(class)
 		local connections = {}
@@ -583,7 +399,7 @@ local Utilities = {
 
 	--// Runs the given function and outputs any errors
 	RunFunction = function(self, Function, ...)
-		xpcall(Function, function(err)
+		return xpcall(Function, function(err)
 			warn("Error while running function; Expand for more info", {Error = tostring(err), Raw = err})
 		end, ...)
 	end;
@@ -610,6 +426,21 @@ local Utilities = {
 	end;
 }
 
+--// Requires a given ModuleScript; If a function is returned immediately, run it
+--// If a table is returned, assume deferred execution
+local function LoadModule(Module: ModuleScript, ...)
+	local ran,func = pcall(require, Module)
+
+	if ran then
+		if type(func) == "function" then
+			Utilities:RunFunction(func, ...)
+		elseif type(func) == "table" then
+			table.insert(InitFunctions, func)
+		end
+	else
+		warn("Encountered error while loading module:", {Module = Module, Error = tostring(func)})
+	end
+end
 
 return table.freeze {
 	Init = function(Root, Package)
@@ -623,5 +454,27 @@ return table.freeze {
 
 		Root.Events = Utilities.Events
 		Root.Services = Utilities.Services
+
+		for i,module in ipairs(Package.Shared.Modules:GetChildren()) do
+			if module:IsA("ModuleScript") then
+				LoadModule(module, Root, Package)
+			end
+		end
+
+		--// Run init methods
+		for i,t in ipairs(InitFunctions) do
+			if t.Init then
+				RunFunction(t.Init, Root, Utilities)
+			end
+		end
+	end;
+
+	AfterInit = function(Root, Package)
+		--// Run afterinit methods
+		for i,t in ipairs(InitFunctions) do
+			if t.AfterInit then
+				RunFunction(t.AfterInit, Root, Utilities)
+			end
+		end
 	end;
 }

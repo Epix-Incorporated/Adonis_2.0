@@ -21,7 +21,7 @@ local Package = {
 
 --// Misc loading variables
 local RootTable;
-local Verbose = true;
+local Verbose = false;
 local InitFunctions = {}
 
 --// Output

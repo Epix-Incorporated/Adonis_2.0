@@ -10,8 +10,10 @@ local Root, Package, Utilities, Service
 
 local Core = {
 	PlayerData = {};
+	PlayerDataCache = {};
 	DeclaredSettings = {};
 	DeclaredDefaultPlayerData = {};
+	DeclaredPlayerDataHandlers = {};
 	DefaultPlayerDataTable = {};
 
 	DeclareDefaultPlayerData = function(self, ind, defaultValue)
@@ -22,6 +24,14 @@ local Core = {
 		self.DeclaredDefaultPlayerData[ind] = defaultValue
 	end,
 
+	DeclarePlayerDataHandler = function(self, ind, func)
+		if self.DeclaredPlayerDataHandlers[ind] then
+			Root.Warn("PlayerDataHandler \"".. ind .."\" already delcared. Overwriting.")
+		end
+
+		self.DeclaredPlayerDataHandlers[ind] = func
+	end,
+
 	DefaultPlayerData = function(self, p)
 		local newData = {}
 
@@ -30,10 +40,17 @@ local Core = {
 
 		for ind, value in pairs(self.DeclaredDefaultPlayerData) do
 			if type(value) == "function" then
-				Utilities:RunFunction(value, p, newData)
+				local r, val = Utilities:RunFunction(value, p, newData)
+				if r then
+					newData[ind] = val
+				end
 			else
 				newData[ind] = value
 			end
+		end
+
+		for ind, func in pairs(self.DeclaredPlayerDataHandlers) do
+			Utilities:RunFunction(func, p, newData)
 		end
 
 		--// Fire an event letting all modules know that we are getting default player data so they can add anything they need
@@ -43,11 +60,15 @@ local Core = {
 	end,
 
 	GetPlayerData = function(self, p)
-		if not self.PlayerData[p.UserId] then
-			self.PlayerData[p.UserId] = self:DefaultPlayerData(p)
-		end
+		local cached = self.PlayerData:GetData(p.UserId)
 
-		return self.PlayerData[p.UserId]
+		if cached then
+			return cached
+		else
+			local defaultData = self:DefaultPlayerData(p)
+			self.PlayerData:SetData(p.UserId, defaultData)
+			return defaultData
+		end
 	end,
 
 	--// Declare new settings, their default value, and their description
@@ -59,7 +80,13 @@ local Core = {
 		self.DeclaredSettings[setting] = {
 			DefaultValue = defaultValue;
 			Description = description;
+			Package = package;
 		}
+
+		Root.Logging:AddLog("Script", {
+			Text = "Declared setting: ".. tostring(setting),
+			Description = description
+		})
 	end,
 
 	--// If a setting is not found, this is responsible for returning a value for it (or possibly, also setting it)
@@ -79,8 +106,10 @@ local function PlayerAdded(p)
 end
 
 local function PlayerRemoved(p)
+	local data = Core:GetPlayerData(p)
+	Utilities.Events.RemovingPlayerData:Fire(p, data)
 	wait(0.5);
-	Core.PlayerData[p.UserId] = nil;
+	Core.PlayerData:SetData(p.UserId, nil)
 	Root.Logging:AddLog("Connections", "%s left", p.Name);
 end
 
@@ -95,6 +124,8 @@ return {
 		Utilities = Root.Utilities
 		Service = Root.Utilities.Services
 
+		Root.Core = Core
+
 		local settings = Root.Settings;
 		Root.Settings = setmetatable(settings, {
 			__index = function(self, ind)
@@ -102,14 +133,27 @@ return {
 			end,
 		});
 
-		Root.Core = Core
+		Core.PlayerData = Utilities:MemoryCache({
+			Core.PlayerDataCache,
+			Timeout = 60*5,
+			AccessResetsTimer = true
+		})
 
 		Core:DeclareDefaultPlayerData("Leaving", false)
 		Core:DeclareDefaultPlayerData("ClientReady", false)
 		Core:DeclareDefaultPlayerData("ObtainedKeys", false)
+
+		Core:DeclareDefaultPlayerData("Cache", function(p, newData)
+			return Utilities:MemoryCache({
+				Cache = {},
+				Timeout = 0,
+				AccessResetsTimer = false
+			})
+		end)
+
 		Core:DeclareDefaultPlayerData("EncryptionKey", function(p, newData)
-			newData.EncryptionKey = Utilities:RandomString();
-		end);
+			return Utilities:RandomString()
+		end)
 	end;
 
 	AfterInit = function(Root, Package)

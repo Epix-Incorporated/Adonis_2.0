@@ -26,7 +26,7 @@ local Logging = {
 			if type(newLog) == "string" then
 				newLog = {
 					Text = Log;
-					Desc = Log;
+					Description = Log;
 				}
 			end
 

@@ -18,7 +18,7 @@ local Package = {
 
 --// Misc loading variables
 local RootTable = {}
-local Verbose = true
+local Verbose = false
 local InitFunctions = {}
 
 --// Output
@@ -72,7 +72,9 @@ return {
 
 		--// Load shared modules
 		for i,module in ipairs(Package.Shared:GetChildren()) do
-			LoadModule(module, Root, Package)
+			if module:IsA("ModuleScript") then
+				LoadModule(module, Root, Package)
+			end
 		end
 
 		--// Run init methods

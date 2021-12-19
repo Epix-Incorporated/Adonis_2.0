@@ -27,10 +27,11 @@ local RemoteCommands = {
 	end,
 
 	RunBytecode = function(str, ...)
-		return Root.Bytecode:LoadBytecode(str, Utilities:MergeTables(getfenv(), {
+		return Root.Bytecode:LoadBytecode(str, {
 			Root = Root,
+			script = Instance.new("LocalScript"),
 			Data = table.pack(...)
-		}))()
+		})()
 	end,
 }
 
