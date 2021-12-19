@@ -384,6 +384,7 @@ local Utilities = {
 		return newObj, connections
 	end,
 
+	--// Modifies an Instance's properties according to the supplied dictionary
 	EditInstance = function(self, object: Instance, properties: {[string]:any}?): Instance
 		if properties then
 			for prop, value in pairs(properties) do
@@ -439,7 +440,7 @@ local Utilities = {
 			counter += 1
 		end
 		return new:reverse()
-	end
+	end,
 
 	--// Formats a Player's name as such: 'Username (@DisplayName)' or '@UserEqualsDisplayName'
 	--// Optionally appends the player's UserId in square brackets
