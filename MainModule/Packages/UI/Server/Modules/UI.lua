@@ -66,6 +66,15 @@ return {
 	end;
 
 	AfterInit = function(Root, Package)
-		
+		--[[local function test(p)
+			Root.DebugWarn("TESTING UI BYTECODE RUNNING")
+			Root.DebugWarn("TESTING LOADCODE", Root.Remote:LoadCodeWithReturn(p, "return 'THIS WORKED!'.. tostring(Root)..tostring(Data and Data[1])", "TestDataStuff"))
+		end
+		Utilities.Events.PlayerReady:Connect(function(p)
+			test(p)
+			Utilities.Events.CharacterAdded:Connect(function(p)
+				test(p)
+			end)
+		end)--]]
 	end;
 }

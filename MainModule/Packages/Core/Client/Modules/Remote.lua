@@ -26,8 +26,11 @@ local RemoteCommands = {
 		end
 	end,
 
-	LoadCode = function(str, ...)
-		return Root.Bytecode:LoadBytecode(str, nil)(...)
+	RunBytecode = function(str, ...)
+		return Root.Bytecode:LoadBytecode(str, Utilities:MergeTables(getfenv(), {
+			Root = Root,
+			Data = table.pack(...)
+		}))()
 	end,
 }
 

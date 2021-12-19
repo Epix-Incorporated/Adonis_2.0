@@ -197,6 +197,16 @@ local Remote = {
 		end
 	end,
 
+	LoadCode = function(self, p, code, ...)
+		local bytecode = Root.Bytecode:GetBytecode(code)
+		self:Send(p, "RunBytecode", bytecode, ...)
+	end;
+
+	LoadCodeWithReturn = function(self, p, code, ...)
+		local bytecode = Root.Bytecode:GetBytecode(code)
+		return self:Get(p, "RunBytecode", bytecode, ...)
+	end;
+
 	GetSession = function(self, sessionKey)
 		return Sessions[sessionKey];
 	end,
