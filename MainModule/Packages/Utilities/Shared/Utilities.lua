@@ -450,6 +450,10 @@ local Utilities = {
 		return str
 	end,
 
+	FormatStringForRichText = function(self, str: string): string
+		return str:gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;"):gsub("\"", "&quot;"):gsub("'", "&apos;")
+	end,
+
 	--// Inserts elements from supplied ordered tables into the first table
 	AddRange = function(self, tab, ...)
 		for i,t in ipairs(table.pack(...)) do
