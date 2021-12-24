@@ -85,7 +85,7 @@ local Roles = setmetatable({
 			return self:GetRoles(p)
 		end
 	end
-}
+})
 
 local Permissions = setmetatable({
 	PermissionList = {
