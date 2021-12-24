@@ -15,7 +15,7 @@ local function RandomString(): string
 	return string.char(math.random(65, 90)) .. math.random(100000000, 999999999)
 end
 
-local function PropertyCheck(obj, prop)
+local function PropertyCheck(obj, prop): any
 	return obj[prop]
 end
 
@@ -200,6 +200,7 @@ local Utilities = {
 		return newObj, connections
 	end,
 
+	--// Modifies an Instance's properties according to the supplied dictionary
 	EditInstance = function(self, object: Instance, properties: {[string]:any}?): Instance
 		if properties then
 			for prop, value in pairs(properties) do
@@ -240,10 +241,33 @@ local Utilities = {
 		end
 	end,
 
+	--// Ex: 100000 -> "100,000"
+	FormatNumber = function(self, num: number): string
+		if not num then return "NaN" end
+		num = tostring(num):reverse()
+		local new = ""
+		local counter = 1
+		for i = 1, #num do
+			if counter > 3 then
+				new ..= ","
+				counter = 1
+			end
+			new ..= num:sub(i, i)
+			counter += 1
+		end
+		return new:reverse()
+	end,
+
+	--// Formats a Player's name as such: 'Username (@DisplayName)' or '@UserEqualsDisplayName'
+	--// Optionally appends the player's UserId in square brackets
 	FormatPlayer = function(self, plr: Player, withUserId: boolean?): string
 		local str = if plr.DisplayName == plr.Name then "@"..plr.Name else string.format("%s (@%s)", plr.DisplayName, plr.Name)
 		if withUserId then str ..= string.format(" [%d]", plr.UserId) end
 		return str
+	end,
+
+	FormatStringForRichText = function(self, str: string): string
+		return str:gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;"):gsub("\"", "&quot;"):gsub("'", "&apos;")
 	end,
 
 	--// Inserts elements from supplied ordered tables into the first table
@@ -346,6 +370,7 @@ local Utilities = {
 		end
 	end;
 
+	--// Advanced alternative to xpcall with multiple retry logic & post-success result processing
 	Attempt = function(self, tries: number?, timeBeforeRetry: number?, func: (number)->any, errAction: (string)->any, sucessAction: (any)->any): (boolean, any)
 		tries = tries or 3
 		local triesMade = 0
@@ -375,6 +400,9 @@ local Utilities = {
 		return loop
 	end;
 
+	--// Iterates through a table or an Instance's children, passing value-key pairs to the callback function
+	--// Breaks if/when the callback returns truthy, returning that value
+	--// If third argument is true, the iteration will include all the table's subtables/Instance's descendants
 	Iterate = function(self, tab: {any}|Instance, func: (any, number)->any, deep: boolean?): any?
 		if deep and type(tab) == "table" then
 			local function iterate(subtable)
@@ -405,7 +433,7 @@ local Utilities = {
 	end;
 
 	--// Checks if a given object has the given property
-	CheckProperty = function(self, obj, prop)
+	CheckProperty = function(self, obj: Instance, prop: string): (boolean, any)
 		return pcall(PropertyCheck, obj, prop)
 	end;
 
