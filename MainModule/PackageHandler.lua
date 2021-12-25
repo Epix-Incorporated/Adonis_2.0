@@ -363,6 +363,7 @@ return table.freeze {
 	StripPackages = StripPackages;
 	GetMetadata = GetMetadata;
 	FindDependency = FindDependency;
+	CheckDependencies = CheckDependencies;
 	GetOrderedPackageList = GetOrderedPackageList;
 	LoadPackages = LoadPackages;
 }

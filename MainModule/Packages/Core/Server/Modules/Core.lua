@@ -135,7 +135,7 @@ return {
 
 		Core.PlayerData = Utilities:MemoryCache({
 			Core.PlayerDataCache,
-			Timeout = 60*5,
+			Timeout = 60*10,
 			AccessResetsTimer = true
 		})
 

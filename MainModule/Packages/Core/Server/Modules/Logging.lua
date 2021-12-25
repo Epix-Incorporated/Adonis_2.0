@@ -43,6 +43,8 @@ local Logging = {
 			end
 
 			table.insert(logTab, newLog);
+
+			Utilities.Events.LogAdded:Fire(Type, newLog)
 		else
 			Root.Warn("Invalid LogType Supplied", Type)
 		end

@@ -12,13 +12,12 @@ local Root, Utilities, Service, Package;
 local Settings = {
 	NewPermissions = {},
 	Roles = {
-		Description = "Administrative roles",
-		DefaultValue = {
-		}
+		Description = "System Roles",
+		DefaultValue = {}
 	},
 
 	Users = {
-		Description = "Administrative users",
+		Description = "System Users",
 		DefaultValue = {}
 	}
 }

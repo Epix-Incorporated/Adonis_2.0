@@ -27,7 +27,8 @@ local Root = {
 	Verbose = true;
 	Packages = {};
 	Globals = {};
-	PackageHandlerModule = script.PackageHandler;
+	PackageHandlerModule = script:WaitForChild("PackageHandler");
+	PackagesFolder = script:WaitForChild("Packages");
 }
 
 --// Client Loading Process
@@ -42,7 +43,7 @@ do
 	warn("Loading packages...")
 
 	--// Get all packages
-	addRange(Root.Packages, script.Packages:GetChildren())
+	addRange(Root.Packages, Root.PackagesFolder:GetChildren())
 
 	--// Get PackageHandler
 	local PackageHandler = require(Root.PackageHandlerModule)

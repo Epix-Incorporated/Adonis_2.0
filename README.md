@@ -58,7 +58,7 @@ The Adonis loader provides a `DebugMode` option which will load a local copy of 
 ## Links
 * Official Adonis Loader: https://www.roblox.com/library/7510622625/Adonis-Loader
 * Official MainModule: https://www.roblox.com/library/7510592873/Adonis-MainModule
-* Documentation: https://github.com/Sceleratis/Adonis/wiki
+* Documentation: https://github.com/Sceleratis/Adonis_2.0/wiki
 * Discord Server: https://discord.gg/rdkgGc4
 
 ## Contributing

@@ -1,6 +1,6 @@
 --[[
 
-	Description: Various utility items and methods used by both the client and server.
+	Description: Various utility objects and methods used by both the client and server.
 	Author: Sceleratis
 	Date: 12/04/2021
 
@@ -10,9 +10,21 @@ local Root = {}
 local EventObjects = {}
 local InitFunctions = {}
 local ParentTester = Instance.new("Folder")
+local __RANDOM_CHARSET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
-local function RandomString(): string
-	return string.char(math.random(65, 90)) .. math.random(100000000, 999999999)
+local function RandomString(self, len: number, charset: string): string
+	len = len or 9
+	charset = charset or __RANDOM_CHARSET
+
+	local charSetLen = string.len(charset)
+	local newStr = ""
+
+	for i = 1, len do
+		local rand = math.random(1, charSetLen)
+		newStr = newStr .. string.sub(charset, rand, rand)
+	end
+
+	return newStr
 end
 
 local function PropertyCheck(obj, prop): any
@@ -68,6 +80,14 @@ local ObjectMethods = {
 				return eventObject:Fire(...)
 			end
 		end;
+
+		Destroy = function(self, ...)
+			local eventObject = EventObjects[self.EventName]
+			if eventObject then
+				EventObjects[self.EventName] = nil
+				return eventObject:Destroy()
+			end
+		end
 	},
 
 	--// MemoryCache
@@ -152,14 +172,17 @@ local Utilities = {
 		})
 	end,
 
-	--// Instance creation
-	CreateInstance = function(self, class: string, properties: {})
-		local newObj = Instance.new(class)
+	--// Modifies an Instance's properties according to the supplied dictionary
+	EditInstance = function(self, object: Instance, properties: {[string]:any}?): Instance
 		local connections = {}
+
+		if self.Wrapping:IsWrapped(object) then
+			object = self.Wrapping:UnWrap(object)
+		end
 
 		if properties then
 			if typeof(properties) == "Instance" then
-				newObj.Parent = properties
+				object.Parent = properties
 			elseif typeof(properties) == "table" then
 				local parent = properties.Parent
 				local events = properties.Events
@@ -171,43 +194,40 @@ local Utilities = {
 				properties.Children = nil
 				properties.Attributes = nil
 
-				self:EditInstance(newObj, properties)
+				for prop, val in pairs(properties) do
+					object[prop] = val
+				end
 
 				if children then
 					for _, child in pairs(children) do
-						child.Parent = newObj
+						child.Parent = object
 					end
 				end
 
 				if attributes then
 					for attrib, value in pairs(attributes) do
-						newObj:SetAttribute(attrib, value)
+						object:SetAttribute(attrib, value)
 					end
 				end
 
 				if parent then
-					newObj.Parent = parent
+					object.Parent = parent
 				end
 
 				if events then
 					for event, func in pairs(events) do
-						connections[event] = newObj[event]:Connect(func)
+						connections[event] = object[event]:Connect(func)
 					end
 				end
 			end
 		end
 
-		return newObj, connections
+		return object, connections
 	end,
 
-	--// Modifies an Instance's properties according to the supplied dictionary
-	EditInstance = function(self, object: Instance, properties: {[string]:any}?): Instance
-		if properties then
-			for prop, value in pairs(properties) do
-				object[prop] = value
-			end
-		end
-		return object
+	--// Instance creation
+	CreateInstance = function(self, class: string, properties: {})
+		return self:EditInstance(Instance.new(class), properties)
 	end,
 
 	--// Returns true if this is running on the server
@@ -266,6 +286,7 @@ local Utilities = {
 		return str
 	end,
 
+	--// Formats a string for use with RichText
 	FormatStringForRichText = function(self, str: string): string
 		return str:gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;"):gsub("\"", "&quot;"):gsub("'", "&apos;")
 	end,
@@ -293,6 +314,7 @@ local Utilities = {
 		return tab
 	end,
 
+	--// Returns the number of elements in a given table
 	CountTable = function(tab: {[any]:any}, excludeNumIndices: boolean?): number
 		local n = 0
 		for i, v in pairs(tab) do
@@ -388,6 +410,7 @@ local Utilities = {
 		return success, result
 	end;
 
+	--// Creates a new loop with specified delay.
 	MakeLoop = function(self, exeDelay: number?, func: (number)->(), dontStart: boolean?)
 		local loop = coroutine.wrap(function()
 			local run = 0
@@ -401,7 +424,7 @@ local Utilities = {
 	end;
 
 	--// Iterates through a table or an Instance's children, passing value-key pairs to the callback function
-	--// Breaks if/when the callback returns truthy, returning that value
+	--// Breaks if/when the callback returns, returning that value
 	--// If third argument is true, the iteration will include all the table's subtables/Instance's descendants
 	Iterate = function(self, tab: {any}|Instance, func: (any, number)->any, deep: boolean?): any?
 		if deep and type(tab) == "table" then
@@ -458,7 +481,6 @@ local Utilities = {
 --// If a table is returned, assume deferred execution
 local function LoadModule(Module: ModuleScript, ...)
 	local ran,func = pcall(require, Module)
-
 	if ran then
 		if type(func) == "function" then
 			Utilities:RunFunction(func, ...)
@@ -492,7 +514,7 @@ return table.freeze {
 		--// Run init methods
 		for i,t in ipairs(InitFunctions) do
 			if t.Init then
-				RunFunction(t.Init, Root, Utilities)
+				Utilities:RunFunction(t.Init, Root, Utilities)
 			end
 		end
 	end;
@@ -501,7 +523,7 @@ return table.freeze {
 		--// Run afterinit methods
 		for i,t in ipairs(InitFunctions) do
 			if t.AfterInit then
-				RunFunction(t.AfterInit, Root, Utilities)
+				Utilities:RunFunction(t.AfterInit, Root, Utilities)
 			end
 		end
 	end;
