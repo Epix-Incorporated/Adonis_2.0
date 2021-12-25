@@ -35,7 +35,7 @@ end
 
 --// Table shared with all packages which acts as the root table for all others
 local Root = {
-	Verbose = true;
+	Verbose = false;
 	Packages = {};
 	Globals = {};
 	PackageHandlerModule = script.PackageHandler;
@@ -44,7 +44,7 @@ local Root = {
 --// Returns to the loader
 return function(Loader: {}, Settings: {}, Packages: Folder)
 	--// Begin loading
-	warn("Loading packages...");
+	if Root.Verbose then warn("Loading packages...") end
 
 	--// Set variables
 	local start = os.clock();
@@ -67,7 +67,7 @@ return function(Loader: {}, Settings: {}, Packages: Folder)
 	PackageHandler.LoadPackages(Packages, "Server", Root, Packages);
 
 	--// Loading complete
-	warn("Loading complete; Elapsed:", os.clock() - start);
+	warn("Loading complete :: Elapsed:", os.clock() - start);
 
 	return true;
 end

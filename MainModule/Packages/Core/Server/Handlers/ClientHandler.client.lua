@@ -24,7 +24,7 @@ end
 
 --// Table shared with all packages which acts as the root table for all others
 local Root = {
-	Verbose = true;
+	Verbose = false;
 	Packages = {};
 	Globals = {};
 	PackageHandlerModule = script:WaitForChild("PackageHandler");
@@ -40,7 +40,7 @@ do
 	repeat task.wait(0.01); script.Parent = nil; until script.Parent == nil
 
 	--// Begin loading
-	warn("Loading packages...")
+	if Root.Verbose then warn("Loading packages...") end
 
 	--// Get all packages
 	addRange(Root.Packages, Root.PackagesFolder:GetChildren())
@@ -58,6 +58,6 @@ do
 	PackageHandler.LoadPackages(Packages, "Client", Root, Packages)
 
 	--// Loading complete
-	warn("Loading complete; Elapsed:", os.clock() - start)
+	warn("Loading complete :: Elapsed:", os.clock() - start)
 
 end

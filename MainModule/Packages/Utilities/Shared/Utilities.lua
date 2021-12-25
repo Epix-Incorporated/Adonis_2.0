@@ -7,6 +7,7 @@
 --]]
 
 local Root = {}
+local RateLimits = {}
 local EventObjects = {}
 local InitFunctions = {}
 local ParentTester = Instance.new("Folder")
@@ -170,6 +171,28 @@ local Utilities = {
 			__index = ObjectMethods.MemoryCache.__index,
 			__newindex = ObjectMethods.MemoryCache.__newindex
 		})
+	end,
+
+	--// Rate Limiting
+	RateLimit = function(self, key: string, data: {})
+		local cache = data.Cache or RateLimits
+		local found = cache[key]
+
+		if found then
+			if tick() - found.Tick < (data.Timeout or found.Timeout) then
+				return true
+			else
+				found.Tick = tick()
+				return false
+			end
+		else
+			cache[key] = {
+				Tick = tick(),
+				Timeout = data.Timeout or 0
+			}
+
+			return false
+		end
 	end,
 
 	--// Modifies an Instance's properties according to the supplied dictionary

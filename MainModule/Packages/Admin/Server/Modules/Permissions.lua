@@ -17,6 +17,15 @@ local function numBasedRankCheck(numBased, rank)
 	end
 end
 
+local RemoteCommands = {
+	GetPermissions = function(p: Player)
+		local data = Root.Core:GetPlayerData(p)
+		if not Utilities:RateLimit("GetPermissions", { Cache = data.RateLimitCache, Timeout = Root.Timeouts.Remote_GetPermissions }) then
+			return Root.Permissions:GetPermissions(p)
+		end
+	end
+}
+
 local Roles = setmetatable({
 	--// Functions used to check whether or not player matches a certain criteria, such as being in a specific group or having a certain UserId for Role assignments.
 	UserChecks = {
@@ -106,7 +115,7 @@ local Roles = setmetatable({
 		else
 			local info = Service.GroupService:GetGroupsAsync(player.UserId)
 			if info then
-				data.Cache:SetData("GroupData", info, { Timeout = math.random(20, 30) }) --// Attempt to slightly desync group grabbing intervals as much as possible
+				data.Cache:SetData("GroupData", info, { Timeout = math.random(Root.Timeouts.GetPlayerGroups, Root.Timeouts.GetPlayerGroups + 10) }) --// Attempt to slightly desync group grabbing intervals as much as possible
 				return info
 			end
 		end
@@ -172,7 +181,7 @@ local Roles = setmetatable({
 			end
 
 			data.Cache:SetData("Roles", foundRoles, {
-				Timeout = math.random(40, 60) --// Intentional desync
+				Timeout = math.random(Root.Timeouts.GetPlayerRoles, Root.Timeouts.GetPlayerRoles + 10) --// Intentional desync
 			})
 
 			for role, val in pairs(data.Overrides.Roles) do
@@ -230,7 +239,7 @@ local Permissions = setmetatable({
 			end
 
 			data.Cache:SetData("Permissions", foundPerms, {
-				Timeout = math.random(40, 60)
+				Timeout = math.random(Root.Timeouts.GetPlayerPermissions, Root.Timeouts.GetPlayerPermissions + 10)
 			})
 		end
 
@@ -295,6 +304,17 @@ return {
 		Root.Roles = Roles
 		Root.Permissions = Permissions
 
+		Root.Timeouts.GetPlayerGroups = 20
+		Root.Timeouts.GetPlayerRoles = 40
+		Root.Timeouts.GetPlayerPermissions = 40
+		Root.Timeouts.Remote_GetPermissions = 2.5
+
+		Utilities.MergeTables(Root.Remote.Commands, RemoteCommands)
+
+		Root.Core:DeclareDefaultPlayerData("RateLimitCache", function()
+			return {}
+		end)
+
 		Root.Core:DeclareDefaultPlayerData("Overrides", function()
 			return {
 				Permissions = {},
@@ -314,11 +334,5 @@ return {
 
 	AfterInit = function(Root, Package)
 		--// Do after-init
-		Utilities.Events.PlayerReady:Connect(function(p)
-			print("PlayerRoles", Roles:GetRoles(p))
-			print("PlayerPerms", Permissions:GetPermissions(p))
-			print("RoleTest2", Roles[p])
-			print("PermTest2", Permissions[p])
-		end)
 	end;
 }

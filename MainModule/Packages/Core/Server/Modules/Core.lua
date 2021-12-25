@@ -125,6 +125,9 @@ return {
 		Service = Root.Utilities.Services
 
 		Root.Core = Core
+		Root.Timeouts = {
+			PlayerDataCacheTimeout = 60*10
+		}
 
 		local settings = Root.Settings;
 		Root.Settings = setmetatable(settings, {
@@ -135,7 +138,7 @@ return {
 
 		Core.PlayerData = Utilities:MemoryCache({
 			Core.PlayerDataCache,
-			Timeout = 60*10,
+			Timeout = Root.Timeouts.PlayerDataCacheTimeout,
 			AccessResetsTimer = true
 		})
 
