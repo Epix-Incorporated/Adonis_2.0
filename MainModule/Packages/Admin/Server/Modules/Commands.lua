@@ -54,8 +54,7 @@ local Commands = {
 				if type(cmdArgData) == "table" then
 					local parser = self.ArgumentParsers[cmdArgData.Type]
 					if parser then
-						local parseResult = parser(data, cmdArgData, textArg)
-						result[i] = if parseResult ~= nil then parseResult else textArg
+						result[i] = parser(data, cmdArgData, textArg)
 					end
 				else
 					result[i] = textArg
@@ -268,21 +267,21 @@ return {
 			DefaultValue = ":",
 			Description = "Character that must appear at the start of a message to indicate it is a command",
 			Package = Package,
-			ShareWithClient = true
+			ClientAccess = true
 		})
 
 		Root.Core:DeclareSetting("SplitChar", {
 			DefaultValue = " ",
 			Description = "Character used when splitting command strings into arguments.",
 			Package = Package,
-			ShareWithClient = true
+			ClientAccess = true
 		})
 
 		Root.Core:DeclareSetting("BatchChar", {
 			DefaultValue = "~|~",
 			Description = "Character used to break up command strings into multiple command strings.",
 			Package = Package,
-			ShareWithClient = true
+			ClientAccess = true
 		})
 	end;
 

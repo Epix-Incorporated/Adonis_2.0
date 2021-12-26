@@ -108,7 +108,7 @@ local Core = {
 	GetSharedSettings = function(self, p: Player)
 		local result = {}
 		for ind, data in pairs(self.DeclaredSettings) do
-			if data.ShareWithClient then
+			if data.ClientAccess then
 				result[ind] = Root.Settings[ind]
 			end
 		end
