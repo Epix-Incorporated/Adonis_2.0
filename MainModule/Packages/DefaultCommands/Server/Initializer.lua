@@ -74,6 +74,13 @@ return {
 		--// Init
 		RootTable = Root
 		Verbose = if Root.Verbose ~= nil then Root.Verbose else Verbose
+		
+		--// Declare settings
+		if Package.Metadata.Settings then
+			for setting,data in pairs(Package.Metadata.Settings) do
+				Root.Core:DeclareSetting(setting, data)
+			end
+		end
 
 		--// Load modules
 		for i,module in ipairs(Package.Modules:GetChildren()) do

@@ -5,7 +5,11 @@ return {
 	Description = [[ This package is responsible for the core functionality of Adonis. It provides core server & client loading and communication ]];
 	Author = "Sceleratis";
 	Package = script.Parent;
+
 	Dependencies = {
 		"Utilities"
+	};
+
+	Settings = {
 	};
 }

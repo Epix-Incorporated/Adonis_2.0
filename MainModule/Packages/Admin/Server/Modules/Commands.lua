@@ -261,28 +261,6 @@ return {
 			Timeout = 30,
 			AccessResetsTimer = false
 		})
-
-		--// Declare command-related settings
-		Root.Core:DeclareSetting("Prefix", {
-			DefaultValue = ":",
-			Description = "Character that must appear at the start of a message to indicate it is a command",
-			Package = Package,
-			ClientAccess = true
-		})
-
-		Root.Core:DeclareSetting("SplitChar", {
-			DefaultValue = " ",
-			Description = "Character used when splitting command strings into arguments.",
-			Package = Package,
-			ClientAccess = true
-		})
-
-		Root.Core:DeclareSetting("BatchChar", {
-			DefaultValue = "~|~",
-			Description = "Character used to break up command strings into multiple command strings.",
-			Package = Package,
-			ClientAccess = true
-		})
 	end;
 
 	AfterInit = function(Root, Package)

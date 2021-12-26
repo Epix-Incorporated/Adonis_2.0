@@ -101,7 +101,7 @@ return {
 
 	AfterInit = function(Root, Packages)
 		debug("AFTERINIT " .. Package.Metadata.Name .. " PACKAGE")
-		
+
 		--// Run AfterInit methods
 		for i,t in ipairs(InitFunctions) do
 			if t.AfterInit then

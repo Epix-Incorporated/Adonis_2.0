@@ -12,6 +12,7 @@ local Core = {
 	PlayerData = {};
 	PlayerDataCache = {};
 	DeclaredSettings = {};
+	SettingsOverrides = {};
 	DeclaredDefaultPlayerData = {};
 	DeclaredPlayerDataHandlers = {};
 	DefaultPlayerDataTable = {};
@@ -81,6 +82,13 @@ local Core = {
 			Root.Warn("Setting \"".. setting .."\" already delcared. Overwriting.")
 		end
 
+		if data.Package and type(data.Package) == "table" then
+			local realPackage = data.Package.Package or data.Package.Folder
+			if realPackage then
+				data.Package = realPackage
+			end
+		end
+
 		self.DeclaredSettings[setting] = data
 
 		Root.Logging:AddLog("Script", {
@@ -108,7 +116,7 @@ local Core = {
 	GetSharedSettings = function(self, p: Player)
 		local result = {}
 		for ind, data in pairs(self.DeclaredSettings) do
-			if data.ClientAccess then
+			if data.ClientAllowed then
 				result[ind] = Root.Settings[ind]
 			end
 		end
@@ -145,13 +153,12 @@ return {
 		Service = Root.Utilities.Services
 
 		Root.Core = Core
-		Root.Core.SettingsOverrides = {}
 		Root.Timeouts = {
 			PlayerDataCacheTimeout = 60*10
 		}
 
 		Root.Core.UserSettings = Root.Settings
-		Root.Settings = table.freeze(setmetatable({}, {
+		Root.Settings = setmetatable({}, {
 			__index = function(self, ind)
 				if Root.Core.SettingsOverrides[ind] ~= nil then
 					return Root.Core.SettingsOverrides[ind]
@@ -165,7 +172,7 @@ return {
 			__newindex = function(self, ind, val)
 				Root.Core.SettingsOverrides[ind] = val
 			end,
-		}));
+		});
 
 		Core.PlayerData = Utilities:MemoryCache({
 			Core.PlayerDataCache,
@@ -188,6 +195,13 @@ return {
 		Core:DeclareDefaultPlayerData("EncryptionKey", function(p, newData)
 			return Utilities:RandomString()
 		end)
+
+		--// Declare settings
+		if Package.Metadata.Settings then
+			for setting,data in pairs(Package.Metadata.Settings) do
+				Core:DeclareSetting(setting, data)
+			end
+		end
 	end;
 
 	AfterInit = function(Root, Package)
