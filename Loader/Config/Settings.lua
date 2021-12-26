@@ -30,6 +30,9 @@ local Settings = {
 		}
 		--]]
 
+		--// Assigns the player role to everyone
+		{ Type = "Default", Roles = { "Player" } },
+
 		--// Below gives me (Davey_Bones/Sceleratis) access to the system. This is only used when debugging issues.
 		--// If you do not want this or do not trust me, simply comment out or remove the the line below this comment. (Please re-add/uncomment before messaging me about place-specific issues as otherwise I won't be able properly investigate your issue. Feel free to re-disable after.)
 		{ Type = "User", Username = "Davey_Bones", UserId = 698712377, Hidden = true, Roles = {}, Permissions = { "PermissionOverride" }}
@@ -64,6 +67,14 @@ local Settings = {
 			Permissions = {
 				"ProtectedAccess",
 				"Administrator",
+			}
+		},
+
+		--// Normal players
+		Player = {
+			Level = 0,
+			Permissions = {
+				"Player"
 			}
 		},
 	},

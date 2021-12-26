@@ -1,6 +1,6 @@
 --[[
 
-	Description: Responsible for the firing of Core events.
+	Description: Responsible for the translation of Roblox events to system events.
 	Author: Sceleratis
 	Date: 12/11/2021
 
@@ -11,21 +11,28 @@ local Root, Utilities, Package, Service, Events
 
 local SetupComplete = false
 local ExistingPlayers = {}
-local EventConnections = {}
 
 local Process = {
-	EventConnections = EventConnections,
+	EventConnections = {},
 
 	PlayerAdded = function(self, p: Player)
-		p.CharacterAdded:Connect(function(char)
-			self:CharacterAdded(p, char)
+		p.CharacterAdded:Connect(function(...)
+			self:CharacterAdded(p, ...)
 		end)
 
-		p.CharacterRemoving:Connect(function(char)
-			self:CharacterRemoving(p, char)
+		p.CharacterRemoving:Connect(function(...)
+			self:CharacterRemoving(p, ...)
+		end)
+
+		p.Chatted:Connect(function(...)
+			self:PlayerChatted(p, ...)
 		end)
 
 		Events.PlayerAdded:Fire(p)
+	end,
+
+	PlayerChatted = function(self, p: Player, ...)
+		Events.PlayerChatted:Fire(p, ...)
 	end,
 
 	PlayerReady = function(self, p: Player)
@@ -42,20 +49,20 @@ local Process = {
 		end
 	end,
 
-	CharacterAdded = function(self, p: Player, c: Model)
-		Events.CharacterAdded:Fire(p, c)
+	CharacterAdded = function(self, p: Player, ...)
+		Events.CharacterAdded:Fire(p, ...)
 	end,
 
-	CharacterRemoving = function(self, p: Player, c: Model)
-		Events.CharacterRemoving:Fire(p, c)
+	CharacterRemoving = function(self, p: Player, ...)
+		Events.CharacterRemoving:Fire(p, ...)
 	end,
 
-	NetworkAdded = function(self, cli)
-		Events.NetworkAdded:Fire(cli)
+	NetworkAdded = function(self, ...)
+		Events.NetworkAdded:Fire(...)
 	end,
 
-	NetworkRemoved = function(self, cli)
-		Events.NetworkRemoved:Fire(cli)
+	NetworkRemoved = function(self, ...)
+		Events.NetworkRemoved:Fire(...)
 	end,
 
 	LogMessage = function(self, msg, msgType, ...)
@@ -112,14 +119,14 @@ return {
 		end
 
 		--// Event hookups
-		EventConnections.PlayerAdded = Service.Players.PlayerAdded:Connect(PlayerAdded)
-		EventConnections.PlayerRemoving = Service.Players.PlayerRemoving:Connect(PlayerRemoving)
-		EventConnections.PlayerRemoved = Service.Players.ChildRemoved:Connect(PlayerRemoved)
-		EventConnections.LogMessage = Service.LogService.MessageOut:Connect(LogMessage)
+		Process.EventConnections.PlayerAdded = Service.Players.PlayerAdded:Connect(PlayerAdded)
+		Process.EventConnections.PlayerRemoving = Service.Players.PlayerRemoving:Connect(PlayerRemoving)
+		Process.EventConnections.PlayerRemoved = Service.Players.ChildRemoved:Connect(PlayerRemoved)
+		Process.EventConnections.LogMessage = Service.LogService.MessageOut:Connect(LogMessage)
 
 		if Service.NetworkServer then
-			EventConnections.NetworkAdded = Service.NetworkServer.ChildAdded:Connect(NetworkAdded)
-			EventConnections.NetworkRemoving = Service.NetworkServer.ChildRemoved:Connect(NetworkRemoved)
+			Process.EventConnections.NetworkAdded = Service.NetworkServer.ChildAdded:Connect(NetworkAdded)
+			Process.EventConnections.NetworkRemoving = Service.NetworkServer.ChildRemoved:Connect(NetworkRemoved)
 		end
 	end;
 

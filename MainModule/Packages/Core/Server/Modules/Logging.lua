@@ -54,6 +54,8 @@ local Logging = {
 		local logTab = self.Logs[Type];
 		if logTab and type(logTab) == "table" then
 			return logTab
+		else
+			return {}
 		end
 	end;
 }

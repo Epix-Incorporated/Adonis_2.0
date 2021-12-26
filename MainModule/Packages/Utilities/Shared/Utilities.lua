@@ -101,7 +101,7 @@ local ObjectMethods = {
 			end
 		end,
 
-		SetData = function(self, key, value, data)
+		SetData = function(self, key: any, value: any?, data)
 			self:CleanCache()
 			self.__Cache[key] = if value ~= nil then {
 				Value = value,
@@ -111,7 +111,7 @@ local ObjectMethods = {
 			} else nil
 		end,
 
-		GetData = function(self, key)
+		GetData = function(self, key: any)
 			local found = self.__Cache[key]
 			if found and os.time() - found.CacheTime <= found.Timeout then
 				if found.AccessResetsTimer then
@@ -325,6 +325,55 @@ local Utilities = {
 		return tab
 	end,
 
+	--// Given an ordered table, returns a subset of that table
+	TableSub = function(self, tab: {}, startPos: number, endPos: number?)
+		return table.pack(table.unpack(tab, startPos, endPos))
+	end,
+
+	--// Removes excess whitespace from strings
+	Trim = function(self, str: string)
+		return string.match(str, "^%s*(.-)%s*$")
+	end,
+
+	--// Splits a string into multiple sub-strings, splitting at SplitChar; Ignores split characters surrounded by double or single quotes
+	ReplaceCharacters = function(self, str: string, chars: {}, replaceWith: any?)
+		for i,char in ipairs(chars) do
+			str = string.gsub(str, char, replaceWith or '')
+		end
+		return str
+	end,
+
+	--// Removes quotations surrounding text
+	RemoveQuotes = function(self, str: string)
+		return self:ReplaceCharacters(str, {'^"(.+)"$', "^'(.+)'$"}, "%1")
+	end,
+
+	--// Splits the provided string while respecting quotations
+	SplitString = function(self, str: string, splitChar: string)
+		local segments = {}
+		local sentinel = string.char(0)
+		local function doSplitSentinelCheck(x: string) return string.gsub(x, splitChar, sentinel) end
+		local quoteSafe = self:ReplaceCharacters(str, {'%b""', "%b''"}, doSplitSentinelCheck)
+		for segment in string.gmatch(quoteSafe, "([^".. splitChar .."]+)") do
+			table.insert(segments, self:Trim(string.gsub(segment, sentinel, splitChar)))
+		end
+		return segments
+	end,
+
+	--// Joins strings together using the join character provided
+	JoinStrings = function(self, joiner: string?, ...)
+		local result = nil
+		local strList = table.pack(...)
+		for i,str in ipairs(strList) do
+			if not result then
+				result = str
+			else
+				result = result .. joiner .. str
+			end
+		end
+		return result or ''
+	end,
+
 	--// Merges tables into the first table
 	--// Each subsequent table will overwrite keys in/from the tables that came before it
 	MergeTables = function(self, tab, ...)
@@ -333,7 +382,20 @@ local Utilities = {
 				tab[k] = v
 			end
 		end
+		return tab
+	end,
 
+	--// Same as MergeTables, but also calls itself when overriting one table with another
+	MergeTablesRecursive = function(self, tab, ...)
+		for i,t in ipairs(table.pack(...)) do
+			for k,v in pairs(t) do
+				if tab[k] ~= nil and type(v) == "table" and type(tab[k]) == "table" then
+					tab[k] = self:MergeTablesRecursive(tab[k], v)
+				else
+					tab[k] = v
+				end
+			end
+		end
 		return tab
 	end,
 

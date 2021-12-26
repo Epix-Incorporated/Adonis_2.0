@@ -22,6 +22,7 @@ return {
 		--// Do init
 		Root.Core = Core
 		Root.Timeouts = {}
+		Root.Settings = {}
 		Root.Cache = Utilities:MemoryCache({ Timeout = 0 })
 	end;
 

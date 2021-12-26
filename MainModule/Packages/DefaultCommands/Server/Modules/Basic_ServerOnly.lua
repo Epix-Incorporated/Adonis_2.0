@@ -1,16 +1,21 @@
 --[[
 
-	Description: Package default settings declaration.
+	Description: Command declaration.
 	Author: Sceleratis
-	Date: 12/18/2021
+	Date: 12/25/2021
 
 --]]
 
 
 local Root, Utilities, Service, Package;
+local Settings = setmetatable({}, {
+	__index = function(self, ind)
+		return { __SETTING_PROXY = true, Index = ind }
+	end
+})
 
-local Settings = {
-	Theme = "Default"
+local DeclareCommands = {
+
 }
 
 return {
@@ -20,9 +25,8 @@ return {
 		Utilities = Root.Utilities
 		Service = Root.Utilities.Services
 
-		--// Do init
-		for setting,data in pairs(Settings) do
-			Root.Core:DeclareSetting(setting, data)
+		for ind, data in pairs(DeclareCommands) do
+			Root.Commands:DeclareCommand(ind, data)
 		end
 	end;
 

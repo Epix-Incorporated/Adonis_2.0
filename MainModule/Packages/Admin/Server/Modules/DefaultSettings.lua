@@ -31,7 +31,7 @@ return {
 
 		--// Do init
 		for setting,data in pairs(Settings) do
-			Root.Core:DeclareSetting(setting, data.DefaultValue, data.Description)
+			Root.Core:DeclareSetting(setting, data)
 		end
 	end;
 

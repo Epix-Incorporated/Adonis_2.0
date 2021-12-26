@@ -14,7 +14,7 @@ local PlayerData = {}
 local Sessions = {}
 
 --// Remote (server-to-client) commands
-local RemoteCommands = {
+local RemoteCommands = setmetatable({
 	SessionData = function(sessionKey, ...)
 		if sessionKey then
 			if Sessions[sessionKey] then
@@ -33,7 +33,27 @@ local RemoteCommands = {
 			Data = table.pack(...)
 		})()
 	end,
-}
+
+	ErrorMessage = function(data)
+		Utilities.Events.ServerError:Fire(data)
+	end,
+
+	DeclareSettings = function(settings)
+		if Root.Settings then
+			Utilities:MergeTables(Root.Settings, settings)
+		end
+	end
+},{
+	__newindex = function(self, ind, value)
+		if self[ind] ~= nil then
+			Root.Warn("RemoteCommand index already declared. Overwriting...", ind)
+		end
+
+		rawset(self, ind, value)
+
+		Utilities.Events.RemoteCommandDeclared:Fire(ind, value)
+	end
+})
 
 --// Methods
 local Methods = {

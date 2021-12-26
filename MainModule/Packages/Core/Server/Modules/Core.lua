@@ -22,6 +22,8 @@ local Core = {
 		end
 
 		self.DeclaredDefaultPlayerData[ind] = defaultValue
+
+		Utilities.Events.DefaultPlayerDataDeclared:Fire(ind, defaultValue)
 	end,
 
 	DeclarePlayerDataHandler = function(self, ind, func)
@@ -30,6 +32,8 @@ local Core = {
 		end
 
 		self.DeclaredPlayerDataHandlers[ind] = func
+
+		Utilities.Events.PlayerDataHandlerDeclared:Fire(ind, func)
 	end,
 
 	DefaultPlayerData = function(self, p)
@@ -72,21 +76,19 @@ local Core = {
 	end,
 
 	--// Declare new settings, their default value, and their description
-	DeclareSetting = function(self, setting, defaultValue, description)
+	DeclareSetting = function(self, setting, data)
 		if self.DeclaredSettings[setting] then
 			Root.Warn("Setting \"".. setting .."\" already delcared. Overwriting.")
 		end
 
-		self.DeclaredSettings[setting] = {
-			DefaultValue = defaultValue;
-			Description = description;
-			Package = package;
-		}
+		self.DeclaredSettings[setting] = data
 
 		Root.Logging:AddLog("Script", {
 			Text = "Declared setting: ".. tostring(setting),
-			Description = description
+			Description = data.Description
 		})
+
+		Utilities.Events.SettingDeclared:Fire(setting, data)
 	end,
 
 	--// If a setting is not found, this is responsible for returning a value for it (or possibly, also setting it)
@@ -98,6 +100,20 @@ local Core = {
 			Root.Warn("Unknown setting requested:", ind)
 		end
 	end,
+
+	GetAllSettings = function(self)
+		return Utilities:MergeTables({}, self.UserSettings, self.SettingsOverrides)
+	end,
+
+	GetSharedSettings = function(self, p: Player)
+		local result = {}
+		for ind, data in pairs(self.DeclaredSettings) do
+			if data.ShareWithClient then
+				result[ind] = Root.Settings[ind]
+			end
+		end
+		return result
+	end
 }
 
 local function PlayerAdded(p)
@@ -117,6 +133,10 @@ local function PlayerError(p: Player, msg, ...)
 	Root.Logging:AddLog("Error", "PlayerError: %s :: %s", p.Name, msg);
 end
 
+local function PlayerReady(p: Player)
+	Root.Remote:Send(p, "DeclareSettings", Root.Core:GetSharedSettings(p))
+end
+
 return {
 	Init = function(cRoot, cPackage)
 		Root = cRoot
@@ -125,16 +145,27 @@ return {
 		Service = Root.Utilities.Services
 
 		Root.Core = Core
+		Root.Core.SettingsOverrides = {}
 		Root.Timeouts = {
 			PlayerDataCacheTimeout = 60*10
 		}
 
-		local settings = Root.Settings;
-		Root.Settings = setmetatable(settings, {
+		Root.Core.UserSettings = Root.Settings
+		Root.Settings = table.freeze(setmetatable({}, {
 			__index = function(self, ind)
-				return Core:SettingsIndex(self, ind);
+				if Root.Core.SettingsOverrides[ind] ~= nil then
+					return Root.Core.SettingsOverrides[ind]
+				elseif Root.Core.UserSettings[ind] ~= nil then
+					return Root.Core.UserSettings[ind]
+				else
+					return Core:SettingsIndex(self, ind);
+				end
 			end,
-		});
+
+			__newindex = function(self, ind, val)
+				Root.Core.SettingsOverrides[ind] = val
+			end,
+		}));
 
 		Core.PlayerData = Utilities:MemoryCache({
 			Core.PlayerDataCache,
@@ -163,5 +194,6 @@ return {
 		Utilities.Events.PlayerAdded:Connect(PlayerAdded)
 		Utilities.Events.PlayerRemoved:Connect(PlayerRemoved)
 		Utilities.Events.PlayerError:Connect(PlayerError)
+		Utilities.Events.PlayerReady:Connect(PlayerReady)
 	end;
 }

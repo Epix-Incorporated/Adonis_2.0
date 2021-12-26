@@ -15,7 +15,7 @@ local MakingEvent = false;
 local Sessions = {};
 
 --// Remote (client-to-server) commands
-local RemoteCommands = {
+local RemoteCommands = setmetatable({
 	GetKeys = function(p, ...)
 		local data = Root.Core:GetPlayerData(p);
 		if data then
@@ -61,7 +61,17 @@ local RemoteCommands = {
 			session:FireEvent(p, ...)
 		end
 	end;
-}
+},{
+	__newindex = function(self, ind, value)
+		if self[ind] ~= nil then
+			Root.Warn("RemoteCommand index already declared. Overwriting...", ind)
+		end
+
+		rawset(self, ind, value)
+
+		Utilities.Events.RemoteCommandDeclared:Fire(ind, value)
+	end
+})
 
 --// Methods
 local Methods = {
@@ -206,6 +216,10 @@ local Remote = {
 		local bytecode = Root.Bytecode:GetBytecode(code)
 		return self:Get(p, "RunBytecode", bytecode, ...)
 	end;
+
+	SendError = function(self, player: Player, data: {})
+		self:Send(player, "ErrorMessage", data)
+	end,
 
 	GetSession = function(self, sessionKey)
 		return Sessions[sessionKey];
