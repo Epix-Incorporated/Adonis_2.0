@@ -349,13 +349,17 @@ local Utilities = {
 	end,
 
 	--// Splits the provided string while respecting quotations
-	SplitString = function(self, str: string, splitChar: string)
+	SplitString = function(self, str: string, splitChar: string, removeQuotes: boolean)
 		local segments = {}
 		local sentinel = string.char(0)
 		local function doSplitSentinelCheck(x: string) return string.gsub(x, splitChar, sentinel) end
 		local quoteSafe = self:ReplaceCharacters(str, {'%b""', "%b''"}, doSplitSentinelCheck)
 		for segment in string.gmatch(quoteSafe, "([^".. splitChar .."]+)") do
-			table.insert(segments, self:Trim(string.gsub(segment, sentinel, splitChar)))
+			local result = self:Trim(string.gsub(segment, sentinel, splitChar))
+			if removeQuotes then
+				result = self:RemoveQuotes(result)
+			end
+			table.insert(segments, result)
 		end
 		return segments
 	end,

@@ -24,8 +24,10 @@ local DeclareCommands = {
 		Description = "Test command",
 		Permissions = { "Player" },
 		Roles = {},
-		ServerSide = function(data: {}, args: {})
+		ServerSide = function(data: {})
 			local plr = data.Player
+			local args = data.Arguments
+			
 			Root.Warn("Success!", {
 				Player = plr,
 				Args = args,
@@ -35,11 +37,8 @@ local DeclareCommands = {
 			data:SendClientSide(plr, args)
 		end,
 
-		ClientSide = function(plr, args: {})
-			Root.Warn("Client Success!", {
-				Player = plr,
-				Args = args
-			})
+		ClientSide = function(...)
+			Root.Warn("Client Success!", ...)
 		end
 	}
 }

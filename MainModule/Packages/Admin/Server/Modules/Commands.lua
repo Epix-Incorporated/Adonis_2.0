@@ -39,6 +39,32 @@ local Commands = {
 	Methods = Methods,
 	DeclaredCommands = {},
 	SharedSettings = {},
+	ArgumentParsers = {
+		Players = function(data, cmdArgData, argText)
+
+		end
+	},
+
+	ParseArguments = function(self, data: {}, cmdArgs: {})
+		local result = {}
+		local textArgs = data.Arguments
+		for i,cmdArgData in ipairs(cmdArgs) do
+			local textArg = textArgs[i]
+			if textArg then
+				if type(cmdArgData) == "table" then
+					local parser = self.ArgumentParsers[cmdArgData.Type]
+					if parser then
+						local parseResult = parser(data, cmdArgData, textArg)
+						result[i] = if parseResult ~= nil then parseResult else textArg
+					end
+				else
+					result[i] = textArg
+				end
+			end
+		end
+
+		return result
+	end,
 
 	PlayerCanRunCommand = function(self, player: Player, command: {})
 		local checkRoles = command.Roles and #command.Roles > 0 and command.Roles
@@ -98,9 +124,9 @@ local Commands = {
 
 	ExtractCommandStrings = function(self, message: string)
 		local foundCommands = {}
-		local cmdStrings = Utilities:SplitString(message, Root.Settings.BatchChar)
+		local cmdStrings = Utilities:SplitString(message, Root.Settings.BatchChar, true)
 		for i,cmdString in ipairs(cmdStrings) do
-			local msgArgs = Utilities:SplitString(cmdString, Root.Settings.SplitChar)
+			local msgArgs = Utilities:SplitString(cmdString, Root.Settings.SplitChar, true)
 			local cmdSub = msgArgs[1]
 			local cmdArgs = Utilities:TableSub(msgArgs, 2)
 
@@ -127,6 +153,10 @@ local Commands = {
 				Description = data.Message,
 				Data = data
 			})
+
+			if data.Arguments and data.CommandData.Arguments then
+				newData.ParsedArguments = self:ParseArguments(data, data.CommandData.Arguments)
+			end
 
 			DebugWarn("GOT SERVER FUNC; RUNNING", serverFunc, newData)
 
