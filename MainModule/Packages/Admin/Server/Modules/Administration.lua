@@ -63,7 +63,7 @@ local Admin = {
 		--// After all previous finders have failed
 		{
 			Name = "Players",
-			Regex = ".+",
+			Regex = "(.+)",
 			Finder = function(data, text)
 				local found = {}
 
@@ -88,6 +88,27 @@ local Admin = {
 		}
 	},
 
+	--// Get players
+	GetPlayers = function(self, data: {}, text: string)
+		if not text then
+			return { data and data.Player }
+		else
+			local foundPlayers = {}
+			local subArgs = Utilities:SplitString(text, ',', true)
+			for i,matchThis in ipairs(subArgs) do
+				for ind, finderData in pairs(self.PlayerFinders) do
+					if (not data.Safe or (data.Safe and finderData.Safe)) then
+						local matched = string.match(matchThis, finderData.Regex)
+						if matched then
+							Utilities:AddRange(foundPlayers, finderData.Finder(data, text, matched))
+						end
+					end
+				end
+			end
+			return foundPlayers
+		end
+	end,
+
 	NewSpoofObject = function(self, data: {})
 		local spoofObject = Instance.new("Folder", data and data.Properties)
 		local wrapped = Utilities:Wrap(spoofObject)
@@ -100,28 +121,6 @@ local Admin = {
 
 		return wrapped
 	end,
-
-	GetPlayers = function(self, data: {}, text: string)
-		if not text then
-			return { data.Player }
-		else
-			local foundPlayers = {}
-			local subArgs = Utilities:SplitString(text, ',', true)
-
-			for i,matchThis in ipairs(subArgs) do
-				for ind, finderData in pairs(self.PlayerFinders) do
-					if (not data.Safe or (data.Safe and finderData.Safe)) then
-						local matched = string.match(matchThis, finderData.Regex)
-						if matched then
-							Utilities:AddRange(foundPlayers, finderData.Finder(data, text, matched))
-						end
-					end
-				end
-			end
-
-			return foundPlayers
-		end
-	end
 }
 
 return {

@@ -34,7 +34,7 @@ local RemoteCommands = setmetatable({
 
 	VerifyRemote = function(p: Player, t, ...)
 		return {
-			Value = Utilities:Encrypt(t, Root.Remote.SharedKey);
+			Value = Utilities:Encrypt(Root.Remote.SharedKey .. t, Root.Remote.SharedKey);
 			Event = Root.Remote.CurrentEvent.RemoteEvent;
 		}
 	end,

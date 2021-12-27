@@ -19,17 +19,31 @@ end
 
 local Methods = {
 	Command = {
-		SendClientSide = function(self, player: Player, ...)
+		SendToClientSide = function(self, player, ...)
 			DebugWarn("SEND CLIENT SIDE", self)
 			if self.CommandData and self.CommandIndex and self.CommandData.ClientSide then
-				Root.Remote:Send(player, "RunClientSideCommand", self.CommandIndex, ...)
+				if typeof(player) == "Instance" and player:IsA("Player") then
+					Root.Remote:Send(player, "RunClientSideCommand", self.CommandIndex, ...)
+				elseif type(player) == "table" then
+					for i,p in ipairs(player) do
+						Root.Remote:Send(p, "RunClientSideCommand", self.CommandIndex, ...)
+					end
+				end
 			end
 		end,
 
-		GetClientSide = function(self, player: Player, ...)
+		GetFromClientSide = function(self, player, ...)
 			DebugWarn("GET CLIENT SIDE", self)
 			if self.CommandData and self.CommandIndex and self.CommandData.ClientSide then
-				Root.Remote:Get(player, "RunClientSideCommand", self.CommandIndex, ...)
+				if typeof(player) == "Instance" and player:IsA("Player") then
+					return Root.Remote:Get(player, "RunClientSideCommand", self.CommandIndex, ...)
+				elseif type(player) == "table" then
+					local results = {}
+					for i,p in ipairs(player) do
+						results[p] = { Root.Remote:Get(p, "RunClientSideCommand", self.CommandIndex, ...) }
+					end
+					return results
+				end
 			end
 		end,
 	}
@@ -40,26 +54,22 @@ local Commands = {
 	DeclaredCommands = {},
 	SharedSettings = {},
 	ArgumentParsers = {
-		["players"] = function(data, cmdArgData, argText)
-
+		["players"] = function(data, cmdArg, argText)
+			return Root.Admin:GetPlayers(data, argText)
 		end
 	},
 
-	ParseArguments = function(self, data: {}, cmdArgs: {})
+	ParseArguments = function(self, data: {}, cmdArgs: {}, argsText: {})
 		local result = {}
-		local textArgs = data.Arguments
 		for i,cmdArg in ipairs(cmdArgs) do
-			local argText = textArgs[i]
+			local argText = argsText[i]
 			if argText then
-				local parser = if data.CommandData and data.CommandData.Parsers then data.CommandData.Parsers[cmdArg] else self.ArgumentParsers[cmdArg]
+				local parser = (if data.CommandData and data.CommandData.Parsers then data.CommandData.Parsers[cmdArg] else nil) or self.ArgumentParsers[cmdArg]
 				if parser then
 					result[i] = parser(data, cmdArg, argText)
-				else
-					result[i] = argText
 				end
 			end
 		end
-
 		return result
 	end,
 
@@ -152,7 +162,7 @@ local Commands = {
 			})
 
 			if data.Arguments and data.CommandData.Arguments then
-				newData.ParsedArguments = self:ParseArguments(data, data.CommandData.Arguments)
+				newData.ParsedArguments = self:ParseArguments(data, data.CommandData.Arguments, data.Arguments)
 			end
 
 			DebugWarn("GOT SERVER FUNC; RUNNING", serverFunc, newData)

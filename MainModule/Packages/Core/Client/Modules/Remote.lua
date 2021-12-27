@@ -216,7 +216,7 @@ local Remote = {
 				--// Verify that we found the correct event and function (very basic and not-infallible trust checking)
 				if self.CurrentEvent.RemoteFunction and self.CurrentEvent.RemoteEvent then
 					local rawValue = Utilities:RandomString()
-					local encValue = Utilities:Encrypt(rawValue, self.SharedKey)
+					local encValue = Utilities:Encrypt(self.SharedKey .. rawValue, self.SharedKey)
 					local cmd = Utilities:Encrypt("VerifyRemote", self.SharedKey)
 					local returnedData = nil
 

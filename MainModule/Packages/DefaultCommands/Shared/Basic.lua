@@ -30,18 +30,23 @@ local DeclareCommands = {
 		ServerSide = function(data: {})
 			local plr = data.Player
 			local args = data.Arguments
+			local parsed = data.ParsedArguments
 
 			Root.Warn("Success!", {
 				Player = plr,
 				Args = args,
+				Parsed = parsed,
 				Data = data
 			})
 
-			data:SendClientSide(plr, args)
+			data:SendToClientSide(plr, args)
+			Root.Warn("ClientGet Test", data:GetFromClientSide(plr, args))
 		end,
 
 		ClientSide = function(...)
 			Root.Warn("Client Success!", ...)
+			
+			return "WE GOT THIS FROM THE CLIENT!"
 		end
 	}
 }
