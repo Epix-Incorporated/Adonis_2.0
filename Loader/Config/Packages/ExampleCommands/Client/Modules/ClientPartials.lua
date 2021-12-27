@@ -33,12 +33,6 @@ return {
 		Service = Root.Utilities.Services
 
 		for ind, data in pairs(DeclareCommands) do
-			for i,v in pairs(data) do
-				if v == SettingsProxy.Test then
-					data[i] = Root.Settings[i]
-				end
-			end
-
 			Root.Commands:DeclareCommand(ind, data)
 		end
 	end;
