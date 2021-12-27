@@ -30,6 +30,7 @@ local DeclareCommands = {
 		Parsers = {
 			testarg2 = function(data, cmdArg, text)
 				Root.Warn("PARSE ARG", data, cmdArg, text)
+				return "PARSE RESULT HERE"
 			end
 		},
 		Description = "Test command",

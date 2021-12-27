@@ -17,13 +17,13 @@ local Sessions = {};
 --// Remote (client-to-server) commands
 local RemoteCommands = setmetatable({
 	GetKeys = function(p, ...)
-		local data = Root.Core:GetPlayerData(p);
+		local data = Root.Core:GetPlayerData(p)
 		if data then
 			if not data.ObtainedKeys then
-				data.ObtainedKeys = true;
-				Root.DebugWarn("Player Obtained Keys", p, ...);
-
-				return data.EncryptionKey;
+				data.ObtainedKeys = true
+				data.RemoteKey = Utilities:RandomString()
+				Root.DebugWarn("Player Obtained Keys", p)
+				return data.RemoteKey
 			else
 				Utilities.Events.PlayerError:Fire(p, "Player attempted to re-obtain keys")
 			end
@@ -190,7 +190,8 @@ local Remote = {
 	Send = function(self, p, cmd, ...)
 		local curEvent = self:WaitForEvent();
 		if curEvent then
-			local cmd = Utilities:Encrypt(cmd, self.SharedKey);
+			local data = Root.Core:GetPlayerData(p)
+			local cmd = Utilities:Encrypt(cmd, data.RemoteKey or self.SharedKey);
 
 			Root.DebugWarn("SENDING", p, cmd, ...)
 			curEvent.RemoteEvent:FireClient(p, cmd, table.pack(...));
@@ -200,7 +201,8 @@ local Remote = {
 	Get = function(self, p: Player, cmd, ...)
 		local curEvent = self:WaitForEvent();
 		if curEvent then
-			local cmd = Utilities:Encrypt(cmd, self.SharedKey);
+			local data = Root.Core:GetPlayerData(p)
+			local cmd = Utilities:Encrypt(cmd, data.RemoteKey or self.SharedKey);
 
 			Root.DebugWarn("GETTING", p, cmd, ...)
 			return table.unpack(curEvent.RemoteFunction:InvokeClient(p, cmd, table.pack(...)));
@@ -274,7 +276,8 @@ local Remote = {
 
 	--// Process remote commands
 	ProcessRemoteCommand = function(self, p: Player, cmd, args)
-		local cmd = Utilities:Decrypt(cmd, self.SharedKey)
+		local data = Root.Core:GetPlayerData(p)
+		local cmd = Utilities:Decrypt(cmd, data.RemoteKey or self.SharedKey)
 		local command = self.Commands[cmd]
 
 		if type(args) ~= "table" then
@@ -408,9 +411,8 @@ return {
 		Service = Utilities.Services
 
 		Root.Remote = Remote;
-	end;
 
-	AfterInit = function(Root, Package)
+		--// EventObjName & SharedKey Init
 		local objNameValue = Package.Shared.EventObjectName
 		local sharedKeyValue = Package.Shared.SharedKey
 
@@ -419,8 +421,14 @@ return {
 
 		Remote.EventObjectsName = objNameValue.Value
 		Remote.SharedKey = sharedKeyValue.Value
-		Remote:SetupRemote();
 
+		Root.Core:DeclareDefaultPlayerData("RemoteKey", function()
+			return Remote.SharedKey
+		end)
+	end;
+
+	AfterInit = function(Root, Package)
+		Remote:SetupRemote();
 		Utilities.Events.PlayerAdded:Connect(PlayerAdded)
 	end;
 }

@@ -104,7 +104,7 @@ local Remote = {
 	Send = function(self, cmd, ...)
 		local curEvent = self:WaitForEvent()
 		if curEvent then
-			local cmd = Utilities:Encrypt(cmd, self.SharedKey)
+			local cmd = Utilities:Encrypt(cmd, self.RemoteKey)
 
 			Root.DebugWarn("SENDING", cmd, ...)
 			curEvent.RemoteEvent:FireServer(cmd, table.pack(...))
@@ -114,7 +114,7 @@ local Remote = {
 	Get = function(self, cmd, ...)
 		local curEvent = self:WaitForEvent()
 		if curEvent then
-			local cmd = Utilities:Encrypt(cmd, self.SharedKey);
+			local cmd = Utilities:Encrypt(cmd, self.RemoteKey);
 
 			Root.DebugWarn("GETTING", cmd, ...)
 			return table.unpack(curEvent.RemoteFunction:InvokeServer(cmd, table.pack(...)))
@@ -151,7 +151,7 @@ local Remote = {
 
 	--// Process remote commands
 	ProcessRemoteCommand = function(self, cmd, args)
-		local cmd = Utilities:Decrypt(cmd, self.SharedKey)
+		local cmd = Utilities:Decrypt(cmd, self.RemoteKey)
 		local command = self.Commands[cmd]
 
 		if type(args) ~= "table" then
@@ -216,8 +216,8 @@ local Remote = {
 				--// Verify that we found the correct event and function (very basic and not-infallible trust checking)
 				if self.CurrentEvent.RemoteFunction and self.CurrentEvent.RemoteEvent then
 					local rawValue = Utilities:RandomString()
-					local encValue = Utilities:Encrypt(self.SharedKey .. rawValue, self.SharedKey)
-					local cmd = Utilities:Encrypt("VerifyRemote", self.SharedKey)
+					local encValue = Utilities:Encrypt(self.RemoteKey .. rawValue, self.RemoteKey)
+					local cmd = Utilities:Encrypt("VerifyRemote", self.RemoteKey)
 					local returnedData = nil
 
 					--// Run it in a pcall, if it errors, it's probably no good
@@ -265,6 +265,13 @@ local Remote = {
 			GettingEvent = false
 		end
 	end,
+
+	UpdateRemoteKey = function(self)
+		if not self.ObtainedKeys then
+			self.RemoteKey = self:Get("GetKeys")
+			self.ObtainedKeys = true
+		end
+	end,
 }
 
 return {
@@ -282,9 +289,10 @@ return {
 		local sharedKeyValue = Package.Shared:WaitForChild("SharedKey")
 
 		Remote.EventObjectsName = objNameValue.Value
-		Remote.SharedKey = sharedKeyValue.Value
+		Remote.RemoteKey = sharedKeyValue.Value
 
 		Remote:SetupRemote()
+		Remote:UpdateRemoteKey()
 		Remote:Send("ClientReady")
 
 		Utilities.Events.ClientReady:Fire()

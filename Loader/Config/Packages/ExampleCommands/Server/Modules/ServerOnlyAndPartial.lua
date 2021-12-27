@@ -24,6 +24,7 @@ local DeclareCommands = {
 		Parsers = {
 			testarg2 = function(data, cmdArg, text)
 				Root.Warn("PARSE ARG", data, cmdArg, text)
+				return "PARSE RESULT"
 			end
 		},
 		Description = "Test command",
@@ -53,6 +54,7 @@ local DeclareCommands = {
 			--// Custom argument parser(s)
 			testarg2 = function(data, cmdArg, text)
 				Root.Warn("PARSE ARG", data, cmdArg, text)
+				return "PARSE RESULT"
 			end
 		},
 		Description = "Test command",
