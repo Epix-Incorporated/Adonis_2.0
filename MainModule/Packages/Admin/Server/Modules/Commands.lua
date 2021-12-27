@@ -40,7 +40,7 @@ local Commands = {
 	DeclaredCommands = {},
 	SharedSettings = {},
 	ArgumentParsers = {
-		Players = function(data, cmdArgData, argText)
+		["players"] = function(data, cmdArgData, argText)
 
 		end
 	},
@@ -48,16 +48,14 @@ local Commands = {
 	ParseArguments = function(self, data: {}, cmdArgs: {})
 		local result = {}
 		local textArgs = data.Arguments
-		for i,cmdArgData in ipairs(cmdArgs) do
-			local textArg = textArgs[i]
-			if textArg then
-				if type(cmdArgData) == "table" then
-					local parser = self.ArgumentParsers[cmdArgData.Type]
-					if parser then
-						result[i] = parser(data, cmdArgData, textArg)
-					end
+		for i,cmdArg in ipairs(cmdArgs) do
+			local argText = textArgs[i]
+			if argText then
+				local parser = if data.CommandData and data.CommandData.Parsers then data.CommandData.Parsers[cmdArg] else self.ArgumentParsers[cmdArg]
+				if parser then
+					result[i] = parser(data, cmdArg, argText)
 				else
-					result[i] = textArg
+					result[i] = argText
 				end
 			end
 		end

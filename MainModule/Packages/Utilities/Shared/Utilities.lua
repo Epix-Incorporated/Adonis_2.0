@@ -564,6 +564,24 @@ local Utilities = {
 		end
 		return false
 	end;
+
+	--// Creates a newproxy object with the provided metatable
+	NewProxy = function(self, meta)
+		local newProxy = newproxy(true)
+		local metatable = getmetatable(newProxy)
+		metatable.__metatable = false
+		for i,v in pairs(meta) do metatable[i] = v end
+		return newProxy
+	end;
+
+	--// Wraps a function in a NewProxy metatable
+	FunctionProxy = function(self, func)
+		return self:NewProxy({
+			__call = function(tab, ...)
+				return func(...)
+			end
+		})
+	end;
 }
 
 --// Requires a given ModuleScript; If a function is returned immediately, run it

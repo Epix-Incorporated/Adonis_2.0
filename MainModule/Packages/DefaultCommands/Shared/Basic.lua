@@ -18,8 +18,11 @@ local DeclareCommands = {
 	TestCommand = {
 		Prefix = Settings.Prefix,
 		Aliases = { "testcommand", "example" },
-		Arguments = {
-			"testarg1", "testarg2", "testarg3" --// Need to figure out how to best handle these
+		Arguments = { "players", "testarg2", "testarg3" },
+		Parsers = {
+			testarg2 = function(data, cmdArg, text)
+				Root.Warn("PARSE ARG", data, cmdArg, text)
+			end
 		},
 		Description = "Test command",
 		Permissions = { "Player" },
@@ -27,7 +30,7 @@ local DeclareCommands = {
 		ServerSide = function(data: {})
 			local plr = data.Player
 			local args = data.Arguments
-			
+
 			Root.Warn("Success!", {
 				Player = plr,
 				Args = args,
