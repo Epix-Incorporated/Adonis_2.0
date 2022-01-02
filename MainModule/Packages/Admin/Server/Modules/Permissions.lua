@@ -63,7 +63,7 @@ local Users = setmetatable({
 			if groupId or groupName then
 				local groupData = self:GetPlayerGroups(player)
 				if groupData then
-					for i,group in ipairs(groupData) do
+					for i, group in ipairs(groupData) do
 						if (groupId and group.Id == groupId) or (groupName and group.Name == groupName) then
 							if not data.GroupRank and not data.GroupRole then
 								return true
@@ -151,7 +151,7 @@ local Users = setmetatable({
 
 		for i, user in ipairs(userEntries) do
 			if user.Permissions then
-				for i,perm in ipairs(user.Permissions) do
+				for i, perm in ipairs(user.Permissions) do
 					if data.Overrides.Permissions[perm] == nil then
 						data.Overrides.Permissions[perm] = true
 					end
@@ -178,7 +178,7 @@ local Roles = setmetatable({
 		local data = Root.Core:GetPlayerData(player)
 		local cached = data.Cache:GetData("GroupData")
 		if cached then
-			DebugWarn("Found cached grroup info", player)
+			DebugWarn("Found cached group info", player)
 			return cached
 		else
 			local info = Service.GroupService:GetGroupsAsync(player.UserId)
@@ -204,7 +204,7 @@ local Roles = setmetatable({
 
 	HasRoles = function(self, player: Player, roles: {})
 		local hasRoles = false
-		for i,role in ipairs(roles) do
+		for i, role in ipairs(roles) do
 			if self:PlayerHasRole(player, role) then
 				hasRoles = true
 			else
@@ -227,8 +227,8 @@ local Roles = setmetatable({
 
 			Root.Users:UpdateUserOverrides(player, userEntries)
 
-			for i,user in ipairs(userEntries) do
-				for i,role in ipairs(user.Roles) do
+			for i, user in ipairs(userEntries) do
+				for i, role in ipairs(user.Roles) do
 					foundRoles[role] = Root.Settings.Roles[role]
 					if role.Level and role.Level > highestLevel then
 						highestLevel = role.Level
@@ -291,8 +291,8 @@ local Permissions = setmetatable({
 
 			local roles = Root.Roles:GetRoles(player)
 
-			for role,data in pairs(roles) do
-				for i,perm in ipairs(data.Permissions) do
+			for role, data in pairs(roles) do
+				for i, perm in ipairs(data.Permissions) do
 					foundPerms[perm] = true
 				end
 			end
@@ -334,7 +334,7 @@ local Permissions = setmetatable({
 		else
 			local hasPerms = false
 			DebugWarn("Checking permissions", perms, player)
-			for i,perm in ipairs(perms) do
+			for i, perm in ipairs(perms) do
 				if playerPerms[perm] then
 					DebugWarn("Player has permission", perm, player)
 					hasPerms = true
@@ -393,7 +393,7 @@ return {
 			}
 		end)
 
-		for i,perm in ipairs({
+		for i, perm in ipairs({
 			"ProtectedAccess",
 			"Administrator",
 			"ModifySettings",
