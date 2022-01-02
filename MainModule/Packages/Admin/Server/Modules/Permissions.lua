@@ -35,17 +35,65 @@ local RemoteCommands = {
 	end
 }
 
+local Users = setmetatable({
+	GetUserEntries = function(self, player: Player)
+		local userEntries = {}
+		for i,user in pairs(Root.Settings.Users) do
+			DebugWarn("Player UserCheck", user, player)
+			local userCheck = self.UserChecks[user.Type or "User"]
+			if userCheck then
+				if userCheck(self, player, user) then
+					table.insert(userEntries, user)
+				end
+			else
+				Root.Warn("Check for RoleType not found", user.Type)
+			end
+		end
+		return userEntries
+	end,
+
+	UpdateUserOverrides = function(self, player: Player, userEntries: {})
+		local userEntries = userEntries or self:GetUserEntries(player)
+		local data = Root.Core:GetPlayerData(player)
+		local highestLevel = 0
+
+		DebugWarn("Updating user overrides", player, userEntries)
+
+		for i, user in ipairs(userEntries) do
+			if user.Permissions then
+				for i,perm in ipairs(user.Permissions) do
+					if data.Overrides.Permissions[perm] == nil then
+						data.Overrides.Permissions[perm] = true
+					end
+				end
+			end
+
+			if user.Level and user.Level > highestLevel then
+				highestLevel = user.Level
+			end
+		end
+
+		data.Level = data.Overrides.Level or highestLevel
+	end,
+}, {
+	__index = function(self, p)
+		if typeof(p) == "Instance" and p:IsA("Player") then
+			return self:GetUserEntries(p)
+		end
+	end
+})
+
 local Roles = setmetatable({
 	--// Functions used to check whether or not player matches a certain criteria, such as being in a specific group or having a certain UserId for Role assignments.
 	UserChecks = {
 		--// Default means it applies to everyone applies to everyone
 		Default = function(self, player: Player, data: {})
-			DebugWarn("DEFAULT; RETURN TRUE")
+			DebugWarn("Default usertype, return true", player, data)
 			return true
 		end,
 
 		User = function(self, player: Player, data: {})
-			DebugWarn("USER CHECK", player, data)
+			DebugWarn("User check", player, data)
 			if data.UserId and data.UserId == player.UserId then
 				return true
 			elseif data.Username and data.Username == player.Name then
@@ -57,7 +105,7 @@ local Roles = setmetatable({
 		end,
 
 		Group = function(self, player: Player, data: {})
-			DebugWarn("GROUP CHECK", player, data)
+			DebugWarn("Group check", player, data)
 			local groupId = data.GroupId
 			local groupName = data.GroupName
 			if groupId or groupName then
@@ -110,7 +158,7 @@ local Roles = setmetatable({
 		end,
 
 		GamePass = function(self, player: Player, data: {})
-			DebugWarn("GAMEPASS CHECK", player, data)
+			DebugWarn("GamePass Check", player, data)
 			local passId = data.GamePassId or data.GamepassId or data.AssetId or data.Id or data.ID
 			if passId then
 				return Service.MarketplaceService:UserOwnsGamePassAsync(player.UserId, passId)
@@ -118,7 +166,7 @@ local Roles = setmetatable({
 		end,
 
 		Asset = function(self, player: Player, data: {})
-			DebugWarn("ASSET CHECK", player, data)
+			DebugWarn("Asset check", player, data)
 			local passId = data.AssetId or data.Id or data.ID
 			if passId and player and typeof(player) == "Instance" and player:IsA("Player") then
 				return Service.MarketplaceService:PlayerOwnsAsset(player, passId)
@@ -130,23 +178,23 @@ local Roles = setmetatable({
 		local data = Root.Core:GetPlayerData(player)
 		local cached = data.Cache:GetData("GroupData")
 		if cached then
-			DebugWarn("CACHED PLAYER GROUPS", player)
+			DebugWarn("Found cached grroup info", player)
 			return cached
 		else
 			local info = Service.GroupService:GetGroupsAsync(player.UserId)
 			if info then
-				DebugWarn("GOT GROUP INFO", info)
+				DebugWarn("Found player group info", info, player)
 				data.Cache:SetData("GroupData", info, { Timeout = math.random(Root.Timeouts.GetPlayerGroups, Root.Timeouts.GetPlayerGroups + 10) }) --// Attempt to slightly desync group grabbing intervals as much as possible
 				return info
 			end
 
-			DebugWarn("NO GROUP INFO?")
+			DebugWarn("Missing player group info!", player)
 		end
 	end,
 
 	HasRole = function(self, player: Player, role: string)
 		local playerRoles = self:GetRoles(player)
-		DebugWarn("GOT PLAYER ROLES", player, playerRoles)
+		DebugWarn("Found player roles", player, playerRoles)
 		if playerRoles then
 			return playerRoles[role]
 		else
@@ -175,33 +223,16 @@ local Roles = setmetatable({
 		else
 			local foundRoles = {}
 			local highestLevel = 0
+			local userEntries = Root.Users:GetUserEntries(player)
 
-			for i,user in pairs(Root.Settings.Users) do
-				DebugWarn("USER CHECK", user)
-				local userCheck = self.UserChecks[user.Type or "User"]
-				if userCheck then
-					if userCheck(self, player, user) then
-						if user.Permissions then
-							for i,perm in ipairs(user.Permissions) do
-								if data.Overrides.Permissions[perm] == nil then
-									data.Overrides.Permissions[perm] = true
-								end
-							end
-						end
+			Root.Users:UpdateUserOverrides(player, userEntries)
 
-						if user.Level and user.Level > highestLevel then
-							highestLevel = user.Level
-						end
-
-						for i,role in ipairs(user.Roles) do
-							foundRoles[role] = Root.Settings.Roles[role]
-							if role.Level and role.Level > highestLevel then
-								highestLevel = role.Level
-							end
-						end
+			for i,user in ipairs(userEntries) do
+				for i,role in ipairs(user.Roles) do
+					foundRoles[role] = Root.Settings.Roles[role]
+					if role.Level and role.Level > highestLevel then
+						highestLevel = role.Level
 					end
-				else
-					Root.Warn("Check for RoleType not found", user.Type)
 				end
 			end
 
@@ -256,9 +287,10 @@ local Permissions = setmetatable({
 		local foundPerms = cached or {}
 
 		if not cached then
-			DebugWarn("NO PERMS CACHE; GET/CHECK ROLES")
+			DebugWarn("No cached permissions found for player", player)
 
 			local roles = Root.Roles:GetRoles(player)
+
 			for role,data in pairs(roles) do
 				for i,perm in ipairs(data.Permissions) do
 					foundPerms[perm] = true
@@ -271,8 +303,7 @@ local Permissions = setmetatable({
 		end
 
 		for perm,val in pairs(data.Overrides.Permissions) do
-			DebugWarn("SET PERMISSION OVERRIDE", perm, val)
-
+			DebugWarn("Setting permission override", perm, val, player)
 			if val then
 				foundPerms[perm] = true
 			else
@@ -280,7 +311,7 @@ local Permissions = setmetatable({
 			end
 		end
 
-		DebugWarn("RETURNING PERMS", foundPerms)
+		DebugWarn("Returning player permissions", foundPerms, player)
 
 		return foundPerms
 	end,
@@ -288,28 +319,31 @@ local Permissions = setmetatable({
 	--// Check if player has specified permission
 	HasPermission = function(self, player: Player, perm: string)
 		local perms = self:GetPermissions(player)
-		DebugWarn("CHECK IF HAS PERMISSION", player, perms, perm)
-		return perms.PermissionOverride or perms[perm]
+		return if perms.PermissionOverride then true elseif perms.DenyPermissions then false else perms[perm]
 	end,
 
 	--// Check if player has specified permissions
 	HasPermissions = function(self, player: Player, perms: {})
 		local playerPerms = self:GetPermissions(player)
 		if playerPerms.PermissionOverride then
-			DebugWarn("HAS PERMISSION OVERRIDE")
+			DebugWarn("Player has permission override", player)
 			return true
+		elseif playerPerms.DenyPermissions then
+			DebugWarn("Player is denied permissions", player)
+			return false
 		else
-			DebugWarn("NO PERMISSION OVERRIDE")
 			local hasPerms = false
+			DebugWarn("Checking permissions", perms, player)
 			for i,perm in ipairs(perms) do
-				DebugWarn("CHECK PERM", perm)
 				if playerPerms[perm] then
+					DebugWarn("Player has permission", perm, player)
 					hasPerms = true
 				else
+					DebugWarn("Player does not have permission, return false", perm, player)
 					return false
 				end
 			end
-			DebugWarn("RETURNING PLAYER HAS PERMS", hasPerms, perms)
+			DebugWarn("Returning player permissions", hasPerms, perms)
 			return hasPerms
 		end
 	end,
@@ -337,6 +371,7 @@ return {
 		Service = Root.Utilities.Services
 
 		--// Do init
+		Root.Users = Users
 		Root.Roles = Roles
 		Root.Permissions = Permissions
 

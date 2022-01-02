@@ -188,24 +188,28 @@ local Remote = {
 
 	--// Player-related methods
 	Send = function(self, p, cmd, ...)
-		local curEvent = self:WaitForEvent();
-		if curEvent then
-			local data = Root.Core:GetPlayerData(p)
-			local cmd = Utilities:Encrypt(cmd, data.RemoteKey or self.SharedKey);
+		if p:IsA("Player") and not Utilities.Wrapping:IsWrapped(p) then
+			local curEvent = self:WaitForEvent();
+			if curEvent then
+				local data = Root.Core:GetPlayerData(p)
+				local cmd = Utilities:Encrypt(cmd, data.RemoteKey or self.SharedKey);
 
-			Root.DebugWarn("SENDING", p, cmd, ...)
-			curEvent.RemoteEvent:FireClient(p, cmd, table.pack(...));
+				Root.DebugWarn("SENDING", p, cmd, ...)
+				curEvent.RemoteEvent:FireClient(p, cmd, table.pack(...));
+			end
 		end
 	end,
 
 	Get = function(self, p: Player, cmd, ...)
-		local curEvent = self:WaitForEvent();
-		if curEvent then
-			local data = Root.Core:GetPlayerData(p)
-			local cmd = Utilities:Encrypt(cmd, data.RemoteKey or self.SharedKey);
+		if p:IsA("Player") and not Utilities.Wrapping:IsWrapped(p) then
+			local curEvent = self:WaitForEvent();
+			if curEvent then
+				local data = Root.Core:GetPlayerData(p)
+				local cmd = Utilities:Encrypt(cmd, data.RemoteKey or self.SharedKey);
 
-			Root.DebugWarn("GETTING", p, cmd, ...)
-			return table.unpack(curEvent.RemoteFunction:InvokeClient(p, cmd, table.pack(...)));
+				Root.DebugWarn("GETTING", p, cmd, ...)
+				return table.unpack(curEvent.RemoteFunction:InvokeClient(p, cmd, table.pack(...)));
+			end
 		end
 	end,
 
@@ -284,7 +288,7 @@ local Remote = {
 			args = {args}
 		end
 
-		Root.DebugWarn("GOT", p, cmd, args)
+		Root.DebugWarn("Remote command received", p, cmd, args)
 
 		Utilities.Events.ReceivedRemoteCommand:Fire(p, cmd, if type(args) == "table" then table.unpack(args) else args)
 

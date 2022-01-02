@@ -74,8 +74,8 @@ local Commands = {
 	end,
 
 	PlayerCanRunCommand = function(self, player: Player, command: {})
-		local checkRoles = command.Roles and #command.Roles > 0 and command.Roles
-		local checkPerms = command.Permissions and #command.Permissions > 0 and command.Permissions
+		local checkRoles = if command.Roles and #command.Roles > 0 then command.Roles else nil
+		local checkPerms = if command.Permissions and #command.Permissions > 0 then command.Permissions else nil
 
 		DebugWarn("GOT ROLES", checkRoles)
 		DebugWarn("GOT PERMS", checkPerms)
@@ -182,9 +182,7 @@ local Commands = {
 		else
 			Root.Warn("Command missing 'Function'", {
 				Command = command,
-				Data = data,
-				Player = player,
-				Arguments = args
+				Data = data
 			})
 		end
 	end,

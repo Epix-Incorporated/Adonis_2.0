@@ -14,6 +14,7 @@ local Core = {
 	DeclaredSettings = {};
 	SettingsOverrides = {};
 	DeclaredDefaultPlayerData = {};
+	DeclaredPlayerPreLoadingHandlers = {};
 	DeclaredPlayerDataHandlers = {};
 	DefaultPlayerDataTable = {};
 
@@ -27,6 +28,16 @@ local Core = {
 		Utilities.Events.DefaultPlayerDataDeclared:Fire(ind, defaultValue)
 	end,
 
+	DeclarePlayerPreLoadProcess = function(self, ind, func)
+		if self.DeclaredPlayerPreLoadingHandlers[ind] then
+			Root.Warn("Player Pre-Loading Process \"".. ind .."\" already declared. Overwriting.")
+		end
+
+		self.DeclaredPlayerPreLoadingHandlers[ind] = func
+
+		Utilities.Events.PlayerPreLoadingHandlerDeclared:Fire(ind, func)
+	end,
+
 	DeclarePlayerDataHandler = function(self, ind, func)
 		if self.DeclaredPlayerDataHandlers[ind] then
 			Root.Warn("PlayerDataHandler \"".. ind .."\" already delcared. Overwriting.")
@@ -35,6 +46,16 @@ local Core = {
 		self.DeclaredPlayerDataHandlers[ind] = func
 
 		Utilities.Events.PlayerDataHandlerDeclared:Fire(ind, func)
+	end,
+
+	HandlePlayerPreLoadingProcesses = function(self, p)
+		for ind, handler in pairs(self.DeclaredPlayerPreLoadingHandlers) do
+			Root:RunFunction(handler, p)
+		end
+
+		if p.Parent then
+			return true
+		end
 	end,
 
 	DefaultPlayerData = function(self, p)

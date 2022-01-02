@@ -59,7 +59,7 @@ local function PlayerRemoving(...)
 	Process:PlayerRemoving(...)
 end
 
-local function PlayerRemoved(...)
+local function PlayerRemoved(p, ...)
 	if p and p:IsA("Player") then
 		Process:PlayerRemoved(...)
 	end

@@ -42,7 +42,7 @@ local UI = {
 		if theme then
 			if theme:IsA("ModuleScript") then
 				Root.DebugWarn("THEME IS MODULESCRIPT")
-				return func
+				return require(theme)(uiName, themeInfo, ...)
 			else
 				local baseTheme = theme:FindFirstChild("BaseTheme");
 				local targObj = theme:FindFirstChild(uiName) or (if baseTheme then self:GetUIElement(uiName, Utilities:MergeTables({}, themeInfo, {Theme = baseTheme.Value}), ...) else nil);
@@ -132,9 +132,9 @@ local UI = {
 				return playerGui
 			else
 				if self.Holder and self.Holder.Parent == playerGui then
-					return UI.Holder
+					return self.Holder
 				else
-					pcall(function()if UI.Holder then UI.Holder:Destroy()end end)
+					pcall(function() if self.Holder then self.Holder:Destroy() end end)
 					local new = Utilities:CreateInstance("ScreenGui", {
 						Name = Utilities:RandomString(),
 						Parent = playerGui,
@@ -275,7 +275,7 @@ Methods.gTable = {
 
 	Register = function(self, gui)
 		Root.DebugWarn("REGISTER GUI", gui)
-		
+
 		local checking = false
 
 		if self.AncestryEvent then

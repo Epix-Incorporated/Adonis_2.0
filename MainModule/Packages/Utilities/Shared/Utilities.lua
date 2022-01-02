@@ -7,6 +7,7 @@
 --]]
 
 local Root = {}
+local Queues = {}
 local RateLimits = {}
 local EventObjects = {}
 local InitFunctions = {}
@@ -37,7 +38,7 @@ local function warn(...)
 	if Root and Root.Warn then
 		Root.Warn(...)
 	else
-		oWarn(":: Adonis ::", ...)
+		oWarn(":: Adonis Utilities ::", ...)
 	end
 end
 
@@ -172,6 +173,91 @@ local Utilities = {
 			__newindex = ObjectMethods.MemoryCache.__newindex
 		})
 	end,
+
+	--// Uses a BindableEvent to yield/release a calling thread
+	Waiter = function(self)
+		local event = Instance.New("BindableEvent");
+		return {
+			Release = function(...) event:Fire(...) end;
+			Wait = function(...) return event.Event:Wait(...) end;
+			Destroy = function() event:Destroy() end;
+			Event = event;
+		}
+	end,
+
+	--// Removes the first element from a table and returns it
+	Pop = function(self, tab)
+		local n = tab[1]
+		table.remove(tab, 1)
+		return n
+	end,
+
+	--// Queues up a function to run
+	Queue = function(self, key, func, noYield)
+		if not Queues[key] then
+			Queues[key] = {
+				Processing = false;
+				Active = {};
+			}
+		end
+
+		local queue = Queues[key]
+		local tab = {
+			Time = os.time();
+			Running = false;
+			Finished = false;
+			Function = func;
+			Waiter = noYield ~= true and self:Waiter();
+		}
+
+		table.insert(queue.Active, tab);
+
+		if not queue.Processing then
+			self.Tasks:TrackTask("Thread: QueueProcessor_"..tostring(key), self.ProcessQueue, self, queue, key);
+		end
+
+		if not noYield and not tab.Finished then
+			return select(2, tab.Waiter:Wait());
+		end
+	end,
+
+	--// Begins processing for a queue
+	ProcessQueue = function(self, queue, key)
+		if queue then
+			if queue.Processing then
+				return "Processing"
+			else
+				queue.Processing = true
+
+				local funcs = queue.Functions;
+				while funcs[1] ~= nil do
+					local func = self:Pop(funcs);
+
+					func.Running = true;
+
+					local r,e = pcall(func.Function);
+
+					if not r then
+						func.Error = e;
+						warn("Queue Error: ".. tostring(key) .. ": ".. tostring(e))
+					end
+
+					func.Running = false;
+					func.Finished = true
+
+					if func.Waiter then
+						func.Waiter:Release(r, e)
+					end
+				end
+
+				if key then
+					Queues[key] = nil;
+				end
+
+				queue.Processing = false;
+			end
+		end
+	end;
 
 	--// Rate Limiting
 	RateLimit = function(self, key: string, data: {})
@@ -581,6 +667,32 @@ local Utilities = {
 				return func(...)
 			end
 		})
+	end;
+
+	--// Creates a new fake player object which can be used as a stand-in for most player-related needs
+	FakePlayer = function(self, plrData)
+		local fakePlayer = self.Wrapping:Wrap(self:CreateInstance("Folder", {
+			Name = plrData.Name
+		}))
+
+		for prop,val in pairs({
+			DisplayName = plrData.DisplayName or plrData.Name;
+			ToString = plrData.Name;
+			ClassName = "Player";
+			AccountAge = 0;
+			CharacterAppearanceId = plrData.UserId or -1;
+			UserId = plrData.UserId or -1;
+			userId = plrData.UserId or -1;
+			Parent = self.Services.Players;
+			Character = Instance.new("Model");
+			Backpack = Instance.new("Folder");
+			PlayerGui = Instance.new("Folder");
+			PlayerScripts = Instance.new("Folder");
+			Kick = function() fakePlayer:Destroy() fakePlayer:SetSpecial("Parent", nil) end;
+			IsA = function(ignore, arg) if arg == "Player" then return true end end;
+		}) do fakePlayer:SetSpecial(prop, val) end
+
+		return fakePlayer
 	end;
 }
 

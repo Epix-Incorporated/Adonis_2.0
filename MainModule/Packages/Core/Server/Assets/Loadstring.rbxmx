@@ -11,11 +11,11 @@
 			<ProtectedString name="Source"><![CDATA[--[[
 	Credit to einsteinK.
 	Credit to Stravant for LBI.
-	
+
 	Credit to the creators of all the other modules used in this.
-	
+
 	Sceleratis was here and decided modify some things.
-	
+
 	einsteinK was here again to fix a bug in LBI for if-statements
 --]]
 
@@ -52,7 +52,7 @@ return function(str, env)
 		luaU:dump(LuaState, func, writer, buff)
 		f = fiOne(buff.data, env)
 	end)
-	
+
 	if ran then
 		return f,buff.data
 	else
@@ -1810,7 +1810,7 @@ function luaU:from_double(x)
     mantissa = (mantissa * 2 - 1) * math.ldexp(0.5, 53)
     exponent = exponent + 1022
   end
-  local v, byte = "" -- convert to bytes
+  local v, byte = "", nil -- convert to bytes
   x = math.floor(mantissa)
   for i = 1,6 do
     x, byte = grab_byte(x); v = v..byte -- 47:0

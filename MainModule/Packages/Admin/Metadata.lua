@@ -15,12 +15,16 @@ return {
 	Settings = {
 		["Roles"] = {
 			DefaultValue = {},
-			Description = "System Roles"
+			Description = "System Roles",
+			Package = script.Parent,
+			ClientAllowed = false
 		},
 
 		["Users"] = {
 			DefaultValue = {},
-			Description = "System Users"
+			Description = "System Users",
+			Package = script.Parent,
+			ClientAllowed = false
 		},
 
 		["Prefix"] = {
@@ -42,6 +46,16 @@ return {
 			Description = "Character used to break up command strings into multiple command strings.",
 			Package = script.Parent,
 			ClientAllowed = true
+		},
+
+		["BanMessage"] = {
+			DefaultValue = "Banned",
+			Description = "Ban message",
+		},
+		
+		["BanList"] = {
+			DefaultValue = {},
+			Description = "Ban list",
 		}
 	}
 }

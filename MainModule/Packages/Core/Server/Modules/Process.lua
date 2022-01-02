@@ -16,19 +16,21 @@ local Process = {
 	EventConnections = {},
 
 	PlayerAdded = function(self, p: Player)
-		p.CharacterAdded:Connect(function(...)
-			self:CharacterAdded(p, ...)
-		end)
+		if Root.Core:HandlePlayerPreLoadingProcesses(p) then
+			p.CharacterAdded:Connect(function(...)
+				self:CharacterAdded(p, ...)
+			end)
 
-		p.CharacterRemoving:Connect(function(...)
-			self:CharacterRemoving(p, ...)
-		end)
+			p.CharacterRemoving:Connect(function(...)
+				self:CharacterRemoving(p, ...)
+			end)
 
-		p.Chatted:Connect(function(...)
-			self:PlayerChatted(p, ...)
-		end)
+			p.Chatted:Connect(function(...)
+				self:PlayerChatted(p, ...)
+			end)
 
-		Events.PlayerAdded:Fire(p)
+			Events.PlayerAdded:Fire(p)
+		end
 	end,
 
 	PlayerChatted = function(self, p: Player, ...)
@@ -39,8 +41,8 @@ local Process = {
 		Events.PlayerReady:Fire(p)
 	end,
 
-	PlayerRemoving = function(self, p: Player)
-		Events.PlayerRemoving:Fire(p, data)
+	PlayerRemoving = function(self, p: Player, ...)
+		Events.PlayerRemoving:Fire(p, ...)
 	end,
 
 	PlayerRemoved = function(self, p: Player?)

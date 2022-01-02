@@ -13,9 +13,8 @@ local Package = {
 	Package = PackageFolder;
 	Metadata = require(PackageFolder.Metadata);
 
-	Client = PackageFolder.Client;
-
-	Modules = PackageFolder.Client.Modules;
+	Server = PackageFolder.Server;
+	Modules = PackageFolder.Server.Modules;
 }
 
 
@@ -31,7 +30,7 @@ local function warn(...)
 	if RootTable and RootTable.Warn then
 		RootTable.Warn(...)
 	else
-		oWarn(":: Adonis Client ::", ...)
+		oWarn(":: Adonis ::", ...)
 	end
 end
 

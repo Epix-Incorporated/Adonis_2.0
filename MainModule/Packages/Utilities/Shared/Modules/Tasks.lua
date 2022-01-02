@@ -29,9 +29,9 @@ local ObjectMethods = {
 }
 
 --// Tasks
-local Tasks = table.freeze{
+local Tasks = {
 	TrackTask = function(self, name, func, ...)
-		local index = RandomString()
+		local index = Utilities:RandomString()
 		local isThread = string.sub(name, 1, 7) == "Thread:"
 
 		local data = {

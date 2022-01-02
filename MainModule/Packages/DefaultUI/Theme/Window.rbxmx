@@ -4427,7 +4427,7 @@ return {
 					local data = data or {}
 					--local numChildren = #frames:GetChildren()
 					local nextPos = getNextPos(buttons);
-					local textSize = service.TextService:GetTextSize(data.Text or name, dTextSize, dFont, buttons.AbsoluteSize)
+					local textSize = Utilities.Services.TextService:GetTextSize(data.Text or name, dTextSize, dFont, buttons.AbsoluteSize)
 					local oTextTrans = data.TextTransparency
 					local isOpen = false
 					local disabled = false
@@ -4533,7 +4533,7 @@ return {
 
 					new.AutomaticCanvasSize = "Y"
 
-					local layout = service.New("UIListLayout", {
+					local layout = Utilities:CreateInstance("UIListLayout", {
 						Parent = new;
 						Name = "LayoutOrder";
 						FillDirection = data.Layout_FillDirection or "Vertical";

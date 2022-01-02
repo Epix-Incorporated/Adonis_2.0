@@ -15,7 +15,6 @@ local Package = {
 
 	Server = PackageFolder.Server;
 	Client = PackageFolder.Client;
-	Shared = PackageFolder.Shared;
 
 	Modules = PackageFolder.Server.Modules;
 }
@@ -88,14 +87,7 @@ return {
 				LoadModule(module, Root, Package)
 			end
 		end
-
-		--// Load shared modules
-		for i,module in ipairs(Package.Shared:GetChildren()) do
-			if module:IsA("ModuleScript") then
-				LoadModule(module, Root, Package)
-			end
-		end
-
+		
 		--// Run init methods
 		for i,t in ipairs(InitFunctions) do
 			if t.Init then

@@ -7,10 +7,11 @@
 --]]
 
 --// Precursory variables/functions
+local AppName = "Adonis Client"
 local oWarn = warn
 
 local function warn(...)
-	oWarn(":: Adonis Client ::", ...)
+	oWarn(":: ".. AppName .." ::", ...)
 end
 
 local function addRange(tab, ...)
@@ -24,6 +25,7 @@ end
 
 --// Table shared with all packages which acts as the root table for all others
 local Root = {
+	AppName = AppName;
 	Verbose = false;
 	Packages = {};
 	Globals = {};
