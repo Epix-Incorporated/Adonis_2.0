@@ -36,54 +36,6 @@ local RemoteCommands = {
 }
 
 local Users = setmetatable({
-	GetUserEntries = function(self, player: Player)
-		local userEntries = {}
-		for i,user in pairs(Root.Settings.Users) do
-			DebugWarn("Player UserCheck", user, player)
-			local userCheck = self.UserChecks[user.Type or "User"]
-			if userCheck then
-				if userCheck(self, player, user) then
-					table.insert(userEntries, user)
-				end
-			else
-				Root.Warn("Check for RoleType not found", user.Type)
-			end
-		end
-		return userEntries
-	end,
-
-	UpdateUserOverrides = function(self, player: Player, userEntries: {})
-		local userEntries = userEntries or self:GetUserEntries(player)
-		local data = Root.Core:GetPlayerData(player)
-		local highestLevel = 0
-
-		DebugWarn("Updating user overrides", player, userEntries)
-
-		for i, user in ipairs(userEntries) do
-			if user.Permissions then
-				for i,perm in ipairs(user.Permissions) do
-					if data.Overrides.Permissions[perm] == nil then
-						data.Overrides.Permissions[perm] = true
-					end
-				end
-			end
-
-			if user.Level and user.Level > highestLevel then
-				highestLevel = user.Level
-			end
-		end
-
-		data.Level = data.Overrides.Level or highestLevel
-	end,
-}, {
-	__index = function(self, p)
-		if typeof(p) == "Instance" and p:IsA("Player") then
-			return self:GetUserEntries(p)
-		end
-	end
-})
-
-local Roles = setmetatable({
 	--// Functions used to check whether or not player matches a certain criteria, such as being in a specific group or having a certain UserId for Role assignments.
 	UserChecks = {
 		--// Default means it applies to everyone applies to everyone
@@ -173,7 +125,55 @@ local Roles = setmetatable({
 			end
 		end,
 	},
+	
+	GetUserEntries = function(self, player: Player)
+		local userEntries = {}
+		for i,user in pairs(Root.Settings.Users) do
+			DebugWarn("Player UserCheck", user, player)
+			local userCheck = self.UserChecks[user.Type or "User"]
+			if userCheck then
+				if userCheck(self, player, user) then
+					table.insert(userEntries, user)
+				end
+			else
+				Root.Warn("Check for RoleType not found", user.Type)
+			end
+		end
+		return userEntries
+	end,
 
+	UpdateUserOverrides = function(self, player: Player, userEntries: {})
+		local userEntries = userEntries or self:GetUserEntries(player)
+		local data = Root.Core:GetPlayerData(player)
+		local highestLevel = 0
+
+		DebugWarn("Updating user overrides", player, userEntries)
+
+		for i, user in ipairs(userEntries) do
+			if user.Permissions then
+				for i,perm in ipairs(user.Permissions) do
+					if data.Overrides.Permissions[perm] == nil then
+						data.Overrides.Permissions[perm] = true
+					end
+				end
+			end
+
+			if user.Level and user.Level > highestLevel then
+				highestLevel = user.Level
+			end
+		end
+
+		data.Level = data.Overrides.Level or highestLevel
+	end,
+}, {
+	__index = function(self, p)
+		if typeof(p) == "Instance" and p:IsA("Player") then
+			return self:GetUserEntries(p)
+		end
+	end
+})
+
+local Roles = setmetatable({
 	GetPlayerGroups = function(self, player: Player)
 		local data = Root.Core:GetPlayerData(player)
 		local cached = data.Cache:GetData("GroupData")

@@ -50,7 +50,7 @@ local Core = {
 
 	HandlePlayerPreLoadingProcesses = function(self, p)
 		for ind, handler in pairs(self.DeclaredPlayerPreLoadingHandlers) do
-			Root:RunFunction(handler, p)
+			Utilities:RunFunction(handler, p)
 		end
 
 		if p.Parent then
