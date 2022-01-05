@@ -1,6 +1,6 @@
 --[[
 
-	Description: Task utilities
+	Description: Wrapping utilities
 	Author: Sceleratis
 	Date: 12/04/2021
 

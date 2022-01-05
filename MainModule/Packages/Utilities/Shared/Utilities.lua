@@ -281,8 +281,8 @@ local Utilities = {
 		end
 	end,
 
-	--// Modifies an Instance's properties according to the supplied dictionary
-	EditInstance = function(self, object: Instance, properties: {[string]:any}?): Instance
+	--// Modifies an Instance's properties & other data according to the supplied dictionary
+	EditInstance = function(self, object: Instance, properties: {[string]:any}?): (Instance, {[string]:RBXScriptConnection})
 		local connections = {}
 
 		if self.Wrapping:IsWrapped(object) then
@@ -395,7 +395,7 @@ local Utilities = {
 		return str
 	end,
 
-	--// Formats a string for use with RichText
+	--// Escapes RichText tags in the provided string
 	FormatStringForRichText = function(self, str: string): string
 		return str:gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;"):gsub("\"", "&quot;"):gsub("'", "&apos;")
 	end,
@@ -423,8 +423,8 @@ local Utilities = {
 
 	--// Splits a string into multiple sub-strings, splitting at SplitChar; Ignores split characters surrounded by double or single quotes
 	ReplaceCharacters = function(self, str: string, chars: {}, replaceWith: any?)
-		for i,char in ipairs(chars) do
-			str = string.gsub(str, char, replaceWith or '')
+		for i, char in ipairs(chars) do
+			str = string.gsub(str, char, replaceWith or "")
 		end
 		return str
 	end,
@@ -454,14 +454,14 @@ local Utilities = {
 	JoinStrings = function(self, joiner: string?, ...)
 		local result = nil
 		local strList = table.pack(...)
-		for i,str in ipairs(strList) do
+		for i, str in ipairs(strList) do
 			if not result then
 				result = str
 			else
-				result = result .. joiner .. str
+				result ..= joiner .. str
 			end
 		end
-		return result or ''
+		return result or ""
 	end,
 
 	--// Merges tables into the first table
@@ -567,8 +567,13 @@ local Utilities = {
 		end
 	end;
 
-	--// Advanced alternative to xpcall with multiple retry logic & post-success result processing
-	Attempt = function(self, tries: number?, timeBeforeRetry: number?, func: (number)->any, errAction: (string)->any, sucessAction: (any)->any): (boolean, any)
+	--// Returns true if either (and only either) A or B is truthy
+	Xor = function(self, a, b): boolean
+		return (a and not b) or (b and not a)
+	end;
+
+	--// Advanced alternative to xpcall with multiple retry logic
+	Attempt = function(self, tries: number?, timeBeforeRetry: number?, func: (number)->any, errAction: (string)->any): (boolean, any)
 		tries = tries or 3
 		local triesMade = 0
 		local success, result
@@ -579,13 +584,12 @@ local Utilities = {
 		until success or triesMade >= tries
 		if not success and errAction then
 			result = errAction(result)
-		elseif success and sucessAction then
-			result = sucessAction(result)
 		end
 		return success, result
 	end;
 
-	--// Creates a new loop with specified delay.
+	--// Creates a new loop with a specified delay between executions
+	--// The loop is broken if and when the function being executed returns truthy
 	MakeLoop = function(self, exeDelay: number?, func: (number)->(), dontStart: boolean?)
 		local loop = coroutine.wrap(function()
 			local run = 0
@@ -624,13 +628,17 @@ local Utilities = {
 	end;
 
 	--// Runs the given function and outputs any errors
-	RunFunction = function(self, Function, ...)
-		return xpcall(Function, function(err)
-			warn("Error while running function; Expand for more info", {Error = tostring(err), Raw = err})
+	RunFunction = function(self, func, ...)
+		return xpcall(func, function(err)
+			if self.Services.RunService:IsStudio() then
+				warn("Error while running function; Expand for more info", {Error = tostring(err), Raw = err})
+			else --// The in-game developer console does not support viewing of table contents.
+				warn("Error while running function;", err)
+			end
 		end, ...)
 	end;
 
-	--// Checks if a given object has the given property
+	--// Safely checks if a given object has the given property
 	CheckProperty = function(self, obj: Instance, prop: string): (boolean, any)
 		return pcall(PropertyCheck, obj, prop)
 	end;
@@ -675,8 +683,8 @@ local Utilities = {
 			Name = plrData.Name
 		}))
 
-		for prop,val in pairs({
-			DisplayName = plrData.DisplayName or plrData.Name;
+		for prop, val in pairs({
+			DisplayName = plrData.DisplayName or plrData.Name; --// note: UserService:GetUserInfosByUserIdsAsync() exists
 			ToString = plrData.Name;
 			ClassName = "Player";
 			AccountAge = 0;
@@ -699,7 +707,7 @@ local Utilities = {
 --// Requires a given ModuleScript; If a function is returned immediately, run it
 --// If a table is returned, assume deferred execution
 local function LoadModule(Module: ModuleScript, ...)
-	local ran,func = pcall(require, Module)
+	local ran, func = pcall(require, Module)
 	if ran then
 		if type(func) == "function" then
 			Utilities:RunFunction(func, ...)
