@@ -11,49 +11,48 @@ local Root, Package, Utilities, Service
 local Logging = {
 	Logs = {};
 
-	AddLog = function(self, Type: string, Log: {}, ...)
-		local logTab = self.Logs[Type];
+	AddLog = function(self, logType: string, logEntry: {Text: string?, Description: string?, Time: number?, NoTime: boolean?}|string, ...)
+		local logTable = self.Logs[logType]
 
-		if not logTab then
-			self.Logs[Type] = {}
-			logTab = self.Logs[Type]
+		if not logTable then
+			self.Logs[logType] = {}
+			logTab = self.Logs[logType]
 		end
 
-		if logTab and type(logTab) == "table" then
-			local newLog = Log;
-			local format = table.pack(...);
+		if logTable and type(logTable) == "table" then
+			local format = table.pack(...)
 
-			if type(newLog) == "string" then
-				newLog = {
-					Text = Log;
-					Description = Log;
+			if type(logEntry) == "string" then
+				logEntry = {
+					Text = logEntry;
+					Description = logEntry;
 				}
 			end
 
 			if #format > 0 then
-				newLog.Text = string.format(newLog.Text, table.unpack(format))
+				logEntry.Text = string.format(logEntry.Text, table.unpack(format))
 			end
 
-			if not newLog.Time and not newLog.NoTime then
-				newLog.Time = Utilities:GetTime()
+			if not logEntry.Time and not logEntry.NoTime then
+				logEntry.Time = Utilities:GetTime()
 			end
 
-			if Type == "Error" then
-				warn("[Error Log] ", newLog.Text)
+			if logType == "Error" then
+				warn("[Error Log] ", logEntry.Text)
 			end
 
-			table.insert(logTab, newLog);
+			table.insert(logTable, logEntry)
 
-			Utilities.Events.LogAdded:Fire(Type, newLog)
+			Utilities.Events.LogAdded:Fire(logType, logEntry)
 		else
-			Root.Warn("Invalid LogType Supplied", Type)
+			Root.Warn("Invalid LogType Supplied:", logType)
 		end
 	end;
 
 	GetLogs = function(self, Type: string)
-		local logTab = self.Logs[Type];
-		if logTab and type(logTab) == "table" then
-			return logTab
+		local logTable = self.Logs[Type]
+		if logTable and type(logTable) == "table" then
+			return logTable
 		else
 			return {}
 		end
