@@ -6,8 +6,8 @@
 
 --]]
 
-local oWarn = warn;
-local Verbose = false;
+local oWarn = warn
+local Verbose = false
 
 --// Warn
 local function warn(...)
@@ -33,15 +33,15 @@ end
 
 --// Formatted error
 local function FormatError(...)
-	error(string.format(...))
+	error(string.format(...), 2)
 end
 
 --// Runs the given function and calls FormatError for any errors
-local function RunFunction(Function, ...)
+local function RunFunction(func: ()->(), ...)
 	--//xpcall(Function, function(err)
 	--//	FormatError("Loading Error: %s", err)
 	--//end, ...)
-	local ran,err = pcall(Function, ...)
+	local ran, err = pcall(func, ...)
 
 	if not ran then
 		FormatError("Loading Error: %s", err)
@@ -49,7 +49,7 @@ local function RunFunction(Function, ...)
 end
 
 --// Returns the metadata for a given package
-local function GetMetadata(Package: Folder)
+local function GetMetadata(Package: Folder): {[string]:any}
 	local metaMod = Package:FindFirstChild("Metadata")
 	if metaMod and metaMod:IsA("ModuleScript") then
 		local metaData = require(metaMod)
@@ -70,7 +70,7 @@ local function GetServerPackages(Packages: {})
 
 	debug("GET SERVER PACKAGES")
 
-	for i,v in ipairs(Packages) do
+	for i, v in ipairs(Packages) do
 		debug("CHECK PACKAGE FOR SERVER", v)
 
 		if v:FindFirstChild("Server") then
@@ -99,7 +99,7 @@ local function GetClientPackages(Packages: {})
 
 	debug("GET CLIENT PACKAGES")
 
-	for i,v in ipairs(Packages) do
+	for i, v in ipairs(Packages) do
 		debug("FOUND PACKAGE", v)
 		if v:FindFirstChild("Client") then
 			local metadata = GetMetadata(v)
