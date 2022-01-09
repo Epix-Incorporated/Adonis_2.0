@@ -7,7 +7,6 @@
 --]]
 
 local Root, Utilities
-local Cache = {}
 local Queues = {}
 local RateLimits = {}
 local ParentTester = Instance.new("Folder")
@@ -16,6 +15,13 @@ local __RANDOM_CHARSET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 local function PropertyCheck(obj, prop): any
 	return obj[prop]
 end
+
+--// Cache
+local Cache = {
+	KnownServices = {},
+	Encrypt = {},
+	Decrypt = {},
+}
 
 --// Misc Helper Methods
 local HelperMethods = {
@@ -37,7 +43,7 @@ local HelperMethods = {
 
 	--// Uses a BindableEvent to yield/release a calling thread
 	Waiter = function(self)
-		local event = Instance.New("BindableEvent");
+		local event = Instance.new("BindableEvent");
 		return {
 			Release = function(...) event:Fire(...) end;
 			Wait = function(...) return event.Event:Wait(...) end;
@@ -90,17 +96,16 @@ local HelperMethods = {
 			else
 				queue.Processing = true
 
-				local funcs = queue.Functions;
+				local funcs = queue.Active;
 				while funcs[1] ~= nil do
 					local func = self:Pop(funcs);
-
 					func.Running = true;
 
 					local r,e = pcall(func.Function);
 
 					if not r then
 						func.Error = e;
-						warn("Queue Error: ".. tostring(key) .. ": ".. tostring(e))
+						Utilities.Warn("Queue Error: ".. tostring(key) .. ": ".. tostring(e))
 					end
 
 					func.Running = false;
@@ -486,17 +491,6 @@ local HelperMethods = {
 			end
 		end
 		return nil
-	end;
-
-	--// Runs the given function and outputs any errors
-	RunFunction = function(self, func, ...)
-		return xpcall(func, function(err)
-			if self.Services.RunService:IsStudio() then
-				warn("Error while running function; Expand for more info", {Error = tostring(err), Raw = err})
-			else --// The in-game developer console does not support viewing of table contents.
-				warn("Error while running function;", err)
-			end
-		end, ...)
 	end;
 
 	--// Safely checks if a given object has the given property

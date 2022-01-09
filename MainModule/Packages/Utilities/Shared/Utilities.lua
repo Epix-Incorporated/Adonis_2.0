@@ -21,9 +21,7 @@ end
 
 --// Cache
 local Cache = {
-	KnownServices = {},
-	Encrypt = {},
-	Decrypt = {},
+	KnownServices = {}
 }
 
 --// Utility Object Methods
@@ -108,17 +106,22 @@ local ObjectMethods = {
 		__newindex = function(self, ind, value)
 			self:SetData(ind, value)
 		end
-	}
+	},
 }
 
 --// Utilities
 local Utilities = {
 	Warn = warn,
-	
+
 	--// Caches and returns Roblox services retrieved via game:GetService()
 	Services = table.freeze(setmetatable({}, {
 		__index = function(self, ind)
-			return Cache.KnownServices[ind] or game:GetService(ind)
+			local cached = Cache.KnownServices[ind]
+			local service = cached or game:GetService(ind)
+			if not cached then
+				Cache.KnownServices[ind] = service
+			end
+			return service
 		end,
 	})),
 
@@ -149,7 +152,18 @@ local Utilities = {
 			__index = ObjectMethods.MemoryCache.__index,
 			__newindex = ObjectMethods.MemoryCache.__newindex
 		})
-	end
+	end,
+
+	--// Runs the given function and outputs any errors
+	RunFunction = function(self, func, ...)
+		return xpcall(func, function(err)
+			if self.Services.RunService:IsStudio() then
+				warn("Error while running function; Expand for more info", {Error = tostring(err), Raw = err})
+			else --// The in-game developer console does not support viewing of table contents.
+				warn("Error while running function;", err)
+			end
+		end, ...)
+	end,
 }
 
 --// Requires a given ModuleScript; If a function is returned immediately, run it

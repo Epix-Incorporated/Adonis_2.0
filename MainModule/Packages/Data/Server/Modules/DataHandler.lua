@@ -44,6 +44,30 @@ local Data = {
 		end
 	end,
 
+	GetSavedPlayerData = function(self, p)
+		return Root.Data:GetData(self.PlayerDataStore, tostring(p.UserId))
+	end,
+
+	GetSavedSystemData = function(self, key)
+		return Root.Data:GetData(self.SystemDataStore, key)
+	end,
+
+	SetSavedPlayerData = function(self, p, data)
+		return Root.Data:SetData(self.PlayerDataStore, tostring(p.UserId), data)
+	end,
+
+	SetSavedSystemData = function(self, key, data)
+		return Root.Data:SetData(self.SystemDataStore, key, data)
+	end,
+
+	UpdateSavedPlayerData = function(self, p, callback)
+		return Root.Data:UpdateData(self.PlayerDataStore, tostring(p.UserId), callback)
+	end,
+
+	UpdateSavedSystemData = function(self, key, callback)
+		return Root.Data:UpdateData(self.SystemDataStore, key, callback)
+	end,
+
 	--// Datastore handlers
 	SetData = function(self, datastore, key, data)
 		Utilities.Events.DatastoreSetData:Fire(datastore, key, data)
@@ -173,7 +197,7 @@ return {
 		})
 
 		Root.Core:DeclareDefaultPlayerData("PersistentData", function(p, newData)
-			local dataTable = Root.Data:GetData(tostring(p.UserId)) or {}
+			local dataTable = Root.Data:GetSavedPlayerData(p) or {}
 			return setmetatable({}, {
 				__index = function(self, ind)
 					return dataTable[ind]
@@ -189,13 +213,13 @@ return {
 
 	AfterInit = function(Root, Package)
 		--// Do after-init
-		Data.SystemDataSaveUpdateLoop = Utilities:NewTask("Thread: DatastoreUpdate_System", function()
+		Data.SystemDataSaveUpdateLoop = Utilities.Tasks:NewTask("Thread: DatastoreUpdate_System", function()
 			while task.wait(Data.SystemDataUpdateInterval) do
 				Root.Data:PerformDataUpdate()
 			end
 		end)
 
-		Data.PlayerDataSaveUpdateLoop = Utilities:NewTask("Thread: DatastoreUpdate_Players", function()
+		Data.PlayerDataSaveUpdateLoop = Utilities.Tasks:NewTask("Thread: DatastoreUpdate_Players", function()
 			while task.wait(Data.SystemDataUpdateInterval) do
 				Root.Data:PerformDataUpdate()
 			end

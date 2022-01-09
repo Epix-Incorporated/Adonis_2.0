@@ -18,8 +18,7 @@ return {
 
 		--// Do init
 		Root.Core:DeclarePlayerPreLoadProcess("BanHandler", function(p: Player)
-
-			if p.Parent and Root.Permissions:HasPermission(p, "Banned") then
+			if p.Parent and Root.Permissions:HasPermission(p, "Banned", true) then
 				local data = Root.Core:GetPlayerData(p)
 				local userEntries = Root.Users:GetUserEntries(p)
 				local banMessage = Root.Settings.BanMessage

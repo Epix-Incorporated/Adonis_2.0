@@ -125,7 +125,7 @@ local Users = setmetatable({
 			end
 		end,
 	},
-	
+
 	GetUserEntries = function(self, player: Player)
 		local userEntries = {}
 		for i,user in pairs(Root.Settings.Users) do
@@ -317,9 +317,9 @@ local Permissions = setmetatable({
 	end,
 
 	--// Check if player has specified permission
-	HasPermission = function(self, player: Player, perm: string)
+	HasPermission = function(self, player: Player, perm: string, ignoreOverride: boolean)
 		local perms = self:GetPermissions(player)
-		return if perms.PermissionOverride then true elseif perms.DenyPermissions then false else perms[perm]
+		return if perms.PermissionOverride and not ignoreOverride then true elseif perms.DenyPermissions then false else perms[perm]
 	end,
 
 	--// Check if player has specified permissions

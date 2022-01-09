@@ -402,7 +402,7 @@ local Remote = {
 }
 
 local function PlayerAdded(p)
-	Remote:SetupClient(p);
+	Remote:SetupClient(p)
 	Root.Logging:AddLog("Script", "Setup client for %s", p.Name)
 end
 

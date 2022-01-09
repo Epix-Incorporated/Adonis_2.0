@@ -8,6 +8,12 @@
 
 local Root, Package, Utilities, Service
 
+local function delayedTimeoutMessage(stillWaiting: boolean, name: string, s: number)
+	if stillWaiting then
+		Root.Warn("Process taking too long to complete: >".. s .."s", name)
+	end
+end
+
 local Core = {
 	PlayerData = {};
 	PlayerDataCache = {};
@@ -50,7 +56,10 @@ local Core = {
 
 	HandlePlayerPreLoadingProcesses = function(self, p)
 		for ind, handler in pairs(self.DeclaredPlayerPreLoadingHandlers) do
+			local waiting = true
+			task.delay(10, function() delayedTimeoutMessage(waiting, ind, 10) end)
 			Utilities:RunFunction(handler, p)
+			waiting = false
 		end
 
 		if p.Parent then

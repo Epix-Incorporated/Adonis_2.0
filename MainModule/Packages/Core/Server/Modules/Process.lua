@@ -28,7 +28,7 @@ local Process = {
 			p.Chatted:Connect(function(...)
 				self:PlayerChatted(p, ...)
 			end)
-
+			
 			Events.PlayerAdded:Fire(p)
 		end
 	end,
