@@ -12,7 +12,7 @@ return {
 	};
 
 	Settings = {
-		["Datastore"] = "Adonis2.0_1",
-
+		["DataStoreName"] = "Adonis2.0_1",
+		["DataStoreKey"] = "CHANGE_ME",
 	}
 }

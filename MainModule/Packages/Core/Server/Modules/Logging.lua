@@ -16,7 +16,7 @@ local Logging = {
 
 		if not logTable then
 			self.Logs[logType] = {}
-			logTab = self.Logs[logType]
+			logTable = self.Logs[logType]
 		end
 
 		if logTable and type(logTable) == "table" then
