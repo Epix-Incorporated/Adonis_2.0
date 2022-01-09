@@ -189,13 +189,13 @@ return {
 
 	AfterInit = function(Root, Package)
 		--// Do after-init
-		Data.DatastoreUpdateLoop = Utilities:NewTask("Thread: DatastoreUpdate_System", function()
+		Data.SystemDataSaveUpdateLoop = Utilities:NewTask("Thread: DatastoreUpdate_System", function()
 			while task.wait(Data.SystemDataUpdateInterval) do
 				Root.Data:PerformDataUpdate()
 			end
 		end)
 
-		Data.DatastoreUpdateLoop = Utilities:NewTask("Thread: DatastoreUpdate_Players", function()
+		Data.PlayerDataSaveUpdateLoop = Utilities:NewTask("Thread: DatastoreUpdate_Players", function()
 			while task.wait(Data.SystemDataUpdateInterval) do
 				Root.Data:PerformDataUpdate()
 			end
