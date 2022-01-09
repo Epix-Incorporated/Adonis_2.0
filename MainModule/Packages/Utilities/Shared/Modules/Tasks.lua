@@ -8,11 +8,11 @@
 
 local Root, Utilities
 
-local TrackedTasks = {}
+local ActiveTasks = {}
 local TaskSchedulers = {}
 local ObjectMethods = {
-	--// Task methods
-	Task = {
+	--// TaskScheduler methods
+	TaskScheduler = {
 		Trigger = function(self, ...)
 			self.Event:Fire(...)
 		end;
@@ -22,18 +22,75 @@ local ObjectMethods = {
 				TaskSchedulers[self.Name] = nil
 			end
 
+			if self.Thread then
+				self:Close()
+			end
+
 			self.Running = false
 			self.Event:Disconnect()
+		end;
+	};
+
+	--// Task methods
+	Task = {
+		RunTaskFunction = function(self, ...)
+			ActiveTasks[self.Index] = self
+
+			Utilities.Events.TaskStarted:Fire(self, ...)
+
+			self.Status = "Running"
+			self.Running = true
+			self.Returns = {pcall(self.Function, ...)}
+			self.Running = false
+
+			if not self.Returns[1] then
+				self.Status = "Errored"
+			else
+				self.Status = "Finished"
+			end
+
+			Utilities.Events.TaskEnded:Fire(self, ...)
+
+			ActiveTasks[self.Index] = nil
+			return unpack(self.Returns)
+		end;
+
+		Resume = function(self)
+			if self.Thread then
+				Utilities.Events.TaskResumed:Fire(self)
+				return coroutine.resume(self.Thread)
+			else
+				Utilities.Warn("Cannot resume non-thread task:", self.Index, self)
+			end
+		end;
+
+		Yield = function(self)
+			if self.Thread then
+				coroutine.yield(self.Thread)
+				Utilities.Events.TaskYielded:Fire(self)
+			else
+				Utilities.Warn("Cannot yield non-thread task:", self.Index, self)
+			end
+		end;
+
+		Stop = function(self)
+			if self.Thread then
+				coroutine.close(self.Thread)
+				Utilities.Events.TaskStopped:Fire(self)
+			else
+				Utilities.Warn("Cannot stop non-thread task:", self.Index, self)
+			end
 		end;
 	}
 }
 
 --// Tasks
 local Tasks = {
-	TrackTask = function(self, name, func, ...)
+	ActiveTasks = ActiveTasks;
+
+	NewTask = function(self, name, func, ...)
 		local index = Utilities:RandomString()
 		local isThread = string.sub(name, 1, 7) == "Thread:"
-
 		local data = {
 			Name = name;
 			Status = "Waiting";
@@ -43,38 +100,26 @@ local Tasks = {
 			Index = index;
 		}
 
-		local function taskFunc(...)
-			TrackedTasks[index] = data
-			data.Status = "Running"
-			data.Returns = {pcall(func, ...)}
-
-			if not data.Returns[1] then
-				data.Status = "Errored"
-			else
-				data.Status = "Finished"
-			end
-
-			TrackedTasks[index] = nil
-			return unpack(data.Returns)
-		end
+		Utilities:MergeTables(data, ObjectMethods.Task)
+		Utilities.Events.TaskCreated:Fire(data)
 
 		if isThread then
-			data.Thread = coroutine.create(taskFunc)
-			return coroutine.resume(data.Thread, ...) --select(2, coroutine.resume(data.Thread, ...))
+			data.Thread = coroutine.create(data.RunTaskFunction)
+			return data, coroutine.resume(data.Thread, data, ...)
 		else
-			return taskFunc(...)
+			return data:RunTaskFunction(...)
 		end
 	end;
 
 	EventTask = function(self, name, func)
-		local newTask = self.TrackTask
+		local newTask = self.NewTask
 		return function(...)
-			return newTask(name, func, ...)
+			return newTask(self, name, func, ...)
 		end
 	end;
 
-	GetTasks = function()
-		return TrackedTasks
+	GetActiveTasks = function()
+		return ActiveTasks
 	end;
 
 	TaskScheduler = function(self, taskName, props)
@@ -87,9 +132,9 @@ local Tasks = {
 			Properties = props;
 			LinkedTasks = {};
 			RunnerEvent = Instance.new("BindableEvent");
-			Trigger = ObjectMethods.Task.Trigger;
-			Delete = ObjectMethods.Task.Delete;
 		}
+
+		Utilities:MergeTables(new, ObjectMethods.TaskScheduler)
 
 		new.Event = new.RunnerEvent.Event:Connect(function(...)
 			for i, v in pairs(new.LinkedTasks) do
@@ -100,7 +145,7 @@ local Tasks = {
 		end)
 
 		if props.Interval then
-			while wait(props.Interval) and new.Running do
+			while task.wait(props.Interval) and new.Running do
 				new:Trigger(os.time())
 			end
 		end

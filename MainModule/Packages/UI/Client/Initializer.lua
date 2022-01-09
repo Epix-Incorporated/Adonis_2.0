@@ -1,8 +1,8 @@
 --[[
 
-	Description:
-	Author:
-	Date:
+	Description: Client UI Initializer
+	Author: Sceleratis
+	Date: 12/23/2021
 
 --]]
 
@@ -14,8 +14,8 @@ local Package = {
 	Metadata = require(PackageFolder.Metadata);
 
 	Client = PackageFolder.Client;
-
 	Modules = PackageFolder.Client.Modules;
+	Libraries = PackageFolder.Client.Libraries;
 }
 
 
@@ -72,6 +72,11 @@ return {
 		--// Init
 		RootTable = Root
 		Verbose = if Root.Verbose ~= nil then Root.Verbose else Verbose
+
+		--// Add libraries
+		for i,lib in ipairs(Package.Libraries:GetChildren()) do
+			Root.Libraries[lib.Name] = lib
+		end
 
 		--// Declare settings
 		if Package.Metadata.Settings then

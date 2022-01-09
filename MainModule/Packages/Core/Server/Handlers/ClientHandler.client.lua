@@ -27,8 +27,9 @@ end
 local Root = {
 	AppName = AppName;
 	Verbose = false;
-	Packages = {};
 	Globals = {};
+	Packages = {};
+	Libraries = {};
 	PackageHandlerModule = script:WaitForChild("PackageHandler");
 	PackagesFolder = script:WaitForChild("Packages");
 }
@@ -53,13 +54,12 @@ do
 	--// Set root variables
 	Root.PackageHandler = PackageHandler
 
-	--// Get server packages
+	--// Get client packages
 	local Packages = PackageHandler.GetClientPackages(Root.Packages)
 
-	--// Load server packages
+	--// Load client packages
 	PackageHandler.LoadPackages(Packages, "Client", Root, Packages)
 
 	--// Loading complete
 	warn("Loading complete :: Elapsed:", os.clock() - start)
-
 end

@@ -74,7 +74,7 @@ local HelperMethods = {
 		table.insert(queue.Active, tab);
 
 		if not queue.Processing then
-			self.Tasks:TrackTask("Thread: QueueProcessor_"..tostring(key), self.ProcessQueue, self, queue, key);
+			self.Tasks:NewTask("Thread: QueueProcessor_"..tostring(key), self.ProcessQueue, self, queue, key);
 		end
 
 		if not noYield and not tab.Finished then
@@ -521,7 +521,7 @@ local HelperMethods = {
 	end;
 
 	--// Creates a newproxy object with the provided metatable
-	NewProxy = function(self, meta)
+	NewProxy = function(self, meta: {})
 		local newProxy = newproxy(true)
 		local metatable = getmetatable(newProxy)
 		metatable.__metatable = false
@@ -539,7 +539,7 @@ local HelperMethods = {
 	end;
 
 	--// Creates a new fake player object which can be used as a stand-in for most player-related needs
-	FakePlayer = function(self, plrData)
+	FakePlayer = function(self, plrData: {})
 		local fakePlayer = self.Wrapping:Wrap(self:CreateInstance("Folder", {
 			Name = plrData.Name
 		}))
@@ -562,6 +562,58 @@ local HelperMethods = {
 		}) do fakePlayer:SetSpecial(prop, val) end
 
 		return fakePlayer
+	end;
+
+	GetTableValueByPath = function(self, tableAncestry: string, table: {}, splitChar: string)
+		local indexNames = self:SplitString(tableAncestry, splitChar or '.', true)
+		local curTable = table
+
+		for i,index in ipairs(indexNames) do
+			local val = curTable[index]
+			if i == #indexNames then
+				return {
+					Table = curTable,
+					Index = index,
+					Value = val,
+				}
+			elseif type(val) == "table" then
+				curTable = val
+			else
+				Root.Warn("Invalid path:", tableAncestry)
+			end
+		end
+	end;
+
+	CheckTableEquality = function(self, tab1, tab2, noRecursive)
+		if type(tab1) == "table" and type(tab2) == "table" and #tab1 == #tab2 then
+			for index, value in pairs(tab1) do
+				local target = tab2[index]
+				if target and typeof(value) == typeof(target) then
+					if type(value) == "table" then
+						if not noRecursive and not self:CheckTableEquality(value, target, noRecursive) then
+							return false
+						end
+					elseif type(value) ~= "function" then
+						if value ~= target then
+							return false
+						end
+					end
+				else
+					return false
+				end
+			end
+			return true
+		else
+			return false
+		end
+	end;
+
+	JSONEncode = function(self, data)
+		return self.Services.HttpService:JSONEncode(data)
+	end;
+
+	JSONDecode = function(self, data)
+		return self.Services.HttpService:JSONDecode(data)
 	end;
 }
 

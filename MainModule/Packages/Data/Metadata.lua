@@ -12,7 +12,17 @@ return {
 	};
 
 	Settings = {
-		["DataStoreName"] = "Adonis2.0_1",
-		["DataStoreKey"] = "CHANGE_ME",
+		["DataStoreName"] = {
+			DefaultValue = "Adonis2.0_1",
+			Description = "Datastore name prefix."
+		},
+		["DataStoreKey"] = {
+			DefaultValue = "CHANGE_ME",
+			Description = "Key used to encrypt saved system data to attempt to prevent tampering.",
+		},
+		["SavingEnabled"] = {
+			DefaultValue = true,
+			Description = "Whether or not the system will save changes made in-game."
+		},
 	}
 }

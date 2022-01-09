@@ -11,7 +11,7 @@
 	-- If you break something, it's on you to debug it. 								--
 	-- Do NOT submit issues or demand help for problems you created. 					--
 	-- Continuing means you accept any risk that comes with this.						--
-	-- Proceed with caution. 															--
+	-- Proceed with caution.												--
 	--																					--
 	--!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!--
 --]]
@@ -38,8 +38,9 @@ end
 local Root = {
 	AppName = AppName;
 	Verbose = false;
-	Packages = {};
 	Globals = {};
+	Packages = {};
+	Libraries = {};
 	PackageHandlerModule = script.PackageHandler;
 }
 

@@ -113,7 +113,8 @@ local ObjectMethods = {
 
 --// Utilities
 local Utilities = {
-
+	Warn = warn,
+	
 	--// Caches and returns Roblox services retrieved via game:GetService()
 	Services = table.freeze(setmetatable({}, {
 		__index = function(self, ind)

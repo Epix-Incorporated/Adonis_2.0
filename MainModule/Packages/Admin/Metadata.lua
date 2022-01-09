@@ -9,6 +9,7 @@ return {
 	Dependencies = {
 		"Core",
 		"Utilities",
+		"Data",
 		"UI"
 	};
 
@@ -52,7 +53,7 @@ return {
 			DefaultValue = "Banned",
 			Description = "Ban message",
 		},
-		
+
 		["BanList"] = {
 			DefaultValue = {},
 			Description = "Ban list",

@@ -1,8 +1,8 @@
 --[[
 
-	Description:
-	Author:
-	Date:
+	Description: Handles player-related Admin events/checks.
+	Author: Sceleratis
+	Date: 1/8/2022
 
 --]]
 
