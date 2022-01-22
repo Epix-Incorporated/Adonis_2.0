@@ -6,9 +6,9 @@ return {
 	Author = "Sceleratis";
 	Package = script.Parent;
 	Dependencies = {
-		"Core",
-		"Utilities",
-		"Admin",
-		"UI"
+		"System.Core",
+		"System.Utilities",
+		"System.Admin",
+		"System.UI"
 	};
 }

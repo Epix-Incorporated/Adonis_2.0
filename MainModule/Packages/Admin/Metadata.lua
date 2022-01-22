@@ -1,16 +1,16 @@
 --// Package Metadata
 return {
-	Name = "Admin";
+	Name = "System.Admin";
 	Version = 1.0;
 	Description = [[ Responsible for administrative functionality. ]];
 	Author = "Sceleratis";
 	Package = script.Parent;
 
 	Dependencies = {
-		"Core",
-		"Utilities",
-		"Data",
-		"UI"
+		"System.Core",
+		"System.Utilities",
+		"System.Data",
+		"System.UI"
 	};
 
 	Settings = {

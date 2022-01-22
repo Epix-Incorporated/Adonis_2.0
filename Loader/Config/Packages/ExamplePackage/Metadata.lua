@@ -6,7 +6,7 @@ return {
 	Author = "Sceleratis";
 	Package = script.Parent;
 	Dependencies = {
-		"Core",
-		"Utilities",
+		"System.Core",
+		"System.Utilities",
 	};
 }

@@ -1,6 +1,6 @@
 --[[
 
-	Description: Command declaration.
+	Description: Shared command declaration. Should not be used for commands with sensitive/not public server-side code.
 	Author: Sceleratis
 	Date: 12/25/2021
 
@@ -46,6 +46,10 @@ local DeclareCommands = {
 		ClientSide = function(...)
 			Root.Warn("Client Success!", ...)
 
+			Root.UI:NewElement("Window", {Theme = "Default"}, {
+				Title = "Test";
+			});
+			
 			return "WE GOT THIS FROM THE CLIENT!"
 		end
 	}

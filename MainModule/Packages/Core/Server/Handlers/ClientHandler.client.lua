@@ -30,6 +30,7 @@ local Root = {
 	Globals = {};
 	Packages = {};
 	Libraries = {};
+	LibraryObjects = {};
 	PackageHandlerModule = script:WaitForChild("PackageHandler");
 	PackagesFolder = script:WaitForChild("Packages");
 }

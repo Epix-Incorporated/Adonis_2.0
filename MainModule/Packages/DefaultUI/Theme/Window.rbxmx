@@ -3778,9 +3778,641 @@ local isInFrame
 local setSize
 local apiIfy
 
+local GUI
+local Name
+local Icon
+local Size
+local Menu
+local Walls
+local Title
+local Ready
+local Mouse
+local Player
+local noHide
+local gIndex
+local noClose
+local onReady
+local onClose
+local onResize
+local onRefresh
+local onMinimize
+local ContextMenu
+local ResetOnSpawn
+local InputService
+local CanKeepAlive
+local iconClicked
+local SizeLocked
+local CanvasSize
+local Position
+local Content
+local MinSize
+local MaxSize
+local curIcon
+local isClosed
+local Resizing
+local Refreshing
+local DragEnabled
+local LoadChildren
+local BringToFront
+local inExpandable
+local checkProperty
+local addTitleButton
+local specialInsts = {}
+
+local Tooltip
+local Drag
+local Main
+local Hide
+local Iconf
+local Close
+local Titlef
+local Refresh
+local rSpinner
+local ScrollFrame
+local LeftSizeIcon
+local RightSizeIcon
+local RightCorner
+local LeftCorner
+local RightSide
+local LeftSide
+local TopRight
+local TopLeft
+local Bottom
+local Top
+
 local function isGui(child)
 	return child:IsA("GuiObject");
 end
+
+local SpecialClasses = {
+	Entry = function(class, data, new)
+		local label = new.Text
+		local dots = new.Dots
+		local desc = new.Desc
+		local richText = data.RichText or label.RichText
+
+		label.ZIndex = data.ZIndex or new.ZIndex
+		dots.ZIndex = data.ZIndex or new.ZIndex
+
+		if data.Text then
+			label.Text = data.Text
+			label.Visible = true
+			data.Text = nil
+		end
+
+		if data.Desc or data.ToolTip then
+			desc.Value = data.Desc or data.ToolTip
+			data.Desc = nil
+		end
+
+		Expand(new, Tooltip, nil, richText)
+		--TODO
+	end;
+
+	ButtonEntry = function(class, data, new)
+		local button = new.Button
+		local debounce = false
+		local onClicked = functionify(data.OnClicked)
+
+		new:SetSpecial("DoClick",function()
+			if not debounce then
+				debounce = true
+				if onClicked then
+					RunFunction(onClicked, Root, gTable, button)
+				end
+				debounce = false
+			end
+		end)
+
+		new.Text = data.Text or new.Text
+		button.ZIndex = data.ZIndex or new.ZIndex
+		button.MouseButton1Down:Connect(new.DoClick)
+	end;
+
+	Boolean = function(class, data, new)
+		local enabled = data.Enabled
+		local debounce = false
+		local onToggle = functionify(data.OnToggle)
+		local function toggle(isEnabled)
+			if not debounce then
+				debounce = true
+				if (isEnabled ~= nil and isEnabled) or (isEnabled == nil and enabled) then
+					enabled = false
+					new.Text = "Disabled"
+				elseif (isEnabled ~= nil and isEnabled == false) or (isEnabled == nil and not enabled) then
+					enabled = true
+					new.Text = "Enabled"
+				end
+
+				if onToggle then
+					RunFunction(onToggle, Root, gTable, enabled, new)
+				end
+				debounce = false
+			end
+		end
+
+		--new.ZIndex = data.ZIndex
+		new.Text = (enabled and "Enabled") or "Disabled"
+		new.MouseButton1Down:Connect(function()
+			if onToggle then
+				toggle()
+			end
+		end)
+
+		new:SetSpecial("Toggle",function(ignore, isEnabled) toggle(isEnabled) end)
+	end;
+
+	StringEntry = function(class, data, new)
+		local box = new.Box
+		local ignore
+
+		new.Text = data.Text or new.Text
+		box.ZIndex = data.ZIndex or new.ZIndex
+
+		if data.BoxText then
+			box.Text = data.BoxText
+		end
+
+		if data.BoxProperties then
+			for i,v in next,data.BoxProperties do
+				if checkProperty(box, i) then
+					box[i] = v
+				end
+			end
+		end
+
+		if data.TextChanged then
+			local textChanged = functionify(data.TextChanged)
+			box.Changed:Connect(function(p)
+				if p == "Text" and not ignore then
+					RunFunction(textChanged, Root, gTable, box.Text)
+				end
+			end)
+
+			box.FocusLost:Connect(function(enter)
+				local change = RunFunction(textChanged, Root, gTable, box.Text, true, enter)
+				if change then
+					ignore = true
+					box.Text = change
+					ignore = false
+				end
+			end)
+		end
+
+		new:SetSpecial("SetValue",function(ignore, newValue) box.Text = newValue end)
+	end;
+
+ Slider = function(class, data, new)
+		local mouseIsIn = false
+		local posValue = new.Percentage
+		local slider = new.Slider
+		local bar = new.SliderBar
+		local drag = new.Drag
+		local moving = false
+		local value = 0
+		local onSlide = functionify(data.OnSlide)
+
+		bar.ZIndex = data.ZIndex or new.ZIndex
+		slider.ZIndex = bar.ZIndex+1
+		drag.ZIndex = slider.ZIndex+1
+		drag.Active = true
+
+		if data.Value then
+			slider.Position = UDim2.new(0.5, -10, 0.5, -10)
+			drag.Position = slider.Position
+		end
+
+		bar.InputBegan:Connect(function(input)
+			if not moving and input.UserInputType == Enum.UserInputType.MouseButton1 then
+				value = ((Mouse.X)-(new.AbsolutePosition.X))/(new.AbsoluteSize.X)
+
+				if value < 0 then
+					value = 0
+				elseif value > 1 then
+					value = 1
+				end
+
+				slider.Position = UDim2.new(value, -10, 0.5, -10)
+				drag.Position = slider.Position
+				posValue.Value = value
+
+				if onSlide then
+					onSlide(Root, gTable, value)
+				end
+			end
+		end)
+
+		drag.DragBegin:Connect(function()
+			moving = true
+		end)
+
+		drag.DragStopped:Connect(function()
+			moving = false
+			drag.Position = slider.Position
+		end)
+
+		drag.Changed:Connect(function()
+			if moving then
+				value = ((Mouse.X)-(new.AbsolutePosition.X))/(new.AbsoluteSize.X)
+
+				if value < 0 then
+					value = 0
+				elseif value > 1 then
+					value = 1
+				end
+
+				slider.Position = UDim2.new(value, -10, 0.5, -10)
+				posValue.Value = value
+
+				if onSlide then
+					onSlide(Root, gTable, value)
+				end
+			end
+		end)
+
+		new:SetSpecial("SetValue",function(ignore, newValue)
+			if newValue and tonumber(newValue) then
+				value = tonumber(newValue)
+				posValue.Value = value
+				slider.Position = UDim2.new(value, -10, 0.5, -10)
+				drag.Position = slider.Position
+			end
+		end)
+	end;
+
+	Dropdown = function(class, data, new)
+		local menu = new.Menu
+		local downImg = new.Down
+		local selected = new.dSelected
+		local options = data.Options
+		local curSelected = data.Selected or data.Selection
+		local onSelect = functionify(data.OnSelection or data.OnSelect or function()end)
+		local textProps = data.TextProperties
+		local scroller = create("ScrollingFrame", {
+			Parent = menu;
+			Size = UDim2.new(1, 0, 1, 0);
+			Position = UDim2.new(0, 0, 0, 0);
+			BackgroundTransparency = 1;
+			ZIndex = 100;
+		})
+
+		menu.ZIndex = scroller.ZIndex
+		menu.Parent = GUI
+		menu.Visible = false
+		menu.Size = UDim2.new(0, new.AbsoluteSize.X, 0, 100);
+		menu.BackgroundColor3 = data.BackgroundColor3 or new.BackgroundColor3
+
+		if data.TextAlignment then
+			selected.TextXAlignment = data.TextAlignment
+			selected.Position = UDim2.new(0, 30, 0, 0);
+		end
+
+		if data.NoArrow then
+			downImg.Visible = false
+		end
+
+		new:SetSpecial("MenuContainer", menu)
+
+		new.Changed:Connect(function(p)
+			if p == "AbsolutePosition" and menu.Visible then
+				menu.Position = UDim2.new(0, new.AbsolutePosition.X, 0, new.AbsolutePosition.Y+new.AbsoluteSize.Y)
+			elseif p == "AbsoluteSize" or p == "Parent" then
+				downImg.Size = UDim2.new(0, new.AbsoluteSize.Y, 1, 0);
+				if data.TextAlignment == "Right" then
+					downImg.Position = UDim2.new(0, 0, 0.5, -(downImg.AbsoluteSize.X/2))
+					selected.Position = UDim2.new(0, new.AbsoluteSize.Y, 0, 0);
+				else
+					downImg.Position = UDim2.new(1, -downImg.AbsoluteSize.X, 0.5, -(downImg.AbsoluteSize.X/2))
+				end
+
+				selected.Size = UDim2.new(1, -downImg.AbsoluteSize.X, 1, 0);
+
+				if options and #options <= 6 then
+					menu.Size = UDim2.new(0, new.AbsoluteSize.X, 0, 30*#options);
+				else
+					menu.Size = UDim2.new(0, new.AbsoluteSize.X, 0, 30*6);
+					scroller:ResizeCanvas(false, true);
+				end
+			end
+		end)
+
+		selected.ZIndex = new.ZIndex
+		downImg.ZIndex = new.ZIndex
+
+		if textProps then
+			for i,v in next,textProps do
+				selected[i] = v
+			end
+		end
+
+		if options then
+			for i,v in next,options do
+				local button = scroller:Add("TextButton", {
+					Text = "  ".. tostring(v);
+					Size = UDim2.new(1, -10, 0, 30);
+					Position = UDim2.new(0, 5, 0, 30*(i-1));
+					ZIndex = menu.ZIndex;
+					BackgroundTransparency = 1;
+					OnClick = function()
+						selected.Text = v;
+						RunFunction(onSelect, Root, gTable, v, new);
+						menu.Visible = false
+					end
+				})
+
+				if textProps then
+					for i,v in next,textProps do
+						button[i] = v
+					end
+				end
+			end
+
+			if curSelected then
+				selected.Text = curSelected
+			else
+				selected.Text = "No Selection"
+			end
+
+			local function showMenu()
+				menu.Position = UDim2.new(0, new.AbsolutePosition.X, 0, new.AbsolutePosition.Y+new.AbsoluteSize.Y)
+				menu.Visible = not menu.Visible
+			end
+
+			selected.MouseButton1Down:Connect(showMenu)
+			downImg.MouseButton1Down:Connect(showMenu)
+		end
+	end;
+
+	TabFrame = function(class, data, new)
+		local buttonsTab = {};
+		local buttons = create("ScrollingFrame", nil, new.Buttons)
+		local frames = new.Frames
+		local numTabs = 0
+		local buttonSize = data.ButtonSize or 60
+
+		new.BackgroundTransparency = data.BackgroundTransparency or 1
+		buttons.ZIndex = data.ZIndex or new.ZIndex
+		frames.ZIndex = buttons.ZIndex
+
+		new:SetSpecial("GetTab", function(ignore, name)
+			return frames:FindFirstChild(name)
+		end)
+
+		new:SetSpecial("NewTab", function(ignore, name, data)
+			local data = data or {}
+			--local numChildren = #frames:GetChildren()
+			local nextPos = getNextPos(buttons);
+			local textSize = Utilities.Services.TextService:GetTextSize(data.Text or name, dTextSize, dFont, buttons.AbsoluteSize)
+			local oTextTrans = data.TextTransparency
+			local isOpen = false
+			local disabled = false
+			local tabFrame = create("ScrollingFrame",{
+				Name = name;
+				Size = UDim2.new(1, 0, 1, 0);
+				Position = UDim2.new(0, 0, 0, 0);
+				BorderSizePixel = 0;
+				BackgroundTransparency = data.FrameTransparency or data.Transparency;
+				BackgroundColor3 = data.Color or dSecondaryBackground;
+				ZIndex = buttons.ZIndex;
+				Visible = false;
+			})
+
+			local tabButton = create("TextButton",{
+				Name = name;
+				Text = data.Text or name;
+				Size = UDim2.new(0, textSize.X+20, 1, 0);
+				ZIndex = buttons.ZIndex;
+				Position = UDim2.new(0, (nextPos.X.Offset > 0 and nextPos.X.Offset+5) or 0, 0, 0);
+				TextColor3 = data.TextColor;
+				BackgroundTransparency = 0.7;
+				TextTransparency = data.TextTransparency;
+				BackgroundColor3 = data.Color or dSecondaryBackground;
+				BorderSizePixel = 0;
+			})
+
+			tabFrame:SetSpecial("FocusTab",function()
+				for i,v in next,buttonsTab do
+					if isGui(v) then
+						v.BackgroundTransparency = (v:IsDisabled() and 0.9) or 0.7
+						v.TextTransparency = (v:IsDisabled() and 0.9) or 0.7
+					end
+				end
+
+				for i,v in next,frames:GetChildren() do
+					if isGui(v) then
+						v.Visible = false
+					end
+				end
+
+				tabButton.BackgroundTransparency = data.Transparency or 0
+				tabButton.TextTransparency = data.TextTransparency or 0
+				tabFrame.Visible = true
+
+				if data.OnFocus then
+					data.OnFocus(true)
+				end
+			end)
+
+			if numTabs == 0 then
+				tabFrame.Visible = true
+				tabButton.BackgroundTransparency = data.Transparency or 0
+			end
+
+			tabButton.MouseButton1Down:Connect(function()
+				if not disabled then
+					tabFrame:FocusTab()
+				end
+			end)
+
+			tabButton.Parent = buttons
+			tabFrame.Parent = frames
+			buttons:ResizeCanvas(true, false)
+
+			tabFrame:SetSpecial("Disable", function()
+				disabled = true;
+				tabButton.BackgroundTransparency = 0.9;
+				tabButton.TextTransparency = 0.9
+			end)
+
+			tabFrame:SetSpecial("Enable", function()
+				disabled = false;
+				tabButton.BackgroundTransparency = 0.7;
+				tabButton.TextTransparency = data.TextTransparency or 0;
+			end)
+
+			tabButton:SetSpecial("IsDisabled", function()
+				return disabled;
+			end)
+
+			table.insert(buttonsTab, tabButton);
+
+			numTabs = numTabs+1;
+
+			return tabFrame,tabButton
+		end)
+	end;
+
+	ScrollingFrame = function(data, class, new)
+		local genning = false
+		if not data.ScrollBarThickness then
+			data.ScrollBarThickness = dScrollBar
+		end
+
+		new:SetSpecial("GenerateList", function(obj, list, labelProperties, bottom)
+			local list = list or obj;
+			local genHold = {}
+			local entProps = labelProperties or {}
+
+			genning = genHold
+			new:ClearAllChildren()
+
+			new.AutomaticCanvasSize = "Y"
+
+			local layout = Utilities:CreateInstance("UIListLayout", {
+				Parent = new;
+				Name = "LayoutOrder";
+				FillDirection = data.Layout_FillDirection or "Vertical";
+				VerticalAlignment = data.Layout_VerticalAlignment or "Top";
+				HorizontalAlignment = data.Layout_HorizontalAlignment or "Left";
+			})
+
+			local num = 0
+			for i,v in next,list do
+				local text = v;
+				local desc;
+				local color
+				local richText;
+
+				if type(v) == "table" then
+					text = v.Text
+					desc = v.Desc
+					color = v.Color
+
+					if v.RichTextAllowed or entProps.RichTextAllowed then
+						richText = true
+					end
+				end
+
+				local label
+				if v.TextSelectable or entProps.TextSelectable then
+					label = create("TextBox",{
+						Text = " "..tostring(text);
+						ToolTip = desc;
+						Size = UDim2.new(1,-5,0,(entProps.ySize or 20));
+						Visible = true;
+						BackgroundTransparency = 1;
+						Font = "Arial";
+						TextSize = 14;
+						TextStrokeTransparency = 0.8;
+						TextXAlignment = "Left";
+						Position = UDim2.new(0,0,0,num*(entProps.ySize or 20));
+						RichText = richText or false;
+						TextEditable = false;
+						ClearTextOnFocus = false;
+					})
+				else
+					label = create("TextLabel",{
+						Text = " "..tostring(text);
+						ToolTip = desc;
+						Size = UDim2.new(1,-5,0,(entProps.ySize or 20));
+						Visible = true;
+						BackgroundTransparency = 1;
+						Font = "Arial";
+						TextSize = 14;
+						TextStrokeTransparency = 0.8;
+						TextXAlignment = "Left";
+						Position = UDim2.new(0,0,0,num*(entProps.ySize or 20));
+						RichText = richText or false;
+					})
+				end
+
+				if color then
+					label.TextColor3 = color
+				end
+
+				if labelProperties then
+					for i,v in pairs(entProps) do
+						if checkProperty(label, i) then
+							label[i] = v
+						end
+					end
+				end
+
+				if genning == genHold then
+					label.Parent = new;
+				else
+					label:Destroy()
+					break
+				end
+
+				num = num+1
+
+				if data.Delay then
+					if type(data.Delay) == "number" then
+						wait(data.Delay)
+					elseif i%100 == 0 then
+						wait(0.1)
+					end
+				end
+			end
+
+			--new:ResizeCanvas(false, true, false, bottom, 5, 5, 50)
+			if bottom then
+				new.CanvasPosition = Vector2.new(0, layout.AbsoluteContentSize.Y);
+			end
+
+			genning = nil
+		end)
+
+		new:SetSpecial("ResizeCanvas", function(ignore, onX, onY, xMax, yMax, xPadding, yPadding, modBreak)
+			local xPadding,yPadding = data.xPadding or 5, data.yPadding or 5
+			local newY, newX = 0,0
+
+			if not onX and not onY then onX = false onY = true end
+			for i,v in next,new:GetChildren() do
+				if v:IsA("GuiObject") then
+					if onY then
+						v.Size = UDim2.new(v.Size.X.Scale, v.Size.X.Offset, 0, v.AbsoluteSize.Y)
+						v.Position = UDim2.new(v.Position.X.Scale, v.Position.X.Offset, 0, v.AbsolutePosition.Y-new.AbsolutePosition.Y)
+					end
+
+					if onX then
+						v.Size = UDim2.new(0, v.AbsoluteSize.X, v.Size.Y.Scale, v.Size.Y.Offset)
+						v.Position = UDim2.new(0, v.AbsolutePosition.X-new.AbsolutePosition.X, v.Position.Y.Scale, v.Position.Y.Offset)
+					end
+
+					local yLower = v.Position.Y.Offset + v.Size.Y.Offset
+					local xLower = v.Position.X.Offset + v.Size.X.Offset
+					newY = math.max(newY, yLower)
+					newX = math.max(newX, xLower)
+					if modBreak then
+						if i%modBreak == 0 then
+							wait(1/60)
+						end
+					end
+				end
+			end
+
+			if onY then
+				new.CanvasSize = UDim2.new(new.CanvasSize.X.Scale, new.CanvasSize.X.Offset, 0, newY+yPadding)
+			end
+
+			if onX then
+				new.CanvasSize = UDim2.new(0, newX + xPadding, new.CanvasSize.Y.Scale, new.CanvasSize.Y.Offset)
+			end
+
+			if xMax then
+				new.CanvasPosition = Vector2.new((newX + xPadding)-new.AbsoluteSize.X, new.CanvasPosition.Y)
+			end
+
+			if yMax then
+				new.CanvasPosition = Vector2.new(new.CanvasPosition.X, (newY+yPadding)-new.AbsoluteSize.Y)
+			end
+		end)
+
+		if data.List then new:GenerateList(data.List) data.List = nil end
+	end;
+}
 
 return {
 	Name = "Window",
@@ -4107,575 +4739,14 @@ return {
 				end
 			end
 
-			if class == "Entry" then
-				local label = new.Text
-				local dots = new.Dots
-				local desc = new.Desc
-				local richText = data.RichText or label.RichText
-
-				label.ZIndex = data.ZIndex or new.ZIndex
-				dots.ZIndex = data.ZIndex or new.ZIndex
-
-				if data.Text then
-					label.Text = data.Text
-					label.Visible = true
-					data.Text = nil
-				end
-
-				if data.Desc or data.ToolTip then
-					desc.Value = data.Desc or data.ToolTip
-					data.Desc = nil
-				end
-
-				Expand(new, Tooltip, nil, richText)
-			else
-				if data.ToolTip then
-					Expand(new, Tooltip, data.ToolTip, data.RichText)
-				end
+			--TODO
+			if data.ToolTip and class ~= "Entry" then
+				Expand(new, Tooltip, data.ToolTip, data.RichText)
 			end
 
-			if class == "ButtonEntry" then
-				local button = new.Button
-				local debounce = false
-				local onClicked = functionify(data.OnClicked)
-
-				new:SetSpecial("DoClick",function()
-					if not debounce then
-						debounce = true
-						if onClicked then
-							RunFunction(onClicked, Root, gTable, button)
-						end
-						debounce = false
-					end
-				end)
-
-				new.Text = data.Text or new.Text
-				button.ZIndex = data.ZIndex or new.ZIndex
-				button.MouseButton1Down:Connect(new.DoClick)
-			end
-
-			if class == "Boolean" then
-				local enabled = data.Enabled
-				local debounce = false
-				local onToggle = functionify(data.OnToggle)
-				local function toggle(isEnabled)
-					if not debounce then
-						debounce = true
-						if (isEnabled ~= nil and isEnabled) or (isEnabled == nil and enabled) then
-							enabled = false
-							new.Text = "Disabled"
-						elseif (isEnabled ~= nil and isEnabled == false) or (isEnabled == nil and not enabled) then
-							enabled = true
-							new.Text = "Enabled"
-						end
-
-						if onToggle then
-							RunFunction(onToggle, Root, gTable, enabled, new)
-						end
-						debounce = false
-					end
-				end
-
-				--new.ZIndex = data.ZIndex
-				new.Text = (enabled and "Enabled") or "Disabled"
-				new.MouseButton1Down:Connect(function()
-					if onToggle then
-						toggle()
-					end
-				end)
-
-				new:SetSpecial("Toggle",function(ignore, isEnabled) toggle(isEnabled) end)
-			end
-
-			if class == "StringEntry" then
-				local box = new.Box
-				local ignore
-
-				new.Text = data.Text or new.Text
-				box.ZIndex = data.ZIndex or new.ZIndex
-
-				if data.BoxText then
-					box.Text = data.BoxText
-				end
-
-				if data.BoxProperties then
-					for i,v in next,data.BoxProperties do
-						if checkProperty(box, i) then
-							box[i] = v
-						end
-					end
-				end
-
-				if data.TextChanged then
-					local textChanged = functionify(data.TextChanged)
-					box.Changed:Connect(function(p)
-						if p == "Text" and not ignore then
-							RunFunction(textChanged, Root, gTable, box.Text)
-						end
-					end)
-
-					box.FocusLost:Connect(function(enter)
-						local change = RunFunction(textChanged, Root, gTable, box.Text, true, enter)
-						if change then
-							ignore = true
-							box.Text = change
-							ignore = false
-						end
-					end)
-				end
-
-				new:SetSpecial("SetValue",function(ignore, newValue) box.Text = newValue end)
-			end
-
-			if class == "Slider" then
-				local mouseIsIn = false
-				local posValue = new.Percentage
-				local slider = new.Slider
-				local bar = new.SliderBar
-				local drag = new.Drag
-				local moving = false
-				local value = 0
-				local onSlide = functionify(data.OnSlide)
-
-				bar.ZIndex = data.ZIndex or new.ZIndex
-				slider.ZIndex = bar.ZIndex+1
-				drag.ZIndex = slider.ZIndex+1
-				drag.Active = true
-
-				if data.Value then
-					slider.Position = UDim2.new(0.5, -10, 0.5, -10)
-					drag.Position = slider.Position
-				end
-
-				bar.InputBegan:Connect(function(input)
-					if not moving and input.UserInputType == Enum.UserInputType.MouseButton1 then
-						value = ((Mouse.X)-(new.AbsolutePosition.X))/(new.AbsoluteSize.X)
-
-						if value < 0 then
-							value = 0
-						elseif value > 1 then
-							value = 1
-						end
-
-						slider.Position = UDim2.new(value, -10, 0.5, -10)
-						drag.Position = slider.Position
-						posValue.Value = value
-
-						if onSlide then
-							onSlide(Root, gTable, value)
-						end
-					end
-				end)
-
-				drag.DragBegin:Connect(function()
-					moving = true
-				end)
-
-				drag.DragStopped:Connect(function()
-					moving = false
-					drag.Position = slider.Position
-				end)
-
-				drag.Changed:Connect(function()
-					if moving then
-						value = ((Mouse.X)-(new.AbsolutePosition.X))/(new.AbsoluteSize.X)
-
-						if value < 0 then
-							value = 0
-						elseif value > 1 then
-							value = 1
-						end
-
-						slider.Position = UDim2.new(value, -10, 0.5, -10)
-						posValue.Value = value
-
-						if onSlide then
-							onSlide(Root, gTable, value)
-						end
-					end
-				end)
-
-				new:SetSpecial("SetValue",function(ignore, newValue)
-					if newValue and tonumber(newValue) then
-						value = tonumber(newValue)
-						posValue.Value = value
-						slider.Position = UDim2.new(value, -10, 0.5, -10)
-						drag.Position = slider.Position
-					end
-				end)
-			end
-
-			if class == "Dropdown" then
-				local menu = new.Menu
-				local downImg = new.Down
-				local selected = new.dSelected
-				local options = data.Options
-				local curSelected = data.Selected or data.Selection
-				local onSelect = functionify(data.OnSelection or data.OnSelect or function()end)
-				local textProps = data.TextProperties
-				local scroller = create("ScrollingFrame", {
-					Parent = menu;
-					Size = UDim2.new(1, 0, 1, 0);
-					Position = UDim2.new(0, 0, 0, 0);
-					BackgroundTransparency = 1;
-					ZIndex = 100;
-				})
-
-				menu.ZIndex = scroller.ZIndex
-				menu.Parent = GUI
-				menu.Visible = false
-				menu.Size = UDim2.new(0, new.AbsoluteSize.X, 0, 100);
-				menu.BackgroundColor3 = data.BackgroundColor3 or new.BackgroundColor3
-
-				if data.TextAlignment then
-					selected.TextXAlignment = data.TextAlignment
-					selected.Position = UDim2.new(0, 30, 0, 0);
-				end
-
-				if data.NoArrow then
-					downImg.Visible = false
-				end
-
-				new:SetSpecial("MenuContainer", menu)
-
-				new.Changed:Connect(function(p)
-					if p == "AbsolutePosition" and menu.Visible then
-						menu.Position = UDim2.new(0, new.AbsolutePosition.X, 0, new.AbsolutePosition.Y+new.AbsoluteSize.Y)
-					elseif p == "AbsoluteSize" or p == "Parent" then
-						downImg.Size = UDim2.new(0, new.AbsoluteSize.Y, 1, 0);
-						if data.TextAlignment == "Right" then
-							downImg.Position = UDim2.new(0, 0, 0.5, -(downImg.AbsoluteSize.X/2))
-							selected.Position = UDim2.new(0, new.AbsoluteSize.Y, 0, 0);
-						else
-							downImg.Position = UDim2.new(1, -downImg.AbsoluteSize.X, 0.5, -(downImg.AbsoluteSize.X/2))
-						end
-
-						selected.Size = UDim2.new(1, -downImg.AbsoluteSize.X, 1, 0);
-
-						if options and #options <= 6 then
-							menu.Size = UDim2.new(0, new.AbsoluteSize.X, 0, 30*#options);
-						else
-							menu.Size = UDim2.new(0, new.AbsoluteSize.X, 0, 30*6);
-							scroller:ResizeCanvas(false, true);
-						end
-					end
-				end)
-
-				selected.ZIndex = new.ZIndex
-				downImg.ZIndex = new.ZIndex
-
-				if textProps then
-					for i,v in next,textProps do
-						selected[i] = v
-					end
-				end
-
-				if options then
-					for i,v in next,options do
-						local button = scroller:Add("TextButton", {
-							Text = "  ".. tostring(v);
-							Size = UDim2.new(1, -10, 0, 30);
-							Position = UDim2.new(0, 5, 0, 30*(i-1));
-							ZIndex = menu.ZIndex;
-							BackgroundTransparency = 1;
-							OnClick = function()
-								selected.Text = v;
-								RunFunction(onSelect, Root, gTable, v, new);
-								menu.Visible = false
-							end
-						})
-
-						if textProps then
-							for i,v in next,textProps do
-								button[i] = v
-							end
-						end
-					end
-
-					if curSelected then
-						selected.Text = curSelected
-					else
-						selected.Text = "No Selection"
-					end
-
-					local function showMenu()
-						menu.Position = UDim2.new(0, new.AbsolutePosition.X, 0, new.AbsolutePosition.Y+new.AbsoluteSize.Y)
-						menu.Visible = not menu.Visible
-					end
-
-					selected.MouseButton1Down:Connect(showMenu)
-					downImg.MouseButton1Down:Connect(showMenu)
-				end
-			end
-
-			if class == "TabFrame" then
-				local buttonsTab = {};
-				local buttons = create("ScrollingFrame", nil, new.Buttons)
-				local frames = new.Frames
-				local numTabs = 0
-				local buttonSize = data.ButtonSize or 60
-
-				new.BackgroundTransparency = data.BackgroundTransparency or 1
-				buttons.ZIndex = data.ZIndex or new.ZIndex
-				frames.ZIndex = buttons.ZIndex
-
-				new:SetSpecial("GetTab", function(ignore, name)
-					return frames:FindFirstChild(name)
-				end)
-
-				new:SetSpecial("NewTab", function(ignore, name, data)
-					local data = data or {}
-					--local numChildren = #frames:GetChildren()
-					local nextPos = getNextPos(buttons);
-					local textSize = Utilities.Services.TextService:GetTextSize(data.Text or name, dTextSize, dFont, buttons.AbsoluteSize)
-					local oTextTrans = data.TextTransparency
-					local isOpen = false
-					local disabled = false
-					local tabFrame = create("ScrollingFrame",{
-						Name = name;
-						Size = UDim2.new(1, 0, 1, 0);
-						Position = UDim2.new(0, 0, 0, 0);
-						BorderSizePixel = 0;
-						BackgroundTransparency = data.FrameTransparency or data.Transparency;
-						BackgroundColor3 = data.Color or dSecondaryBackground;
-						ZIndex = buttons.ZIndex;
-						Visible = false;
-					})
-
-					local tabButton = create("TextButton",{
-						Name = name;
-						Text = data.Text or name;
-						Size = UDim2.new(0, textSize.X+20, 1, 0);
-						ZIndex = buttons.ZIndex;
-						Position = UDim2.new(0, (nextPos.X.Offset > 0 and nextPos.X.Offset+5) or 0, 0, 0);
-						TextColor3 = data.TextColor;
-						BackgroundTransparency = 0.7;
-						TextTransparency = data.TextTransparency;
-						BackgroundColor3 = data.Color or dSecondaryBackground;
-						BorderSizePixel = 0;
-					})
-
-					tabFrame:SetSpecial("FocusTab",function()
-						for i,v in next,buttonsTab do
-							if isGui(v) then
-								v.BackgroundTransparency = (v:IsDisabled() and 0.9) or 0.7
-								v.TextTransparency = (v:IsDisabled() and 0.9) or 0.7
-							end
-						end
-
-						for i,v in next,frames:GetChildren() do
-							if isGui(v) then
-								v.Visible = false
-							end
-						end
-
-						tabButton.BackgroundTransparency = data.Transparency or 0
-						tabButton.TextTransparency = data.TextTransparency or 0
-						tabFrame.Visible = true
-
-						if data.OnFocus then
-							data.OnFocus(true)
-						end
-					end)
-
-					if numTabs == 0 then
-						tabFrame.Visible = true
-						tabButton.BackgroundTransparency = data.Transparency or 0
-					end
-
-					tabButton.MouseButton1Down:Connect(function()
-						if not disabled then
-							tabFrame:FocusTab()
-						end
-					end)
-
-					tabButton.Parent = buttons
-					tabFrame.Parent = frames
-					buttons:ResizeCanvas(true, false)
-
-					tabFrame:SetSpecial("Disable", function()
-						disabled = true;
-						tabButton.BackgroundTransparency = 0.9;
-						tabButton.TextTransparency = 0.9
-					end)
-
-					tabFrame:SetSpecial("Enable", function()
-						disabled = false;
-						tabButton.BackgroundTransparency = 0.7;
-						tabButton.TextTransparency = data.TextTransparency or 0;
-					end)
-
-					tabButton:SetSpecial("IsDisabled", function()
-						return disabled;
-					end)
-
-					table.insert(buttonsTab, tabButton);
-
-					numTabs = numTabs+1;
-
-					return tabFrame,tabButton
-				end)
-			end
-
-			if class == "ScrollingFrame" then
-				local genning = false
-				if not data.ScrollBarThickness then
-					data.ScrollBarThickness = dScrollBar
-				end
-
-				new:SetSpecial("GenerateList", function(obj, list, labelProperties, bottom)
-					local list = list or obj;
-					local genHold = {}
-					local entProps = labelProperties or {}
-
-					genning = genHold
-					new:ClearAllChildren()
-
-					new.AutomaticCanvasSize = "Y"
-
-					local layout = Utilities:CreateInstance("UIListLayout", {
-						Parent = new;
-						Name = "LayoutOrder";
-						FillDirection = data.Layout_FillDirection or "Vertical";
-						VerticalAlignment = data.Layout_VerticalAlignment or "Top";
-						HorizontalAlignment = data.Layout_HorizontalAlignment or "Left";
-					})
-
-					local num = 0
-					for i,v in next,list do
-						local text = v;
-						local desc;
-						local color
-						local richText;
-
-						if type(v) == "table" then
-							text = v.Text
-							desc = v.Desc
-							color = v.Color
-
-							if v.RichTextAllowed or entProps.RichTextAllowed then
-								richText = true
-							end
-						end
-
-						local label
-						if v.TextSelectable or entProps.TextSelectable then
-							label = create("TextBox",{
-								Text = " "..tostring(text);
-								ToolTip = desc;
-								Size = UDim2.new(1,-5,0,(entProps.ySize or 20));
-								Visible = true;
-								BackgroundTransparency = 1;
-								Font = "Arial";
-								TextSize = 14;
-								TextStrokeTransparency = 0.8;
-								TextXAlignment = "Left";
-								Position = UDim2.new(0,0,0,num*(entProps.ySize or 20));
-								RichText = richText or false;
-								TextEditable = false;
-								ClearTextOnFocus = false;
-							})
-						else
-							label = create("TextLabel",{
-								Text = " "..tostring(text);
-								ToolTip = desc;
-								Size = UDim2.new(1,-5,0,(entProps.ySize or 20));
-								Visible = true;
-								BackgroundTransparency = 1;
-								Font = "Arial";
-								TextSize = 14;
-								TextStrokeTransparency = 0.8;
-								TextXAlignment = "Left";
-								Position = UDim2.new(0,0,0,num*(entProps.ySize or 20));
-								RichText = richText or false;
-							})
-						end
-
-						if color then
-							label.TextColor3 = color
-						end
-
-						if labelProperties then
-							for i,v in pairs(entProps) do
-								if checkProperty(label, i) then
-									label[i] = v
-								end
-							end
-						end
-
-						if genning == genHold then
-							label.Parent = new;
-						else
-							label:Destroy()
-							break
-						end
-
-						num = num+1
-
-						if data.Delay then
-							if type(data.Delay) == "number" then
-								wait(data.Delay)
-							elseif i%100 == 0 then
-								wait(0.1)
-							end
-						end
-					end
-
-					--new:ResizeCanvas(false, true, false, bottom, 5, 5, 50)
-					if bottom then
-						new.CanvasPosition = Vector2.new(0, layout.AbsoluteContentSize.Y);
-					end
-
-					genning = nil
-				end)
-
-				new:SetSpecial("ResizeCanvas", function(ignore, onX, onY, xMax, yMax, xPadding, yPadding, modBreak)
-					local xPadding,yPadding = data.xPadding or 5, data.yPadding or 5
-					local newY, newX = 0,0
-
-					if not onX and not onY then onX = false onY = true end
-					for i,v in next,new:GetChildren() do
-						if v:IsA("GuiObject") then
-							if onY then
-								v.Size = UDim2.new(v.Size.X.Scale, v.Size.X.Offset, 0, v.AbsoluteSize.Y)
-								v.Position = UDim2.new(v.Position.X.Scale, v.Position.X.Offset, 0, v.AbsolutePosition.Y-new.AbsolutePosition.Y)
-							end
-
-							if onX then
-								v.Size = UDim2.new(0, v.AbsoluteSize.X, v.Size.Y.Scale, v.Size.Y.Offset)
-								v.Position = UDim2.new(0, v.AbsolutePosition.X-new.AbsolutePosition.X, v.Position.Y.Scale, v.Position.Y.Offset)
-							end
-
-							local yLower = v.Position.Y.Offset + v.Size.Y.Offset
-							local xLower = v.Position.X.Offset + v.Size.X.Offset
-							newY = math.max(newY, yLower)
-							newX = math.max(newX, xLower)
-							if modBreak then
-								if i%modBreak == 0 then
-									wait(1/60)
-								end
-							end
-						end
-					end
-
-					if onY then
-						new.CanvasSize = UDim2.new(new.CanvasSize.X.Scale, new.CanvasSize.X.Offset, 0, newY+yPadding)
-					end
-
-					if onX then
-						new.CanvasSize = UDim2.new(0, newX + xPadding, new.CanvasSize.Y.Scale, new.CanvasSize.Y.Offset)
-					end
-
-					if xMax then
-						new.CanvasPosition = Vector2.new((newX + xPadding)-new.AbsoluteSize.X, new.CanvasPosition.Y)
-					end
-
-					if yMax then
-						new.CanvasPosition = Vector2.new(new.CanvasPosition.X, (newY+yPadding)-new.AbsoluteSize.Y)
-					end
-				end)
-
-				if data.List then new:GenerateList(data.List) data.List = nil end
+			local special = SpecialClasses[class]
+			if special then
+				special(class, data, new)
 			end
 
 			LoadChildren(new, data.Content or data.Children)

@@ -151,8 +151,9 @@ local Data = {
 	end,
 
 	SetupDatastore = function(self)
-		local systemStore = Service.DataStoreService:GetDataStore(Root.Settings.DataStoreName .."_System")
-		local playerStore = Service.DataStoreService:GetDataStore(Root.Settings.DataStoreName .."_PlayerData")
+		local dataStoreService = if Utilities:IsStudio() then Root.Libraries.MockDataStoreService else Service.DataStoreService
+		local systemStore = dataStoreService:GetDataStore(Root.Settings.DataStoreName .."_System")
+		local playerStore = dataStoreService:GetDataStore(Root.Settings.DataStoreName .."_PlayerData")
 
 		self.SystemDataStore = systemStore
 		self.PlayerDataStore = playerStore

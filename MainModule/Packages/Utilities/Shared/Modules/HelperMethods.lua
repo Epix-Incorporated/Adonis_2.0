@@ -215,6 +215,11 @@ local HelperMethods = {
 		return self.Services.RunService:IsClient()
 	end,
 
+	--// Returns true if this is running in studio
+	IsStudio = function(self): boolean
+		return self.Services.RunService:IsStudio()
+	end,
+
 	--// Returns os.time()
 	GetTime = function(self): number
 		return os.time()

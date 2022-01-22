@@ -1,14 +1,14 @@
 --// Package Metadata
 return {
-	Name = "Data";
+	Name = "System.Data";
 	Version = 1.0;
 	Description = [[ Responsible for data handling/saving functionality. ]];
 	Author = "Sceleratis";
 	Package = script.Parent;
 
 	Dependencies = {
-		"Core",
-		"Utilities",
+		"System.Core",
+		"System.Utilities",
 	};
 
 	Settings = {

@@ -1,8 +1,8 @@
 --[[
 
-	Description: Client UI Initializer
+	Description: Library Indexer
 	Author: Sceleratis
-	Date: 12/23/2021
+	Date: 1/22/2022
 
 --]]
 
@@ -13,8 +13,8 @@ local Package = {
 	Package = PackageFolder;
 	Metadata = require(PackageFolder.Metadata);
 
-	Client = PackageFolder.Client;
-	Modules = PackageFolder.Client.Modules;
+	Server = PackageFolder.Server;
+	Libraries = PackageFolder.Server.Libraries;
 }
 
 
@@ -72,24 +72,20 @@ return {
 		RootTable = Root
 		Verbose = if Root.Verbose ~= nil then Root.Verbose else Verbose
 
-		--// Declare settings
-		if Package.Metadata.Settings then
-			for setting,data in pairs(Package.Metadata.Settings) do
-				Root.Core:DeclareSetting(setting, data)
-			end
+		if not Root.Libraries then
+			debug("INIT Root.Libraries")
+			Root.Libraries = {}
+			Root.LibraryObjects = {}
 		end
 
-		--// Load modules
-		for i,module in ipairs(Package.Modules:GetChildren()) do
-			if module:IsA("ModuleScript") then
-				LoadModule(module, Root, Package)
-			end
-		end
-
-		--// Run init methods
-		for i,t in ipairs(InitFunctions) do
-			if t.Init then
-				RunFunction(t.Init, Root, Package)
+		--// Add libraries
+		for i,lib in ipairs(Package.Libraries:GetChildren()) do
+			debug("INDEX LIBRARY", lib.Name)
+			Root.LibraryObjects[lib.Name] = lib
+			if lib:IsA("ModuleScript") then
+				Root.Libraries[lib.Name] = require(lib)
+			else
+				Root.Libraries[lib.Name] = lib
 			end
 		end
 
@@ -98,13 +94,6 @@ return {
 
 	AfterInit = function(Root, Packages)
 		debug("AFTERINIT " .. Package.Metadata.Name .. " PACKAGE")
-
-		--// Run AfterInit methods
-		for i,t in ipairs(InitFunctions) do
-			if t.AfterInit then
-				RunFunction(t.AfterInit, Root, Package)
-			end
-		end
 
 		debug("AFTERINIT " .. Package.Metadata.Name .. " PACKAGE FINISHED")
 	end;

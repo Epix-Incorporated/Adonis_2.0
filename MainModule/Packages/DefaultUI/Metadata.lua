@@ -7,8 +7,8 @@ return {
 	Package = script.Parent;
 	ThemeName = "Default";
 	Dependencies = {
-		"Core",
-		"Utilities",
-		"UI"
+		"System.Core",
+		"System.Utilities",
+		"System.UI"
 	};
 }

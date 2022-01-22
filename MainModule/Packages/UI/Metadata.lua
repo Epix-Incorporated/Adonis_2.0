@@ -1,14 +1,15 @@
 --// Package Metadata
 return {
-	Name = "UI";
+	Name = "System.UI";
 	Version = 1.0;
 	Description = [[ Responsible for UI functionality. ]];
 	Author = "Sceleratis";
 	Package = script.Parent;
 
 	Dependencies = {
-		"Core",
-		"Utilities",
+		"System.Core",
+		"System.Utilities",
+		"System.Libraries"
 	};
 
 	Settings = {

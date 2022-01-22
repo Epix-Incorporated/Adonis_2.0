@@ -41,6 +41,7 @@ local Root = {
 	Globals = {};
 	Packages = {};
 	Libraries = {};
+	LibraryObjects = {};
 	PackageHandlerModule = script.PackageHandler;
 }
 
