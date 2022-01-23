@@ -1,8 +1,8 @@
 --// Package Metadata
 return {
-	Name = "DefaultCommands";
+	Name = "Commands.Basic";
 	Version = 1.0;
-	Description = [[ Responsible for the declaration of default commands. ]];
+	Description = [[ Basic commands package. ]];
 	Author = "Sceleratis";
 	Package = script.Parent;
 	Dependencies = {

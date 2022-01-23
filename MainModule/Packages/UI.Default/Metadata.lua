@@ -1,6 +1,6 @@
 --// Package Metadata
 return {
-	Name = "Default UI";
+	Name = "UI.Default";
 	Version = 1.0;
 	Description = [[ Provides default UI theme. ]];
 	Author = "Sceleratis";
