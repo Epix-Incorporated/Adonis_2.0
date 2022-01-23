@@ -51,6 +51,8 @@ local Settings = {
 	DataStoreKey = "CHANGE_ME",		--// Key used as part of datastore encryption.
 	SavingEnabled = true,			--// Whether or not data saving is enabled.
 
+	DisabledPackages = {};			--// Allows you to selectively disable packages (use with caution)
+
 	--// UI
 	Theme = "Default", --// Interface theme.
 
