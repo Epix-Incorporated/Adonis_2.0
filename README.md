@@ -21,6 +21,8 @@ Adonis is a server moderation and management system created for use on the Roblo
 # NOTICE
 THIS VERSION OF ADONIS IS CURRENTLY A WORK IN PROGRESS AND IS MISSING MANY FEATURES! For the current version head to: https://github.com/Sceleratis/Adonis
 
+THIS README IS CURRENTLY BASED ON 1.0!
+
 ## Installation
 
 📢 **New to Adonis? Take a look at our official quick start video [here](https://youtu.be/1f9x9gdxLjw).**
