@@ -3762,6 +3762,11 @@ local MouseIcons = {
 
 --/////////////////////////////////////////////////////////--
 
+local Root = {}
+local gTable = {}
+local Service = {}
+local Utilities = {}
+
 local curSize
 local create
 local Expand
@@ -3839,6 +3844,23 @@ local TopRight
 local TopLeft
 local Bottom
 local Top
+
+local RunFunction
+local functionify
+local Expand
+local getNextPos
+local LoadChildren
+local BringToFront
+local addTitleButton
+local create
+local apiIfy
+local doClose
+local isVisible
+local doHide
+local isInFrame
+local wallPosition
+local setSize
+local setPosition
 
 local function isGui(child)
 	return child:IsA("GuiObject");
@@ -4419,14 +4441,14 @@ return {
 	OnLoad = function(Root, gTable, data)
 		Root.DebugWarn("LOADING WINDOW!", Root, gTable, data)
 
-		local Utilities = Root.Utilities
-		local Service = Utilities.Services
+		Utilities = Root.Utilities
+		Service = Utilities.Services
 
-		local RunFunction = function(...)
+		RunFunction = function(...)
 			return Utilities:RunFunction(...)
 		end
 
-		local functionify = function(byteCode)
+		functionify = function(byteCode)
 			if type(byteCode) == "string" then
 				return Root.Bytecode:LoadBytecode(byteCode)
 			else
@@ -4434,68 +4456,64 @@ return {
 			end
 		end
 
-		local Player = Service.Players.LocalPlayer
-		local Mouse = Player:GetMouse()
-		local InputService = Service.UserInputService
-		local gIndex = gTable.Index
+		Player = Service.Players.LocalPlayer
+		Mouse = Player:GetMouse()
+		InputService = Service.UserInputService
+		gIndex = gTable.Index
 
-		local GUI = gTable.Object
-		local Name = data.Name
-		local Icon = data.Icon
-		local Size = data.Size
-		local Menu = data.Menu
-		local Title = data.Title
-		local Ready = data.Ready
-		local Walls = data.Walls
-		local noHide = data.NoHide
-		local noClose = data.NoClose
-		local onReady = functionify(data.OnReady)
-		local onClose = functionify(data.OnClose)
-		local onResize = functionify(data.OnResize)
-		local onRefresh = functionify(data.OnRefresh)
-		local onMinimize = functionify(data.OnMinimize)
-		local ContextMenu = data.ContextMenu
-		local ResetOnSpawn = data.ResetOnSpawn
-		local CanKeepAlive = data.CanKeepAlive
-		local iconClicked = functionify(data.IconClicked)
-		local SizeLocked = data.SizeLocked or data.SizeLock
-		local CanvasSize = data.CanvasSize
-		local Position = data.Position
-		local Content = data.Content or data.Children
-		local MinSize = data.MinSize or {150, 50}
-		local MaxSize = data.MaxSize or {math.huge, math.huge}
-		local curIcon = Mouse.Icon
-		local isClosed = false
-		local Resizing = false
-		local Refreshing = false
-		local DragEnabled = true
-		local checkProperty = function(obj, prop) return Utilities:CheckProperty(obj, prop) end
-		local specialInsts = {}
-		local inExpandable
-		local addTitleButton
-		local LoadChildren
-		local BringToFront
+		GUI = gTable.Object
+		Name = data.Name
+		Icon = data.Icon
+		Size = data.Size
+		Menu = data.Menu
+		Title = data.Title
+		Ready = data.Ready
+		Walls = data.Walls
+		noHide = data.NoHide
+		noClose = data.NoClose
+		onReady = functionify(data.OnReady)
+		onClose = functionify(data.OnClose)
+		onResize = functionify(data.OnResize)
+		onRefresh = functionify(data.OnRefresh)
+		onMinimize = functionify(data.OnMinimize)
+		ContextMenu = data.ContextMenu
+		ResetOnSpawn = data.ResetOnSpawn
+		CanKeepAlive = data.CanKeepAlive
+		iconClicked = functionify(data.IconClicked)
+		SizeLocked = data.SizeLocked or data.SizeLock
+		CanvasSize = data.CanvasSize
+		Position = data.Position
+		Content = data.Content or data.Children
+		MinSize = data.MinSize or {150, 50}
+		MaxSize = data.MaxSize or {math.huge, math.huge}
+		curIcon = Mouse.Icon
+		isClosed = false
+		Resizing = false
+		Refreshing = false
+		DragEnabled = true
+		checkProperty = function(obj, prop) return Utilities:CheckProperty(obj, prop) end
+		specialInsts = {}
 
-		local Tooltip = GUI.Desc
-		local Drag = GUI.Drag
-		local Main = Drag.Main
-		local Hide = Drag.Hide
-		local Iconf = Drag.Icon
-		local Close = Drag.Close
-		local Titlef = Drag.Title
-		local Refresh = Drag.Refresh
-		local rSpinner = Refresh.Spinner
-		local ScrollFrame = GUI.Drag.Main.ScrollingFrame
-		local LeftSizeIcon = Main.LeftResizeIcon
-		local RightSizeIcon = Main.RightResizeIcon
-		local RightCorner = Main.RightCorner
-		local LeftCorner = Main.LeftCorner
-		local RightSide = Main.RightSide
-		local LeftSide = Main.LeftSide
-		local TopRight = Main.TopRight
-		local TopLeft = Main.TopLeft
-		local Bottom = Main.Bottom
-		local Top = Main.Top
+		Tooltip = GUI.Desc
+		Drag = GUI.Drag
+		Main = Drag.Main
+		Hide = Drag.Hide
+		Iconf = Drag.Icon
+		Close = Drag.Close
+		Titlef = Drag.Title
+		Refresh = Drag.Refresh
+		rSpinner = Refresh.Spinner
+		ScrollFrame = GUI.Drag.Main.ScrollingFrame
+		LeftSizeIcon = Main.LeftResizeIcon
+		RightSizeIcon = Main.RightResizeIcon
+		RightCorner = Main.RightCorner
+		LeftCorner = Main.LeftCorner
+		RightSide = Main.RightSide
+		LeftSide = Main.LeftSide
+		TopRight = Main.TopRight
+		TopLeft = Main.TopLeft
+		Bottom = Main.Bottom
+		Top = Main.Top
 
 		function Expand(ent, point, text, richText)
 			local label = point:FindFirstChild("Label")
