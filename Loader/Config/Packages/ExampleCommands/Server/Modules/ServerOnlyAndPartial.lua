@@ -10,7 +10,7 @@
 local Root, Utilities, Service, Package;
 local Settings = setmetatable({}, {
 	__index = function(self, ind)
-		return { __SETTING_PROXY = true, Index = ind }
+		return { __ROOT_PROXY = true, Path = "Settings", Index = ind }
 	end
 })
 

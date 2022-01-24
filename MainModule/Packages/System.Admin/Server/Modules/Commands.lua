@@ -228,10 +228,11 @@ local Commands = {
 
 	UpdateSettingProxies = function(self, data)
 		for i,v in pairs(data) do
-			if type(v) == "table" and v.__SETTING_PROXY then
-				local setting = Root.Settings[v.Index]
+			if type(v) == "table" and v.__ROOT_PROXY then
+				local dest = Utilities:GetTableValueByPath(Root, v.Path)
+				local setting = dest[v.Index]
 				if setting then
-					data[i] = Root.Settings[v.Index]
+					data[i] = dest[v.Index]
 				else
 					Root.Warn("Cannot update setting definition: Setting not found :: ", v.Index)
 				end

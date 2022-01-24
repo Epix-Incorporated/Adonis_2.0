@@ -563,7 +563,7 @@ local HelperMethods = {
 		return fakePlayer
 	end;
 
-	GetTableValueByPath = function(self, tableAncestry: string, table: {}, splitChar: string)
+	GetTableValueByPath = function(self, table: {}, tableAncestry: string, splitChar: string)
 		local indexNames = self:SplitString(tableAncestry, splitChar or '.', true)
 		local curTable = table
 
