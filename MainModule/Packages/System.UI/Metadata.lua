@@ -29,7 +29,7 @@ return {
 				Text = Color3.fromRGB(245, 245, 245),
 			},
 
-			Description = "Theme Colors. Must be supported by the currently selected theme."
+			Description = "Theme Colors. Must be supported by the currently selected theme.",
 			Package = script.Parent,
 			ClientAllowed = true,
 		}

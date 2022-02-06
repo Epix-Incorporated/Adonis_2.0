@@ -230,8 +230,8 @@ local Commands = {
 		for i,v in pairs(data) do
 			if type(v) == "table" and v.__ROOT_PROXY then
 				local dest = Utilities:GetTableValueByPath(Root, v.Path)
-				local setting = dest[v.Index]
-				if setting then
+				local setting = dest and dest.Value and dest.Value[v.Index]
+				if setting ~= nil then
 					data[i] = dest[v.Index]
 				else
 					Root.Warn("Cannot update setting definition: Setting not found :: ", v.Index)
