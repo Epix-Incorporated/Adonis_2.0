@@ -26,22 +26,16 @@ local UI = {
 local Remote = {
 	MakeGui = function(self, p: Player, uiName, ...)
 		local theme = UI:GetTheme(p)
-		local themeData = {
-			Theme = theme
-		}
 
-		Root.DebugWarn("SENDING: ", p, "GUI", uiName, themeData, ...)
-		self:Send(p, "GUI", uiName, themeData, ...)
+		Root.DebugWarn("SENDING: ", p, "GUI", uiName, theme, ...)
+		self:Send(p, "GUI", uiName, theme, ...)
 	end;
 
 	GetGui = function(self, p: Player, uiName, ...)
 		local data = Root.Core:GetPlayerData(p)
 		local theme = UI:GetTheme(p)
-		local themeData = {
-			Theme = theme
-		}
 
-		return self:Get(p, "GUI", uiName, themeData, ...)
+		return self:Get(p, "GUI", uiName, theme, ...)
 	end;
 }
 

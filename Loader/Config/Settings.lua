@@ -33,12 +33,12 @@
 	https://developer.roblox.com/en-us/articles/Table
 
 	Attempting to modify this module without the absolute minimum knowledge required to do so will undoubtedly lead
-	to unexpected behavior or, eqally if not more likely, confusion.
+	to unexpected behavior or, equally if not more likely: confusion.
 
 	You have been warned.
 --]]
 
---// Attempts to protect the settings module from rogue server scripts
+--// Attempts to protect the settings module from rogue server scripts; Ignore
 if not game:GetService("RunService"):IsStudio() then
 	script:Destroy()
 end

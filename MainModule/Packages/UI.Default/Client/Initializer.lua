@@ -14,7 +14,8 @@ local Package = {
 	Metadata = require(PackageFolder.Metadata);
 
 	Client = PackageFolder.Client;
-	Theme = PackageFolder.Theme;
+	Theme = PackageFolder:FindFirstChild("Theme");
+	Prefabs = PackageFolder:FindFirstChild("Prefabs");
 }
 
 
@@ -48,7 +49,16 @@ return {
 		RootTable = Root
 		Verbose = if Root.Verbose ~= nil then Root.Verbose else Verbose
 
-		Root.UI:DeclareTheme(Package.Metadata.ThemeName, Package.Theme)
+
+		if Package.Theme then
+			Root.UI:DeclareTheme(Package.Metadata.ThemeName, Package.Theme)
+		end
+
+		if Package.Prefabs then
+			for i,obj in ipairs(Package.Prefabs:GetChildren()) do
+				Root.UI:DeclarePrefab(Package.Theme, obj.Name, obj)
+			end
+		end
 
 		debug("INIT " .. Package.Metadata.Name .. " PACKAGE FINISHED")
 	end;
