@@ -18,6 +18,20 @@ return {
 			Description = "Default UI theme",
 			Package = script.Parent,
 			ClientAllowed = true,
+		},
+
+		["Colors"] = {
+			DefaultValue = {
+				Primary = Color3.fromRGB(33, 118, 208),
+				Secondary = Color3.fromRGB(48, 48, 48),
+				Tertiary = Color3.fromRGB(245, 245, 245),
+				Icon = Color3.fromRGB(245, 245, 245),
+				Text = Color3.fromRGB(245, 245, 245),
+			},
+
+			Description = "Theme Colors. Must be supported by the currently selected theme."
+			Package = script.Parent,
+			ClientAllowed = true,
 		}
 	};
 }

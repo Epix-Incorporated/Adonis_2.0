@@ -75,6 +75,19 @@ local UI = {
 		end
 	end;
 
+	Colorize = function(self, colors, obj)
+		local objs = obj:GetDescendants()
+		for color,value in pairs(colors) do
+			local colorAttributeName = "Use".. color .."Color"
+			for i,b in ipairs(objs) do
+				local attr = b:GetAttribute(colorAttributeName)
+				if attr then
+					b[attr] = value
+				end
+			end
+		end
+	end;
+
 	GetThemeElement = function(self, uiName, theme, ...)
 		local theme = self.DeclaredThemes[theme] or self.DeclaredThemes.Default
 

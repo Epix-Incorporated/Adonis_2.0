@@ -473,6 +473,24 @@ local HelperMethods = {
 		return loop
 	end;
 
+	--// Given an ordered list of items and a desired batch size, breaks the given list into smaller batches of size
+	Batchify = function(self, tab, size)
+		local batches = {}
+		for b = 1, table.getn(tab), size do
+			local batch = {}
+			for i = b, b + size-1 do
+				local item = tab[i]
+				if item then
+					table.insert(batch, item)
+				else
+					break
+				end
+			end
+			table.insert(batches, batch)
+		end
+		return batches
+	end;
+
 	--// Iterates through a table or an Instance's children, passing value-key pairs to the callback function
 	--// Breaks if/when the callback returns, returning that value
 	--// If third argument is true, the iteration will include all the table's subtables/Instance's descendants
