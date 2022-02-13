@@ -31,7 +31,7 @@ jobs:
 
       - name: Send file nightly build to Discord channel
         uses: tsickert/discord-webhook@v3.0.0
-        if: github.event_name != 'pull_request'
+        if: github.repository == 'Sceleratis/Adonis_2.0' && github.event_name == 'push'
         with:
           webhook-url: ${{ secrets.NIGHTLY_WEBHOOK }}
           filename: Adonis2.0_Nightly_${{ steps.date.outputs.date }}.rbxm
