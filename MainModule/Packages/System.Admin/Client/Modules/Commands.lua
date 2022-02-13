@@ -50,7 +50,7 @@ local Commands = {
 				local dest = Utilities:GetTableValueByPath(Root, v.Path)
 				local setting = dest and dest.Value and dest.Value[v.Index]
 				if setting then
-					data[i] = dest[v.Index]
+					data[i] = setting
 				else
 					Root.Warn("Cannot update setting definition: Setting not found :: ", v.Index)
 				end

@@ -37,11 +37,9 @@ return {
 		Service = Root.Utilities.Services
 
 		Root.Bytecode = Bytecode
-
-		Utilities:MergeTables(Root.Remote.Commands, RemoteCommands)
 	end;
 
 	AfterInit = function(Root, Package)
-
+		Utilities:MergeTables(Root.Remote.Commands, RemoteCommands)
 	end;
 }

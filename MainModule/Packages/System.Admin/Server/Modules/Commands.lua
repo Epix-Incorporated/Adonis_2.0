@@ -117,7 +117,8 @@ local Commands = {
 					DebugWarn("CHECKING ALIASES")
 					for i,alias in ipairs(data.Aliases) do
 						DebugWarn("CHECKING ALIAS MATCH")
-						if data.Prefix .. string.lower(alias) == string.lower(str) then
+						warn("DATA", data)
+						if (data.Prefix or '') .. string.lower(alias) == string.lower(str) then
 							DebugWarn("RETURNING ALIAS MATCH")
 							local result = { Index = index, Data = data, Alias = alias }
 							self.CommandCache:SetData(str, result)
@@ -232,7 +233,7 @@ local Commands = {
 				local dest = Utilities:GetTableValueByPath(Root, v.Path)
 				local setting = dest and dest.Value and dest.Value[v.Index]
 				if setting ~= nil then
-					data[i] = dest[v.Index]
+					data[i] = setting
 				else
 					Root.Warn("Cannot update setting definition: Setting not found :: ", v.Index)
 				end
