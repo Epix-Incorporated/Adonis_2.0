@@ -2,7 +2,7 @@
 	<Meta name="ExplicitAutoJoints">true</Meta>
 	<External>null</External>
 	<External>nil</External>
-	<Item class="Frame" referent="RBX8C3B52965B3A4CF8A4A55BAC21D247B8">
+	<Item class="Frame" referent="RBX9FB6C4F0289C4492BCDE728F1C2ACB8A">
 		<Properties>
 			<bool name="Active">false</bool>
 			<Vector2 name="AnchorPoint">
@@ -56,7 +56,7 @@
 			<bool name="Visible">true</bool>
 			<int name="ZIndex">1</int>
 		</Properties>
-		<Item class="Frame" referent="RBXAC9C747B8A114B0E884E39F2E21AE834">
+		<Item class="Frame" referent="RBX529654B666A34C1FB2C5319F29A434A3">
 			<Properties>
 				<bool name="Active">false</bool>
 				<Vector2 name="AnchorPoint">
@@ -111,7 +111,7 @@
 				<int name="ZIndex">1</int>
 			</Properties>
 		</Item>
-		<Item class="Frame" referent="RBX842C60553E8648429207357F41657C95">
+		<Item class="Frame" referent="RBX731DF51F07CD4CE7AF1EB06E451CFC4A">
 			<Properties>
 				<bool name="Active">false</bool>
 				<Vector2 name="AnchorPoint">
@@ -166,7 +166,7 @@
 				<int name="ZIndex">1</int>
 			</Properties>
 		</Item>
-		<Item class="Frame" referent="RBXAE0C2955802D48D28DE82F48AA8A8EF9">
+		<Item class="Frame" referent="RBXB63581F4E9F14C348D90A21C336312D5">
 			<Properties>
 				<bool name="Active">false</bool>
 				<Vector2 name="AnchorPoint">
@@ -221,14 +221,14 @@
 				<int name="ZIndex">1</int>
 			</Properties>
 		</Item>
-		<Item class="Folder" referent="RBXD96C4857ABA24C3990B4B572AE6C0373">
+		<Item class="Folder" referent="RBX1273256AF689432A97145DF89283E5A8">
 			<Properties>
 				<BinaryString name="AttributesSerialize"></BinaryString>
 				<string name="Name">Controller</string>
 				<int64 name="SourceAssetId">-1</int64>
 				<BinaryString name="Tags"></BinaryString>
 			</Properties>
-			<Item class="BindableEvent" referent="RBX20FFF48D7BA64B0E89FE0CD4DAC44F73">
+			<Item class="BindableEvent" referent="RBX2E6ADA5A966B4B389F9D2320B8F34C15">
 				<Properties>
 					<BinaryString name="AttributesSerialize"></BinaryString>
 					<string name="Name">UIEvent</string>
@@ -236,29 +236,48 @@
 					<BinaryString name="Tags"></BinaryString>
 				</Properties>
 			</Item>
-			<Item class="ModuleScript" referent="RBX8B25CFF3B9DE47F69779B803E3162B8F">
+			<Item class="ModuleScript" referent="RBX8DD8DC4E078B410CA9232D723A3450BC">
 				<Properties>
 					<BinaryString name="AttributesSerialize"></BinaryString>
 					<Content name="LinkedSource"><null></null></Content>
 					<string name="Name">Interface</string>
-					<string name="ScriptGuid">{6D7C94A0-CE0A-40A6-A15B-2243274B0EDF}</string>
+					<string name="ScriptGuid">{DB74CA52-A8E3-48AF-A86C-2CE80A26C312}</string>
 					<ProtectedString name="Source"><![CDATA[--[[
 	
-	Description: Returns an interface to the prefab object & events.
+	Description: Handles various aspects of the UI object & Fires events which can be listened to.
 	Author: Sceleratis
 	Date: 2/5/2022
 	
 --]]
 
+
+--// Prefab variables
 local folder = script.Parent
 local prefab = folder.Parent
-local UIHandler = folder:WaitForChild("UIHandler")
-local UIEvent = prefab:WaitForChild("UIEvent")
-local UIFunction = prefab:WaitForChild("UIFunction")
-local indexMethodCache = {}
+local objects = {}
+local misc = {}
 
-local function FireEvent(self, ...)
-	UIEvent.Event:Fire(...)
+local expanded = false
+local expanding = false
+
+local UIEvent = prefab:FindFirstChild("UIEvent") or Instance.new("BindableEvent")
+
+local Player = game:GetService("Players").LocalPlayer
+local InputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+
+local ExpandButtonTweenInfo = TweenInfo.new(0.25, Enum.EasingStyle.Linear, Enum.EasingDirection.Out, 0, false, 0)
+local ExpandButtonTweenOpen = { Rotation = 180 }
+local ExpandButtonTweenClose = { Rotation = 0 }
+local ExpandButtonTween
+
+local ExpandTweenInfo = TweenInfo.new(0.25, Enum.EasingStyle.Linear, Enum.EasingDirection.Out, 0, false, 0)
+local ExpandTween = false
+
+
+--// Event/function handlers
+function FireEvent(type, ...)
+	UIEvent:Fire(type, ...)
 end
 
 local function HookFullEvent(self, ...)
@@ -273,43 +292,140 @@ local function HookEvent(event, func)
 	end)
 end
 
-local function FireFunction(self, ...)
-	return UIFunction:Invoke(...) 
+
+--// Helper functions
+function IsInFrame(obj, x, y)
+	local absPos = obj.AbsolutePosition
+	local absSize = obj.AbsoluteSize
+
+	return (x >= absPos.X and x <= absPos.X + absSize.X) and (y >= absPos.Y and y <= absPos.Y + absSize.Y)
 end
 
-local function SetEnabled(self, bool)
-	UIHandler.Disabled = not bool
-	prefab.Visible = bool
+
+--// Prefab-specific events/functionality
+function SizeUpdate()
+	prefab.Size = UDim2.new(objects.MainContent.Size.X.Scale, objects.MainContent.Size.X.Offset, 0, objects.MainContent.AbsoluteSize.Y + (if expanded then objects.SubContent.AbsoluteSize.Y else 0))
 end
 
-return setmetatable({
+local function ExpandTweenComplete(playbackState)
+	expanding = false
+
+	if playbackState == Enum.PlaybackState.Completed then
+		expanded = not expanded
+		objects.SubContent.Visible = expanded
+		FireEvent("Expanded", expanded)
+	elseif ExpandButtonTween then
+		ExpandButtonTween:Cancel()
+		ExpandButtonTween = nil
+	end
+end
+
+function Expand(open)
+	if not expanding then
+		expanding = true
+
+		if open then
+			ExpandButtonTween = TweenService:Create(objects.Expand, ExpandButtonTweenInfo, ExpandButtonTweenOpen)
+			ExpandTween = TweenService:Create(prefab, ExpandTweenInfo, {
+				Size = UDim2.new(objects.MainContent.Size.X.Scale, objects.MainContent.Size.X.Offset, 0, objects.SubContent.AbsoluteSize.Y + objects.MainContent.AbsoluteSize.Y)
+			})
+
+			objects.SubContent.Visible = true
+			ExpandTween.Completed:Connect(ExpandTweenComplete)
+			ExpandButtonTween:Play()
+			ExpandTween:Play()
+		else
+			ExpandButtonTween = TweenService:Create(objects.Expand, ExpandButtonTweenInfo, ExpandButtonTweenClose)
+			ExpandTween = TweenService:Create(prefab, ExpandTweenInfo, {
+				Size = UDim2.new(objects.MainContent.Size.X.Scale, objects.MainContent.Size.X.Offset, 0, objects.MainContent.AbsoluteSize.Y)
+			})
+
+			ExpandTween.Completed:Connect(ExpandTweenComplete)
+			ExpandButtonTween:Play()
+			ExpandTween:Play()
+		end
+	end
+end
+
+--// Input handlers
+local function ExpandToggle()
+	Expand(not expanded)
+end
+
+--// Init
+local function Init()
+	UIEvent.Name = "UIEvent"
+
+	for i,obj in ipairs(prefab:GetChildren()) do
+		objects[obj.Name] = obj
+	end
+
+	objects.Expand.Activated:Connect(ExpandToggle)
+
+	FireEvent("Ready")
+end
+
+
+--// Property handlers
+local PropertyHandlers = {
+	MainContentSize = function(value)
+		objects.MainContent.Size = value
+		SizeUpdate()
+	end,
+
+	SubContentSize = function(value)
+		objects.SubContent.Size = value
+		SizeUpdate()
+	end,
+
+	ExpandEnabled = function(value)
+		objects.Expand.Visible = value
+	end,
+}
+
+return {
 	Prefab = prefab,
 	UIEvent = UIEvent,
-	UIFunction = UIFunction,
 	
-	SetEnabled = SetEnabled,
+	Init = Init,
 	FireEvent = FireEvent,
 	HookEvent = HookEvent,
 	HookFullEvent = HookFullEvent,
-	FireFunction = FireFunction,
-}, {
-	__index = function(self, index)
-		local cached = indexMethodCache[index]
-		if cached then
-			return cached
-		else
-			local new = function(self, ...) return FireFunction(self, index, ...) end
-			indexMethodCache[index] = new 
-			return new
+	
+	SetProperties = function(self, properties)
+		for prop,val in pairs(properties) do
+			local handler = PropertyHandlers[prop]
+			if handler then
+				handler(val)
+			else
+				prefab[prop] = val
+			end
 		end
 	end,
-})]]></ProtectedString>
+
+	Expand = function(self, value)
+		Expand(value)
+	end,
+
+	GetMainFrame = function(self)
+		return objects.MainContent
+	end,
+
+	GetSubFrame = function(self)
+		return objects.SubContent
+	end,
+
+	SubFrameEnabled = function(self, value)
+		objects.SubContent.Visible = value
+		objects.Expand.Visible = value
+	end,
+}]]></ProtectedString>
 					<int64 name="SourceAssetId">-1</int64>
 					<BinaryString name="Tags"></BinaryString>
 				</Properties>
 			</Item>
 		</Item>
-		<Item class="TextButton" referent="RBXC93E39AF3FFC4F7AADF4CCCBBC519E1A">
+		<Item class="TextButton" referent="RBX529A72D1000D4B3EB296BCEA8B4C8887">
 			<Properties>
 				<bool name="Active">true</bool>
 				<Vector2 name="AnchorPoint">
@@ -389,7 +505,7 @@ return setmetatable({
 				<bool name="Visible">true</bool>
 				<int name="ZIndex">1</int>
 			</Properties>
-			<Item class="ImageLabel" referent="RBXD1D601406AE444B288E899435D02F4A6">
+			<Item class="ImageLabel" referent="RBXABA2CBC2D87644CEAFFBD537A7BACE79">
 				<Properties>
 					<bool name="Active">false</bool>
 					<Vector2 name="AnchorPoint">

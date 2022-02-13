@@ -1920,11 +1920,11 @@
 					<string name="Name">Interface</string>
 					<string name="ScriptGuid">{5058F97A-37E7-4ED1-9C2A-A105232D2CB5}</string>
 					<ProtectedString name="Source"><![CDATA[--[[
-	
+
 	Description: Handles various aspects of the UI object & Fires events which can be listened to.
 	Author: Sceleratis
 	Date: 2/5/2022
-	
+
 --]]
 
 
@@ -2067,7 +2067,8 @@ end
 
 --// Prefab-specific events/functionality
 function DoClose()
-	FireEvent("Close")
+	FireEvent("Closed")
+
 	for name,obj in pairs(objects) do
 		if obj:IsA("GuiObject") then
 			TweenService:Create(obj, CloseTweenInfo, {
@@ -2126,7 +2127,7 @@ end
 function DoRefresh(forced)
 	if forced or not refreshing then
 		RefreshSpinnerTween:Play()
-		if special.RefreshHandler then 
+		if special.RefreshHandler then
 			local r,e = pcall(special.RefreshHandler)
 			if not r then
 				warn("RefreshHandler Failed:", e)
@@ -2253,6 +2254,23 @@ local function InputEnded(input, gameHandled)
 	end
 end
 
+local function DeletionTest(temp)
+	prefab.Parent = temp
+	prefab.Parent = nil
+end
+
+local function DeletionCheck()
+	if prefab.Parent == nil then
+		local temp = Instance.new("Folder")
+		local ran,err = pcall(DeletionTest, temp)
+		temp:Destroy()
+
+		if not ran and string.match(err, "The Parent property of.*is locked") then
+			FireEvent("Closed")
+		end
+	end
+end
+
 
 --// Init
 local function Init()
@@ -2269,9 +2287,9 @@ local function Init()
 	RefreshSpinnerTween = TweenService:Create(objects.Refresh:WaitForChild("Spinner"), RefreshSpinnerTweenInfo, RefreshSpinnerTweenProperties)
 
 	SetButtonEnabled(objects.Refresh, false)
-	
+
 	prefab.Enabled = true
-	
+
 	FireEvent("Init")
 end
 
@@ -2279,7 +2297,7 @@ end
 InputService.InputBegan:Connect(InputBegan)
 InputService.InputChanged:Connect(InputChanged)
 InputService.InputEnded:Connect(InputEnded)
-
+prefab.AncestryChanged:Connect(DeletionCheck)
 
 --// Property handlers
 local PropertyHandlers = {
@@ -2304,7 +2322,7 @@ local PropertyHandlers = {
 return {
 	Prefab = prefab,
 	UIEvent = UIEvent,
-	
+
 	Init = Init,
 	FireEvent = FireEvent,
 	HookEvent = HookEvent,
@@ -2313,7 +2331,7 @@ return {
 	Close = DoClose,
 	Hide = DoHide,
 	Refresh = DoRefresh,
-	
+
 	SetProperties = function(self, properties)
 		for prop,val in pairs(properties) do
 			local handler = PropertyHandlers[prop]

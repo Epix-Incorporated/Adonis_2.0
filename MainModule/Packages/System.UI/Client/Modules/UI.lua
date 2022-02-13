@@ -67,10 +67,9 @@ local UI = {
 				local prefab = found:Clone()
 				local controller = prefab:FindFirstChild("Controller")
 				local interface = if controller then controller:FindFirstChild("Interface") else nil
-				return {
+				return (interface and require(interface)) or {
 					Prefab = prefab,
-					Controller = controller,
-					Interface = if interface then require(interface) else nil
+					Controller = controller
 				}
 			end
 		end
@@ -173,7 +172,7 @@ local UI = {
 			Root.DebugWarn("GOT GUI HANDLER:", gTable)
 			if func then
 				Root.DebugWarn("LOADMODULE RUN FUNC", Root, gTable, ...)
-				return func(Root, gTable, ...)
+				return func(config, Root, gTable, ...)
 			else
 				Root.Warn("OnLoad method not found for: ", tostring(gui))
 			end

@@ -68,10 +68,13 @@ local Methods = {
 		end;
 
 		ConnectEvent = function(self, ...)
-			if not self.Ended then
-				return self.SessionEvent.Event:Connect(...)
-			end
-		end,
+			assert(not self.Ended, "Cannot connect session event: Session Ended")
+
+			local connection = self.SessionEvent.Event:Connect(func)
+			table.insert(self.Events, connection)
+
+			return connection
+		end;
 
 		End = function(self)
 			if not self.Ended then
@@ -123,6 +126,7 @@ local Remote = {
 			local session = {
 				SessionKey = sessionKey;
 				SessionEvent = Instance.new("BindableEvent");
+				Events = {};
 
 				SendToServer = Methods.Session.SendToServer;
 				FireEvent = Methods.Session.FireEvent;
