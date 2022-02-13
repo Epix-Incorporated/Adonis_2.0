@@ -227,6 +227,10 @@ return {
 			return Utilities:RandomString()
 		end)
 
+		Core:DeclareDefaultPlayerData("UserSettings", function(p, newData)
+			return {}
+		end)
+
 		--// Declare settings
 		if Package.Metadata.Settings then
 			for setting,data in pairs(Package.Metadata.Settings) do

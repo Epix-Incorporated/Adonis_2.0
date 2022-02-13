@@ -10,9 +10,9 @@
 local Root, Utilities, Service, Package;
 
 local RemoteCommands = {
-	GUI = function(uiName, theme, data, ...)
-		Root.DebugWarn("CREATE UI ELEMENT", uiName, theme, data, ...)
-		return Root.UI:NewElement(uiName, theme, data, ...);
+	GUI = function(uiName, data, ...)
+		Root.DebugWarn("CREATE UI ELEMENT", uiName, data, ...)
+		return Root.UI:NewElement(uiName, data, ...);
 	end;
 }
 
@@ -49,7 +49,7 @@ local UI = {
 	end;
 
 	GetTheme = function(self)
-		local theme = Root.Globals.ThemeOverride or self.CachedTheme or Root.Settings.Theme or Root.Remote:Get("ThemeInfo")
+		local theme = Root.Settings.Theme or Root.Remote:Get("Setting", "Theme") or "Default"
 
 		if theme then
 			self.CachedTheme = theme
@@ -116,27 +116,28 @@ local UI = {
 		end
 	end;
 
-	LoadElement = function(self, obj, uiName, theme, ...)
-		Root.DebugWarn("LOADING ELEMENT", obj, uiName, theme, ...)
+	LoadElement = function(self, obj, uiName, ...)
+		Root.DebugWarn("LOADING ELEMENT", obj, uiName, ...)
 
 		if obj:IsA("ModuleScript") then
 			Root.DebugWarn("IS MODULESCRIPT", obj)
 
-			return self:LoadModule(obj, obj, theme, ...)
+			return self:LoadModule(obj, obj, ...)
 		else
 			Root.DebugWarn("IS NOT MODULESCRIPT", obj)
 
 			local configMod = obj:FindFirstChild("Config")
 			if configMod and configMod:IsA("ModuleScript") then
 				Root.DebugWarn("CONFIGMOD IS MODULESCRIPT, LOADMODULE", configMod)
-				return self:LoadModule(obj, configMod, theme, ...)
+				return self:LoadModule(obj, configMod, ...)
 			else
 				Root.Warn("Config module not found for:", uiName)
 			end
 		end
 	end;
 
-	NewElement = function(self, uiName, theme, ...)
+	NewElement = function(self, uiName, ...)
+		local theme = Root.Settings.Theme
 		local obj = self:GetThemeElement(uiName, theme, ...)
 		if obj and type(obj) == "function" then
 			Root.DebugWarn("GUI Object is function, return after call");
@@ -161,13 +162,13 @@ local UI = {
 		return found
 	end;
 
-	LoadModule = function(self, gui, configMod, theme, ...)
+	LoadModule = function(self, gui, configMod, ...)
 		local config = require(configMod);
 
 		Root.DebugWarn("GOT CONFIG", config)
 		if config and type(config) == "table" then
 			local func = config.OnLoad;
-			local gTable = self:GetHandler(gui, config, theme, ...);
+			local gTable = self:GetHandler(gui, config, ...);
 
 			Root.DebugWarn("GOT GUI HANDLER:", gTable)
 			if func then
@@ -208,12 +209,11 @@ local UI = {
 		end
 	end;
 
-	GetHandler = function(self, gui, config, theme, ...)
+	GetHandler = function(self, gui, config, ...)
 		local gIndex = Utilities:RandomString()
 		local gTable = {
 			Object = gui,
 			Config = config,
-			Theme = theme,
 			Data = table.pack(...),
 			Name = config.Name or gui.Name,
 			Class = config.ClassName or gui.ClassName,

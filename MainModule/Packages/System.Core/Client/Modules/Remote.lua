@@ -32,13 +32,15 @@ local RemoteCommands = setmetatable({
 
 	DeclareSettings = function(settings)
 		if Root.Settings then
-			Utilities:MergeTables(Root.Settings, settings)
+			for setting,value in pairs(settings) do
+				rawset(Root.Settings, setting, value)
+			end
 			Utilities.Events.SettingsDeclared:Fire(settings)
 		end
 	end,
 
 	UpdateSetting = function(setting, value)
-		Root.Settings[setting] = value
+		rawset(Root.Settings, setting, value)
 	end,
 },{
 	__newindex = function(self, ind, value)

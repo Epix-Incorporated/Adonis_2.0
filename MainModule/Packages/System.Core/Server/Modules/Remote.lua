@@ -62,10 +62,19 @@ local RemoteCommands = setmetatable({
 		end
 	end;
 
-	GetSetting = function(p: Player, setting: string)
+	Setting = function(p: Player, setting: string)
 		local declared = Root.Core.DeclaredSettings[string]
 		if declared and declared.ClientAllowed then
 			return Root.Settings[setting]
+		end
+	end;
+
+	SetUserSettings = function(p: Player, settings)
+		local data = Root.Core:GetPlayerData(p)
+		local userSettings = data.UserSettings
+
+		for setting,value in pairs(settings) do
+			userSettings[setting] = value
 		end
 	end;
 },{
