@@ -22,11 +22,12 @@ return {
 
 		["Colors"] = {
 			DefaultValue = {
-				Primary = Color3.fromRGB(33, 118, 208),
-				Secondary = Color3.fromRGB(48, 48, 48),
-				Tertiary = Color3.fromRGB(245, 245, 245),
-				Icon = Color3.fromRGB(245, 245, 245),
-				Text = Color3.fromRGB(245, 245, 245),
+				Primary = Color3.fromRGB(0, 59, 255),
+			    Secondary = Color3.fromRGB(227, 73, 67),
+			    Tertiary = Color3.fromRGB(255, 255, 255),
+			    Quaternary = Color3.fromRGB(56, 0, 79),
+			    Text = Color3.fromRGB(255, 255, 255),
+			    Icon = Color3.fromRGB(255, 255, 255),
 			},
 
 			Description = "Theme Colors. Must be supported by the currently selected theme.",

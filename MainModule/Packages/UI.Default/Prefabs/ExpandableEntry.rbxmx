@@ -2,7 +2,7 @@
 	<Meta name="ExplicitAutoJoints">true</Meta>
 	<External>null</External>
 	<External>nil</External>
-	<Item class="Frame" referent="RBX2AC93E2F57BA49C99C5D77B6CE2A9113">
+	<Item class="Frame" referent="RBX8C3B52965B3A4CF8A4A55BAC21D247B8">
 		<Properties>
 			<bool name="Active">false</bool>
 			<Vector2 name="AnchorPoint">
@@ -53,10 +53,10 @@
 			<int64 name="SourceAssetId">-1</int64>
 			<token name="Style">0</token>
 			<BinaryString name="Tags"></BinaryString>
-			<bool name="Visible">false</bool>
+			<bool name="Visible">true</bool>
 			<int name="ZIndex">1</int>
 		</Properties>
-		<Item class="Frame" referent="RBX9303C58B422B42FE97B5C01F0DF12C29">
+		<Item class="Frame" referent="RBXAC9C747B8A114B0E884E39F2E21AE834">
 			<Properties>
 				<bool name="Active">false</bool>
 				<Vector2 name="AnchorPoint">
@@ -67,11 +67,11 @@
 				<bool name="AutoLocalize">true</bool>
 				<token name="AutomaticSize">0</token>
 				<Color3 name="BackgroundColor3">
-					<R>0.282352954</R>
-					<G>0.282352954</G>
-					<B>0.282352954</B>
+					<R>0.819607913</R>
+					<G>0.592156887</G>
+					<B>1</B>
 				</Color3>
-				<float name="BackgroundTransparency">0</float>
+				<float name="BackgroundTransparency">0.899999976</float>
 				<Color3 name="BorderColor3">
 					<R>0.105882362</R>
 					<G>0.164705887</G>
@@ -111,7 +111,7 @@
 				<int name="ZIndex">1</int>
 			</Properties>
 		</Item>
-		<Item class="Frame" referent="RBXA0034946D14945E3B4E5D9F9C5D8D882">
+		<Item class="Frame" referent="RBX842C60553E8648429207357F41657C95">
 			<Properties>
 				<bool name="Active">false</bool>
 				<Vector2 name="AnchorPoint">
@@ -166,7 +166,7 @@
 				<int name="ZIndex">1</int>
 			</Properties>
 		</Item>
-		<Item class="Frame" referent="RBXC48B43678409462BBD47B0DDDB73D80A">
+		<Item class="Frame" referent="RBXAE0C2955802D48D28DE82F48AA8A8EF9">
 			<Properties>
 				<bool name="Active">false</bool>
 				<Vector2 name="AnchorPoint">
@@ -221,209 +221,14 @@
 				<int name="ZIndex">1</int>
 			</Properties>
 		</Item>
-		<Item class="Folder" referent="RBX0DCA42178381472BA1257DC7B68CE60E">
+		<Item class="Folder" referent="RBXD96C4857ABA24C3990B4B572AE6C0373">
 			<Properties>
 				<BinaryString name="AttributesSerialize"></BinaryString>
 				<string name="Name">Controller</string>
 				<int64 name="SourceAssetId">-1</int64>
 				<BinaryString name="Tags"></BinaryString>
 			</Properties>
-			<Item class="BindableFunction" referent="RBXED03977939C348788067E48BF5F0BF75">
-				<Properties>
-					<BinaryString name="AttributesSerialize"></BinaryString>
-					<string name="Name">UIFunction</string>
-					<int64 name="SourceAssetId">-1</int64>
-					<BinaryString name="Tags"></BinaryString>
-				</Properties>
-			</Item>
-			<Item class="LocalScript" referent="RBX0F2ED90B4026462993350707E21A4084">
-				<Properties>
-					<BinaryString name="AttributesSerialize"></BinaryString>
-					<bool name="Disabled">true</bool>
-					<Content name="LinkedSource"><null></null></Content>
-					<string name="Name">UIHandler</string>
-					<string name="ScriptGuid">{85B636C2-2854-4878-8090-00F78E533FE6}</string>
-					<ProtectedString name="Source"><![CDATA[--[[
-	
-	Description: Handles various aspects of the UI object & Fires events which can be listened to.
-	Author: Sceleratis
-	Date: 2/5/2022
-	
---]]
-
-
---// Prefab variables
-local folder = script.Parent
-local prefab = folder.Parent
-local objects = {}
-local misc = {}
-
-local expanded = false
-local expanding = false
-
-local UIEvent = prefab:FindFirstChild("UIEvent") or Instance.new("BindableEvent")
-local UIFunction = prefab:FindFirstChild("UIFunction") or Instance.new("BindableFunction")
-
-local Player = game:GetService("Players").LocalPlayer
-local InputService = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")
-
-local ExpandButtonTweenInfo = TweenInfo.new(0.25, Enum.EasingStyle.Linear, Enum.EasingDirection.Out, 0, false, 0)
-local ExpandButtonTweenOpen = { Rotation = 180 }
-local ExpandButtonTweenClose = { Rotation = 0 }
-local ExpandButtonTween
-
-local ExpandTweenInfo = TweenInfo.new(0.25, Enum.EasingStyle.Linear, Enum.EasingDirection.Out, 0, false, 0)
-local ExpandTween = false
-
-
---// Property handlers
-local PropertyHandlers = {
-	MainContentSize = function(value)
-		objects.MainContent.Size = value
-		SizeUpdate()
-	end,
-	
-	SubContentSize = function(value)
-		objects.SubContent.Size = value
-		SizeUpdate()
-	end,
-	
-	ExpandEnabled = function(value)
-		objects.Expand.Visible = value
-	end,
-}
-
---// Interface methods
-local InterfaceMethods = {
-	SetProperties = function(self, properties)
-		for prop,val in pairs(properties) do
-			local handler = PropertyHandlers[prop]
-			if handler then
-				handler(val)
-			else
-				prefab[prop] = val
-			end
-		end
-	end,
-	
-	Expand = function(self, value)
-		Expand(value)
-	end,
-	
-	GetMainFrame = function(self)
-		return objects.MainContent
-	end,
-	
-	GetSubFrame = function(self)
-		return objects.SubContent
-	end,
-	
-	SubFrameEnabled = function(self, value)
-		objects.SubContent.Visible = value
-		objects.Expand.Visible = value
-	end,
-}
-
---// Event/function handlers
-local function InterfaceHandler(method, ...)
-	local found = InterfaceMethods[method]
-	if found then
-		return found(InterfaceMethods, ...)
-	else
-		warn("Window prefab interface method not found: ".. tostring(method))
-	end
-end
-
-function FireEvent(type, ...)
-	UIEvent:Fire(type, ...)
-end
-
-
---// Helper functions
-function IsInFrame(obj, x, y)
-	local absPos = obj.AbsolutePosition
-	local absSize = obj.AbsoluteSize
-
-	return (x >= absPos.X and x <= absPos.X + absSize.X) and (y >= absPos.Y and y <= absPos.Y + absSize.Y)
-end
-
-
---// Prefab-specific events/functionality
-function SizeUpdate()
-	prefab.Size = UDim2.new(objects.MainContent.Size.X.Scale, objects.MainContent.Size.X.Offset, 0, objects.MainContent.AbsoluteSize.Y + (if expanded then objects.SubContent.AbsoluteSize.Y else 0))
-end
-
-local function ExpandTweenComplete(playbackState)
-	expanding = false
-
-	if playbackState == Enum.PlaybackState.Completed then
-		expanded = not expanded
-		objects.SubContent.Visible = expanded
-		FireEvent("Expanded", expanded)
-	elseif ExpandButtonTween then
-		ExpandButtonTween:Cancel()
-		ExpandButtonTween = nil
-	end
-end
-
-function Expand(open)
-	if not expanding then
-		expanding = true
-
-		if open then
-			ExpandButtonTween = TweenService:Create(objects.Expand, ExpandButtonTweenInfo, ExpandButtonTweenOpen)
-			ExpandTween = TweenService:Create(prefab, ExpandTweenInfo, {
-				Size = UDim2.new(objects.MainContent.Size.X.Scale, objects.MainContent.Size.X.Offset, 0, objects.SubContent.AbsoluteSize.Y + objects.MainContent.AbsoluteSize.Y)
-			})
-			
-			objects.SubContent.Visible = true
-			ExpandTween.Completed:Connect(ExpandTweenComplete)
-			ExpandButtonTween:Play()
-			ExpandTween:Play()
-		else
-			ExpandButtonTween = TweenService:Create(objects.Expand, ExpandButtonTweenInfo, ExpandButtonTweenClose)
-			ExpandTween = TweenService:Create(prefab, ExpandTweenInfo, {
-				Size = UDim2.new(objects.MainContent.Size.X.Scale, objects.MainContent.Size.X.Offset, 0, objects.MainContent.AbsoluteSize.Y)
-			})
-
-			ExpandTween.Completed:Connect(ExpandTweenComplete)
-			ExpandButtonTween:Play()
-			ExpandTween:Play()
-		end
-	end
-end
-
---// Input handlers
-local function ExpandToggle()
-	Expand(not expanded)
-end
-
---// Init
-local function Init()
-	UIEvent.Name = "UIEvent"
-	UIFunction.Name = "UIFunction"
-
-	for i,obj in ipairs(prefab:GetChildren()) do
-		objects[obj.Name] = obj
-	end
-	
-	originalSize = objects.MainContent.Size
-	objects.Expand.Activated:Connect(ExpandToggle)
-	
-	FireEvent("Init")
-end
-
---// Events
-UIFunction.OnInvoke = InterfaceHandler
-
---// Misc
-Init()]]></ProtectedString>
-					<int64 name="SourceAssetId">-1</int64>
-					<BinaryString name="Tags"></BinaryString>
-				</Properties>
-			</Item>
-			<Item class="BindableEvent" referent="RBX59BBC17464EC4065BBDAD7FF12346331">
+			<Item class="BindableEvent" referent="RBX20FFF48D7BA64B0E89FE0CD4DAC44F73">
 				<Properties>
 					<BinaryString name="AttributesSerialize"></BinaryString>
 					<string name="Name">UIEvent</string>
@@ -431,12 +236,12 @@ Init()]]></ProtectedString>
 					<BinaryString name="Tags"></BinaryString>
 				</Properties>
 			</Item>
-			<Item class="ModuleScript" referent="RBXB46EE04B4EF041DA84C0884B0D6E80A0">
+			<Item class="ModuleScript" referent="RBX8B25CFF3B9DE47F69779B803E3162B8F">
 				<Properties>
 					<BinaryString name="AttributesSerialize"></BinaryString>
 					<Content name="LinkedSource"><null></null></Content>
 					<string name="Name">Interface</string>
-					<string name="ScriptGuid">{3BC65994-F6A9-4DC2-B75B-132397101307}</string>
+					<string name="ScriptGuid">{6D7C94A0-CE0A-40A6-A15B-2243274B0EDF}</string>
 					<ProtectedString name="Source"><![CDATA[--[[
 	
 	Description: Returns an interface to the prefab object & events.
@@ -504,7 +309,7 @@ return setmetatable({
 				</Properties>
 			</Item>
 		</Item>
-		<Item class="TextButton" referent="RBXFBB09E33D23342CA8AFEBF966197155D">
+		<Item class="TextButton" referent="RBXC93E39AF3FFC4F7AADF4CCCBBC519E1A">
 			<Properties>
 				<bool name="Active">true</bool>
 				<Vector2 name="AnchorPoint">
@@ -584,7 +389,7 @@ return setmetatable({
 				<bool name="Visible">true</bool>
 				<int name="ZIndex">1</int>
 			</Properties>
-			<Item class="ImageLabel" referent="RBXE832C713A8684952BE1E690EB7AB2617">
+			<Item class="ImageLabel" referent="RBXD1D601406AE444B288E899435D02F4A6">
 				<Properties>
 					<bool name="Active">false</bool>
 					<Vector2 name="AnchorPoint">
@@ -623,7 +428,7 @@ return setmetatable({
 						<X>0</X>
 						<Y>0</Y>
 					</Vector2>
-					<float name="ImageTransparency">0.5</float>
+					<float name="ImageTransparency">0.699999988</float>
 					<int name="LayoutOrder">0</int>
 					<string name="Name">ImageLabel</string>
 					<Ref name="NextSelectionDown">null</Ref>

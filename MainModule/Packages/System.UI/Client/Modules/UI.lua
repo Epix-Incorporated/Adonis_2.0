@@ -30,7 +30,7 @@ local UI = {
 		end
 
 		if self.DeclaredPrefabs[groupName][name] then
-			Root.Warn("Prefab for group already declared. Overwriting. Prefab Name:", themeName, "| Group Name:", groupName);
+			Root.Warn("Prefab for group already declared. Overwriting. Prefab Name:", name, "| Group Name:", groupName);
 			Utilities.Events.UIWarning:Fire("Overwriting existing prefab", name, groupName);
 		end
 
@@ -49,7 +49,7 @@ local UI = {
 	end;
 
 	GetTheme = function(self)
-		local theme = Root.Globals.ThemeOverride or self.CachedTheme or Remote:Get("ThemeInfo")
+		local theme = Root.Globals.ThemeOverride or self.CachedTheme or Root.Settings.Theme or Root.Remote:Get("ThemeInfo")
 
 		if theme then
 			self.CachedTheme = theme
@@ -58,8 +58,9 @@ local UI = {
 		return theme or "Default"
 	end;
 
-	GetPrefab = function(self, prefabName, prefabGroup)
-		local prefabGroup = self.DeclaredPrefabs[prefabGroup] or self.DeclaredPrefabs.Default
+	GetPrefab = function(self, prefabName, prefabGroupName)
+		local prefabGroupName = prefabGroupName or Root.Globals.PrefabOverride or Root.Globals.ThemeOverride or self.CachedTheme or Root.Settings.Theme
+		local prefabGroup = self.DeclaredPrefabs[prefabGroupName] or self.DeclaredPrefabs.Default
 		if prefabGroup then
 			local found = prefabGroup[prefabName]
 			if found then
@@ -75,17 +76,20 @@ local UI = {
 		end
 	end;
 
-	Colorize = function(self, colors, obj)
-		local objs = obj:GetDescendants()
-		for color,value in pairs(colors) do
-			local colorAttributeName = "Use".. color .."Color"
-			for i,b in ipairs(objs) do
-				local attr = b:GetAttribute(colorAttributeName)
-				if attr then
-					b[attr] = value
-				end
-			end
-		end
+	Colorize = function(self, obj, colors)
+	    local objs = obj:GetDescendants()
+	    for i,b in ipairs(objs) do
+	        local attributes = b:GetAttributes()
+	        for name,value in pairs(attributes) do
+	            local color = string.match(name, "Use(.+)Color")
+	            if color then
+	                local colorVal = colors[color]
+	                if colorVal then
+	                    b[value] = colorVal
+	                end
+	            end
+	        end
+	    end
 	end;
 
 	GetThemeElement = function(self, uiName, theme, ...)

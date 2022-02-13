@@ -61,6 +61,13 @@ local RemoteCommands = setmetatable({
 			session:FireEvent(p, ...)
 		end
 	end;
+
+	GetSetting = function(p: Player, setting: string)
+		local declared = Root.Core.DeclaredSettings[string]
+		if declared and declared.ClientAllowed then
+			return Root.Settings[setting]
+		end
+	end;
 },{
 	__newindex = function(self, ind, value)
 		if self[ind] ~= nil then

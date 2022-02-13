@@ -201,6 +201,7 @@ return {
 
 			__newindex = function(self, ind, val)
 				Root.Core.SettingsOverrides[ind] = val
+				Utilities.Events.SettingChanged:Fire(ind, val)
 			end,
 		});
 
@@ -235,6 +236,15 @@ return {
 	end;
 
 	AfterInit = function(Root, Package)
+		Utilities.Events.SettingChanged:Connect(function(setting, val)
+			local declared = Core.DeclaredSettings[setting]
+			if declared and declared.ClientAllowed then
+				for i,p in ipairs(Service.Players:GetPlayers()) do
+					Root.Remote:Send(p, "UpdateSetting", setting, val)
+				end
+			end
+		end)
+
 		Utilities.Events.PlayerAdded:Connect(PlayerAdded)
 		Utilities.Events.PlayerRemoved:Connect(PlayerRemoved)
 		Utilities.Events.PlayerError:Connect(PlayerError)

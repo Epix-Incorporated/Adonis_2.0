@@ -26,14 +26,6 @@ local RemoteCommands = setmetatable({
 		end
 	end,
 
-	RunBytecode = function(str, ...)
-		return Root.Bytecode:LoadBytecode(str, {
-			Root = Root,
-			script = Instance.new("LocalScript"),
-			Data = table.pack(...)
-		})()
-	end,
-
 	ErrorMessage = function(data)
 		Utilities.Events.ServerError:Fire(data)
 	end,
@@ -41,8 +33,13 @@ local RemoteCommands = setmetatable({
 	DeclareSettings = function(settings)
 		if Root.Settings then
 			Utilities:MergeTables(Root.Settings, settings)
+			Utilities.Events.SettingsDeclared:Fire(settings)
 		end
-	end
+	end,
+
+	UpdateSetting = function(setting, value)
+		Root.Settings[setting] = value
+	end,
 },{
 	__newindex = function(self, ind, value)
 		if self[ind] ~= nil then

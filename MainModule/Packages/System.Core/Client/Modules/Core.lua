@@ -70,6 +70,7 @@ return {
 
 			__newindex = function(self, ind, val)
 				Root.Core.SettingsOverrides[ind] = val
+				Utilities.Events.SettingChanged:Fire(ind, val)
 			end,
 		});
 
