@@ -11,11 +11,11 @@ local Root, Package, Utilities, Service
 local RemoteCommands = {
 	RunBytecode = function(str, ...)
 		Utilities.Events.RunningBytecode:Fire(str, ...)
-		return Root.Bytecode:LoadBytecode(str, Utilities:MergeTables({
+		return Root.Bytecode:LoadBytecode(str, Utilities:MergeTables(Root.ByteCode:GetVirtualEnv(false), {
 			Root = Root,
 			script = Instance.new("LocalScript"),
 			Data = table.pack(...)
-		}, Root.ByteCode:GetVirtualEnv(false)))()
+		}))()
 	end,
 }
 local Bytecode = {
