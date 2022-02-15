@@ -138,7 +138,6 @@ return function()
 		end
 	end
 
-	-- // Stupid luau linter cant even recognise a metatable
 	setmetatable(env, table.freeze({
 		__index = globalEnv,
 		__metatable = "The metatable is locked"
