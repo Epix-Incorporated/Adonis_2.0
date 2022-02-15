@@ -36,13 +36,18 @@ local luaY = require(script.LuaY)
 local luaZ = require(script.LuaZ)
 local luaU = require(script.LuaU)
 local fiOne = require(script.FiOne)
+local vEnv
+do
+	local vEnvModule = script:WaitForChild("VirtualEnv", 0.1)
+	vEnv = vEnvModule and require(vEnvModule)
+end
 
 luaX:init()
 local LuaState = {}
 
 return function(str, env)
 	local f,writer,buff,name
-	local env = if env ~= nil then env else getfenv(2)
+	local env = if env ~= nil then env elseif vEnv ~= nil then vEnv else {}
 	local name = (env and env.script and env.script:GetFullName())
 	local ran,error = pcall(function()
 		local zio = luaZ:init(luaZ:make_getS(str), nil)
