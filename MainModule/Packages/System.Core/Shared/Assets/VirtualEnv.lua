@@ -1,7 +1,7 @@
 --!strict
 --[[
 	Description: Contains bytecode/loadstring-related functionality
-	Author: github@ccuser44/ALE111_boiPNG
+	Author: github@ccuser44
 	Date: 15.2.2022
 --]]
 
