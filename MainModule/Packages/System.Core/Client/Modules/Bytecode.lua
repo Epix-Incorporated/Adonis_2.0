@@ -15,10 +15,16 @@ local RemoteCommands = {
 			Root = Root,
 			script = Instance.new("LocalScript"),
 			Data = table.pack(...)
-		}, getfenv()))()
+		}, Root.ByteCode:GetVirtualEnv(false)))()
 	end,
 }
 local Bytecode = {
+
+	-- // Gets a virtual env instead of a function env to not disable optimisations
+	GetVirtualEnv = function(self, returnInstance)
+		local vEnvModule = Package.SharedAssets.VirtualEnv:Clone() :: ModuleScript
+		return returnInstance == true and vEnvModule or returnInstance == false and require(vEnvModule)()
+	end
 
 	--// Load bytecode
 	LoadBytecode = function(self, bytecode: string, envData: {})
