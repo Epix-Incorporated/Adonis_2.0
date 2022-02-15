@@ -38,7 +38,7 @@ local luaU = require(script.LuaU)
 local fiOne = require(script.FiOne)
 local vEnv
 do
-	local vEnvModule = script:WaitForChild("VirtualEnv", 0.1)
+	local vEnvModule = script:FindFirstChild("VirtualEnv")
 	vEnv = vEnvModule and require(vEnvModule)
 end
 
