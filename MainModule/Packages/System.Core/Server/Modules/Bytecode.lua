@@ -9,17 +9,19 @@
 local Root, Package, Utilities, Service;
 
 local Bytecode = {
-	
+
 	--// Get loadstring function
 	GetLoadstring = function(self)
-		local module = Package.Assets.Loadstring:Clone()
-		local fiOne = Package.SharedAssets.FiOne:Clone()
-		
+		local module = Package.Assets.Loadstring:Clone() :: ModuleScript
+		local vEnvModule = Package.SharedAssets.VirtualEnv:Clone() :: ModuleScript
+		local fiOne = Package.SharedAssets.FiOne:Clone() :: ModuleScript
+
 		fiOne.Parent = module
-		
+		vEnvModule.Parent = module
+
 		return require(module)
 	end,
-	
+
 	--// Get bytecode for str
 	GetBytecode = function(self, str: string)
 		local loadstring = self.Loadstring or self:GetLoadstring()
@@ -27,7 +29,13 @@ local Bytecode = {
 		
 		return buff
 	end,
-	
+
+	-- // Gets a virtual env instead of a function env to not disable optimisations
+	GetVirtualEnv = function(self, returnInstance)
+		local vEnvModule = Package.SharedAssets.VirtualEnv:Clone() :: ModuleScript
+		return returnInstance == true and vEnvModule or returnInstance == false and require(vEnvModule)()
+	end
+
 	--// Load bytecode
 	LoadBytecode = function(self, bytecode: string, envData: {})
 		local fiOneMod = Package.SharedAssets.FiOne:Clone()
