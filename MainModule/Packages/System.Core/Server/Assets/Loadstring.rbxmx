@@ -39,7 +39,7 @@ local fiOne = require(script.FiOne)
 local vEnv
 do
 	local vEnvModule = script:FindFirstChild("VirtualEnv")
-	vEnv = vEnvModule and require(vEnvModule)
+	vEnv = vEnvModule and require(vEnvModule)()
 end
 
 luaX:init()
