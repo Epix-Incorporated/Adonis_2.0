@@ -113,7 +113,7 @@ local UI = {
 				local interface = if controller then controller:FindFirstChild("Interface") else nil
 
 				if prefab:IsA("ScreenGui") then
-					self:Tag(prefab)
+					self:Tag(prefab, "ADONIS_UI", prefab.Name)
 				end
 
 				return (interface and require(interface)) or {
@@ -172,7 +172,7 @@ local UI = {
 		local found = {}
 		for i, child in ipairs(self:GetPlayerGui():GetDescendants()) do
 			if child ~= ignore and child.Name ~= ignore then
-				local attribute = child:GetAttribute("ADONIS_UI")
+				local attribute = self:GetTag("ADONIS_UI")
 				if attribute and (child.Name == name or attribute == name) then
 					if returnOne then
 						return child
@@ -185,19 +185,31 @@ local UI = {
 		return found
 	end;
 
-	--// Adds an attribute to the specified object indicating that this is an Adonis UI object
-	Tag = function(self, obj, name)
-		obj:SetAttribute("ADONIS_UI", name or obj.Name)
+	--// Adds an attribute to the specified object ; Uses special UI methods in-case the way this is handled ever changes.
+	Tag = function(self, obj, tagName, tagValue)
+		obj:SetAttribute(tagName, tagValue)
 	end;
 
-	Colorize = function(self, obj, colors)
+	--// Returns the specified attribute
+	GetTag = function(self, obj, tagName)
+		return obj:GetAttribute(tagName)
+	end;
+
+	--// Get attributes for the specified object
+	GetTags = function(self, obj)
+		return obj:GetAttributes()
+	end;
+
+	--// Given an object and theming information such as colors and font, applies desired font and colors to object and it's descendants based on attribute tags
+	ApplyThemeSettings = function(self, obj, data)
+		local data = data or Root.Settings.UI_ThemeSettings
 	    local objs = obj:GetDescendants()
 	    for i,b in ipairs(objs) do
 	        local attributes = b:GetAttributes()
 	        for name,value in pairs(attributes) do
-	            local color = string.match(name, "Use(.+)Color")
+	            local color = string.match(name, "^Use(.+)")
 	            if color then
-	                local colorVal = colors[color]
+	                local colorVal = data[color]
 	                if colorVal then
 	                    b[value] = colorVal
 	                end
@@ -235,6 +247,11 @@ local UI = {
 		else
 			Root.Warn("PlayerGui not found")
 		end
+	end;
+
+	--// Sets the object's parent to the appropriate destination ; May do more in the future and should be used instead of setting ScreenGui parent to PlayerGui manually
+	SetParent = function(self, obj)
+		obj.Parent = self:GetParent(obj)
 	end;
 
 	--// Currently unused

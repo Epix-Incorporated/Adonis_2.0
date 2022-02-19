@@ -702,11 +702,11 @@
 					<string name="Name">Interface</string>
 					<string name="ScriptGuid">{57248CCA-E2CF-480A-AA29-1577C3406BB3}</string>
 					<ProtectedString name="Source"><![CDATA[--[[
-	
+
 	Description: Handles various aspects of the UI object & Fires events which can be listened to.
 	Author: Sceleratis
 	Date: 2/5/2022
-	
+
 --]]
 
 
@@ -931,7 +931,7 @@ local PropertyHandlers = {
 	end,
 }
 
-return {
+return setmetatable({
 	Prefab = prefab,
 	UIEvent = UIEvent,
 
@@ -940,6 +940,10 @@ return {
 	HookEvent = HookEvent,
 	HookFullEvent = HookFullEvent,
 
+	GetObject = function(self, name)
+		return objects[name]
+	end,
+	
 	SetProperties = function(self, properties)
 		for prop,val in pairs(properties) do
 			local handler = PropertyHandlers[prop]
@@ -978,7 +982,12 @@ return {
 	SetSearchEnabled = function(self, value)
 		SetSearchEnabled(value)
 	end,
-}]]></ProtectedString>
+}, {
+	__index = function(self, ind)
+		return objects[ind]
+	end
+})
+]]></ProtectedString>
 					<int64 name="SourceAssetId">-1</int64>
 					<BinaryString name="Tags"></BinaryString>
 				</Properties>

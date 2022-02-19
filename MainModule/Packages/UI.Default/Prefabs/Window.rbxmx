@@ -2319,7 +2319,7 @@ local PropertyHandlers = {
 	end,
 }
 
-return {
+return setmetatable({
 	Prefab = prefab,
 	UIEvent = UIEvent,
 
@@ -2332,6 +2332,10 @@ return {
 	Hide = DoHide,
 	Refresh = DoRefresh,
 
+	GetObject = function(self, name)
+		return objects[name]
+	end,
+	
 	SetProperties = function(self, properties)
 		for prop,val in pairs(properties) do
 			local handler = PropertyHandlers[prop]
@@ -2355,7 +2359,11 @@ return {
 			end
 		end
 	end,
-}]]></ProtectedString>
+}, {
+	__index = function(self, ind)
+		return objects[ind]
+	end
+})]]></ProtectedString>
 					<int64 name="SourceAssetId">-1</int64>
 					<BinaryString name="Tags"></BinaryString>
 				</Properties>

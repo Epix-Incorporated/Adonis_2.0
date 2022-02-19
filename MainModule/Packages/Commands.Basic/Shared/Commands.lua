@@ -15,6 +15,83 @@ local Settings = setmetatable({}, {
 })
 
 local DeclareCommands = {
+	ViewCommands = {
+		Prefix = Settings.Prefix,
+		Aliases = { "cmds", "commands" },
+		Arguments = {},
+		Roles = {},
+		Permissions = { "Player" },
+		Description = "Displays all declared commands.",
+		ServerSide = function(data: {})
+			local plr = data.Player
+			local args = data.Arguments
+			local parsed = data.ParsedArguments
+			local commands = Root.Commands.DeclaredCommands
+
+			local function getCommandList()
+				local resultList = {}
+				for index,command in pairs(commands) do
+					if Root.Commands:PlayerCanRunCommand(plr, command) then
+						local mainText = (command.Prefix or '') .. command.Aliases[1]
+						local roleString = ''
+						local permString = ''
+						local subText = nil
+
+						if command.Arguments then
+							for i,arg in ipairs(command.Arguments) do
+								mainText = mainText .. Root.Settings.SplitChar .. "<" .. arg .. ">"
+							end
+						end
+
+						if command.Permissions then
+							for i,perm in ipairs(command.Permissions) do
+								permString = permString ..'; '.. perm
+							end
+						end
+
+						if command.Roles then
+							for i,role in ipairs(command.Roles) do
+								roleString = roleString ..';'.. role
+							end
+						end
+
+						subText = [[
+							Example: ]].. mainText .."\n"..[[
+							Description: ]].. (command.Description or '') .."\n"..[[
+							Roles: ]].. roleString .."\n"..[[
+							Permissions: ]].. permString
+
+						table.insert(resultList, {
+							Text = mainText,
+							Expanded = subText
+						})
+					end
+				end
+				return resultList
+			end
+
+			local session = Root.Remote:NewSession({plr})
+			local sessionKey = session.SessionKey
+			local sessionEvent; sessionEvent = session:Connect(function(p, cmd, data)
+				warn("GOT DATA?", p, cmd, data)
+				if cmd == "Refresh" then
+					session:SendToUser(p, "Refresh", getCommandList())
+				end
+			end)
+
+			data:SendClientSide(sessionKey, getCommandList())
+		end,
+		ClientSide = function(sessionKey, cmdData)
+			Root.UI:LoadModule({
+				Name = "List"
+			}, {
+				Title = "Commands",
+				List = cmdData,
+				Refresh = sessionKey
+			})
+		end,
+	},
+
 	DebugTest = {
 		Prefix = Settings.Prefix,
 		Aliases = { "debugtest", "debugtest2" },
@@ -22,6 +99,7 @@ local DeclareCommands = {
 		Parsers = {
 			testarg2 = function(data, cmdArg, text)
 				Root.Warn("PARSE ARG", data, cmdArg, text)
+				return text
 			end
 		},
 		Description = "Test command",

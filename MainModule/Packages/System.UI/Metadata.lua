@@ -27,14 +27,15 @@ return {
 			ClientAllowed = true,
 		},
 
-		["UI_Colors"] = {
+		["UI_ThemeSettings"] = {
 			DefaultValue = {
-				Primary = Color3.fromRGB(0, 59, 255),
-			    Secondary = Color3.fromRGB(227, 73, 67),
-			    Tertiary = Color3.fromRGB(255, 255, 255),
-			    Quaternary = Color3.fromRGB(56, 0, 79),
-			    Text = Color3.fromRGB(255, 255, 255),
-			    Icon = Color3.fromRGB(255, 255, 255),
+				PrimaryColor = Color3.fromRGB(0, 59, 255),
+			    SecondaryColor = Color3.fromRGB(227, 73, 67),
+			    TertiaryColor = Color3.fromRGB(255, 255, 255),
+			    QuaternaryColor = Color3.fromRGB(56, 0, 79),
+			    TextColor = Color3.fromRGB(255, 255, 255),
+			    IconColor = Color3.fromRGB(255, 255, 255),
+				Font = "Gotham",
 			},
 
 			Description = "UI Colors. Must be supported by the currently selected prefab or module group.",

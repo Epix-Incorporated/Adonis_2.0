@@ -12,7 +12,6 @@ local Package, Utilities, Root
 local Service
 
 local MakingEvent = false;
-local Sessions = {};
 
 --// Remote (client-to-server) commands
 local RemoteCommands = setmetatable({
@@ -180,7 +179,8 @@ local Methods = {
 				self.SessionEvent:Destroy()
 
 				self.Ended = true
-				Sessions[self.SessionKey] = nil
+
+				Root.Remote.Sessions:SetData(self.SessionKey, nil)
 			end
 		end;
 
@@ -200,7 +200,7 @@ local Remote = {
 	SharedKey = "";
 	EventObjectsName = "";
 	Commands = RemoteCommands;
-	Sessions = Sessions;
+	Sessions = {};
 
 	--// Player-related methods
 	Send = function(self, p, cmd, ...)
@@ -244,10 +244,10 @@ local Remote = {
 	end,
 
 	GetSession = function(self, sessionKey)
-		return Sessions[sessionKey];
+		return self.Sessions:GetData(sessionKey);
 	end,
 
-	NewSession = function(self, sessionType, func)
+	NewSession = function(self, users)
 		local session = {
 			Ended = false;
 			NumUsers = 0;
@@ -259,7 +259,6 @@ local Remote = {
 
 			ActiveUsers = {};
 
-			SessionType = sessionType;
 			SessionKey = Utilities:RandomString();
 			SessionEvent = Instance.new("BindableEvent");
 
@@ -289,7 +288,13 @@ local Remote = {
 			end
 		end)
 
-		Sessions[session.SessionKey] = session
+		if users then
+			for i,p in ipairs(users) do
+				session:AddUser(p)
+			end
+		end
+
+		Root.Remote.Sessions:SetData(session.SessionKey, session)
 
 		return session
 	end;
@@ -441,6 +446,10 @@ return {
 
 		Remote.EventObjectsName = objNameValue.Value
 		Remote.SharedKey = sharedKeyValue.Value
+		Remote.Sessions = Utilities:MemoryCache({
+			AccessResetsTimer = true,	--// Reset timeout timer on session access
+			Timeout = 60 * 60 			--// If a session is unused for an hour, assume it's dead... no session should be lasting this long without usage
+		})
 
 		Root.Core:DeclareDefaultPlayerData("RemoteKey", function()
 			return Remote.SharedKey

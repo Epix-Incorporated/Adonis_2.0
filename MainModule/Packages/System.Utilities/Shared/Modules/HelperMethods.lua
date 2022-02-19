@@ -205,6 +205,11 @@ local HelperMethods = {
 		return self:EditInstance(Instance.new(class), properties)
 	end,
 
+	--// Slightly more intuitive alternative to CreateInstance
+	NewInstance = function(self, ...)
+		return self:CreateInstance(...)
+	end,
+
 	--// Returns true if this is running on the server
 	IsServer = function(self): boolean
 		return self.Services.RunService:IsServer()

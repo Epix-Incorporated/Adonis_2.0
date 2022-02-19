@@ -151,7 +151,12 @@ local Core = {
 			end
 		end
 		return result
-	end
+	end,
+
+	UpdateSetting = function(self, setting, value, save)
+		Root.Core.SettingsOverrides[setting] = value
+		Utilities.Events.SettingChanged:Fire(setting, value, save)
+	end,
 }
 
 local function PlayerAdded(p)
@@ -192,16 +197,13 @@ return {
 			__index = function(self, ind)
 				if Root.Core.SettingsOverrides[ind] ~= nil then
 					return Root.Core.SettingsOverrides[ind]
-				elseif Root.Core.UserSettings[ind] ~= nil then
-					return Root.Core.UserSettings[ind]
 				else
 					return Core:SettingsIndex(self, ind);
 				end
 			end,
 
 			__newindex = function(self, ind, val)
-				Root.Core.SettingsOverrides[ind] = val
-				Utilities.Events.SettingChanged:Fire(ind, val)
+				Root.Core:UpdateSetting(ind, val)
 			end,
 		});
 

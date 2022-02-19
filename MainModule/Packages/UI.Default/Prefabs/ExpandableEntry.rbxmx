@@ -243,11 +243,11 @@
 					<string name="Name">Interface</string>
 					<string name="ScriptGuid">{DB74CA52-A8E3-48AF-A86C-2CE80A26C312}</string>
 					<ProtectedString name="Source"><![CDATA[--[[
-	
+
 	Description: Handles various aspects of the UI object & Fires events which can be listened to.
 	Author: Sceleratis
 	Date: 2/5/2022
-	
+
 --]]
 
 
@@ -365,7 +365,6 @@ local function Init()
 	FireEvent("Ready")
 end
 
-
 --// Property handlers
 local PropertyHandlers = {
 	MainContentSize = function(value)
@@ -383,15 +382,19 @@ local PropertyHandlers = {
 	end,
 }
 
-return {
+return setmetatable({
 	Prefab = prefab,
 	UIEvent = UIEvent,
-	
+
 	Init = Init,
 	FireEvent = FireEvent,
 	HookEvent = HookEvent,
 	HookFullEvent = HookFullEvent,
-	
+
+	GetObject = function(self, name)
+		return objects[name]
+	end,
+
 	SetProperties = function(self, properties)
 		for prop,val in pairs(properties) do
 			local handler = PropertyHandlers[prop]
@@ -419,7 +422,13 @@ return {
 		objects.SubContent.Visible = value
 		objects.Expand.Visible = value
 	end,
-}]]></ProtectedString>
+}, {
+	__index = function(self, ind)
+		return objects[ind]
+	end
+})
+
+]]></ProtectedString>
 					<int64 name="SourceAssetId">-1</int64>
 					<BinaryString name="Tags"></BinaryString>
 				</Properties>

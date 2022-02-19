@@ -42,6 +42,11 @@ local Core = {
 	GetAllSettings = function(self)
 		return Utilities:MergeTables({}, self.UserSettings, self.SettingsOverrides)
 	end,
+
+	UpdateSetting = function(self, setting, value)
+		Root.Core.SettingsOverrides[setting] = value
+		Utilities.Events.SettingChanged:Fire(setting, value)
+	end,
 }
 
 return {
@@ -69,8 +74,7 @@ return {
 			end,
 
 			__newindex = function(self, ind, val)
-				Root.Core.SettingsOverrides[ind] = val
-				Utilities.Events.SettingChanged:Fire(ind, val)
+				Root.Core:UpdateSetting(ind, val)
 			end,
 		});
 
