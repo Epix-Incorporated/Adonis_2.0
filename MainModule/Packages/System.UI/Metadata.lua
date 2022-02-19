@@ -13,14 +13,21 @@ return {
 	};
 
 	Settings = {
-		["Theme"] = {
+		["UI_ModuleGroup"] = {
 			DefaultValue = "Default",
-			Description = "Default UI theme",
+			Description = "Default UI module group",
 			Package = script.Parent,
 			ClientAllowed = true,
 		},
 
-		["Colors"] = {
+		["UI_PrefabGroup"] = {
+			DefaultValue = "Default",
+			Description = "Default UI prefab group.",
+			Package = script.Parent,
+			ClientAllowed = true,
+		},
+
+		["UI_Colors"] = {
 			DefaultValue = {
 				Primary = Color3.fromRGB(0, 59, 255),
 			    Secondary = Color3.fromRGB(227, 73, 67),
@@ -30,7 +37,7 @@ return {
 			    Icon = Color3.fromRGB(255, 255, 255),
 			},
 
-			Description = "Theme Colors. Must be supported by the currently selected theme.",
+			Description = "UI Colors. Must be supported by the currently selected prefab or module group.",
 			Package = script.Parent,
 			ClientAllowed = true,
 		}

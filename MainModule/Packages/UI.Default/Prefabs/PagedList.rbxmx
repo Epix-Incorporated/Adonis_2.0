@@ -2,7 +2,7 @@
 	<Meta name="ExplicitAutoJoints">true</Meta>
 	<External>null</External>
 	<External>nil</External>
-	<Item class="Frame" referent="RBXD57D62755FB9400C9C0F9376B5986102">
+	<Item class="Frame" referent="RBX054C2D6DF8DF4F1F80EE9B673911F062">
 		<Properties>
 			<bool name="Active">false</bool>
 			<Vector2 name="AnchorPoint">
@@ -56,7 +56,7 @@
 			<bool name="Visible">true</bool>
 			<int name="ZIndex">1</int>
 		</Properties>
-		<Item class="ScrollingFrame" referent="RBXC47CF3E0D77A4A3CADF8CD6482F83461">
+		<Item class="ScrollingFrame" referent="RBX6A7754BBA6BA4D5CB839A936F25F3865">
 			<Properties>
 				<bool name="Active">true</bool>
 				<Vector2 name="AnchorPoint">
@@ -136,7 +136,7 @@
 				<bool name="Visible">true</bool>
 				<int name="ZIndex">1</int>
 			</Properties>
-			<Item class="UIListLayout" referent="RBXA03AFBD7BD6E40ADB2E8E077D9356015">
+			<Item class="UIListLayout" referent="RBX8F1F7A0318924D0691FE3F9126AAC3F6">
 				<Properties>
 					<BinaryString name="AttributesSerialize"></BinaryString>
 					<token name="FillDirection">1</token>
@@ -153,7 +153,7 @@
 				</Properties>
 			</Item>
 		</Item>
-		<Item class="TextButton" referent="RBXDB29356222694F2A86D579E79ACC1680">
+		<Item class="TextButton" referent="RBX256E9B8E41D240DC9B1B2EDF110CAE46">
 			<Properties>
 				<bool name="Active">true</bool>
 				<Vector2 name="AnchorPoint">
@@ -233,7 +233,7 @@
 				<bool name="Visible">true</bool>
 				<int name="ZIndex">2</int>
 			</Properties>
-			<Item class="UICorner" referent="RBX147FBD3643444D778F7A9EEDD3CA96E0">
+			<Item class="UICorner" referent="RBX985A9F14472740268AF51FBA11F52DFC">
 				<Properties>
 					<BinaryString name="AttributesSerialize"></BinaryString>
 					<UDim name="CornerRadius">
@@ -245,7 +245,7 @@
 					<BinaryString name="Tags"></BinaryString>
 				</Properties>
 			</Item>
-			<Item class="ImageLabel" referent="RBX82330A631F734600991CC369E4F8B62D">
+			<Item class="ImageLabel" referent="RBX771F284892BB4D2BB3D9B3272F544349">
 				<Properties>
 					<bool name="Active">false</bool>
 					<Vector2 name="AnchorPoint">
@@ -334,7 +334,7 @@
 				</Properties>
 			</Item>
 		</Item>
-		<Item class="TextButton" referent="RBX6D1EFA3F55104B99A7567C907F63CD51">
+		<Item class="TextButton" referent="RBX917002F89BB94753BA85CCF6D0FBD41F">
 			<Properties>
 				<bool name="Active">true</bool>
 				<Vector2 name="AnchorPoint">
@@ -414,7 +414,7 @@
 				<bool name="Visible">true</bool>
 				<int name="ZIndex">2</int>
 			</Properties>
-			<Item class="UICorner" referent="RBX667552EAA6674848BA087665BB670E62">
+			<Item class="UICorner" referent="RBX6E606B7486384BE6A5F342CB1C50736B">
 				<Properties>
 					<BinaryString name="AttributesSerialize"></BinaryString>
 					<UDim name="CornerRadius">
@@ -426,7 +426,7 @@
 					<BinaryString name="Tags"></BinaryString>
 				</Properties>
 			</Item>
-			<Item class="ImageLabel" referent="RBX7F367286D70F42459C75DB52FA8F6571">
+			<Item class="ImageLabel" referent="RBXEC064541B7EA4250A9FC0C57F6EB1092">
 				<Properties>
 					<bool name="Active">false</bool>
 					<Vector2 name="AnchorPoint">
@@ -515,7 +515,7 @@
 				</Properties>
 			</Item>
 		</Item>
-		<Item class="TextLabel" referent="RBX12080F9EA47440B19D6CB4934E996546">
+		<Item class="TextLabel" referent="RBX7C6D130E71A24F9CA5AA26F72DC87DBD">
 			<Properties>
 				<bool name="Active">false</bool>
 				<Vector2 name="AnchorPoint">
@@ -592,7 +592,7 @@
 				<int name="ZIndex">1</int>
 			</Properties>
 		</Item>
-		<Item class="ImageLabel" referent="RBXDA965262B165448ABF76C98B539519EB">
+		<Item class="ImageLabel" referent="RBX06CAAE1908314C1C9A59E86518EEE9AB">
 			<Properties>
 				<bool name="Active">false</bool>
 				<Vector2 name="AnchorPoint">
@@ -680,14 +680,14 @@
 				<int name="ZIndex">5</int>
 			</Properties>
 		</Item>
-		<Item class="Folder" referent="RBX2BB20A7DB49B49AF8ED1A7D9158ED793">
+		<Item class="Folder" referent="RBXEA851C874C0A482887750D66064691C2">
 			<Properties>
 				<BinaryString name="AttributesSerialize"></BinaryString>
 				<string name="Name">Controller</string>
 				<int64 name="SourceAssetId">-1</int64>
 				<BinaryString name="Tags"></BinaryString>
 			</Properties>
-			<Item class="BindableEvent" referent="RBXDE43B7F8688A4425837FFEC01961F19C">
+			<Item class="BindableEvent" referent="RBX531943F10B444C94BFE7298F10F8AB32">
 				<Properties>
 					<BinaryString name="AttributesSerialize"></BinaryString>
 					<string name="Name">UIEvent</string>
@@ -695,7 +695,7 @@
 					<BinaryString name="Tags"></BinaryString>
 				</Properties>
 			</Item>
-			<Item class="ModuleScript" referent="RBX66182D94D38D4339BB3ABD7A6565F2AC">
+			<Item class="ModuleScript" referent="RBXE2D180359CE44A67B939FBB30EE49B9B">
 				<Properties>
 					<BinaryString name="AttributesSerialize"></BinaryString>
 					<Content name="LinkedSource"><null></null></Content>
@@ -703,21 +703,34 @@
 					<string name="ScriptGuid">{57248CCA-E2CF-480A-AA29-1577C3406BB3}</string>
 					<ProtectedString name="Source"><![CDATA[--[[
 	
-	Description: Returns an interface to the prefab object & events.
+	Description: Handles various aspects of the UI object & Fires events which can be listened to.
 	Author: Sceleratis
 	Date: 2/5/2022
 	
 --]]
 
+
+--// Prefab variables
 local folder = script.Parent
 local prefab = folder.Parent
-local UIHandler = folder:WaitForChild("UIHandler")
-local UIEvent = prefab:WaitForChild("UIEvent")
-local UIFunction = prefab:WaitForChild("UIFunction")
-local indexMethodCache = {}
+local mainFrame = prefab:WaitForChild("ScrollingFrame")
+local objects = {}
 
-local function FireEvent(self, ...)
-	UIEvent.Event:Fire(...)
+local pages = {}
+local contents = {}
+local pageSize = 100
+local curPage = 1
+
+local UIEvent = prefab:FindFirstChild("UIEvent") or Instance.new("BindableEvent")
+
+local Player = game:GetService("Players").LocalPlayer
+local InputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+
+
+--// Event/function handlers
+function FireEvent(type, ...)
+	UIEvent:Fire(type, ...)
 end
 
 local function HookFullEvent(self, ...)
@@ -732,43 +745,246 @@ local function HookEvent(event, func)
 	end)
 end
 
-local function FireFunction(self, ...)
-	return UIFunction:Invoke(...) 
+
+--// Helper functions
+function IsInFrame(obj, x, y)
+	local absPos = obj.AbsolutePosition
+	local absSize = obj.AbsoluteSize
+
+	return (x >= absPos.X and x <= absPos.X + absSize.X) and (y >= absPos.Y and y <= absPos.Y + absSize.Y)
 end
 
-local function SetEnabled(self, bool)
-	UIHandler.Disabled = not bool
-	prefab.Visible = bool
+function Batchify(tab, size)
+	local batches = {}
+	for b = 1, table.getn(tab), size do
+		local batch = {}
+		for i = b, b + size-1 do
+			local item = tab[i]
+			if item then
+				table.insert(batch, item)
+			else
+				break
+			end
+		end
+		table.insert(batches, batch)
+	end
+	return batches
 end
 
-return setmetatable({
+function StringIsEmptyOrNull(str)
+	return if str then string.match(str, "%S") ~= nil else false
+end
+
+
+--// Prefab-specific events/functionality
+function Filter(str)
+	local searchVal = objects.Search.TextBox.Text
+	if not StringIsEmptyOrNull(searchVal) then
+		if string.match(str, searchVal) then
+			return true
+		else
+			return false
+		end
+	else
+		return true
+	end
+end
+
+function Populate()
+	ClearContents()
+
+	local page = pages[math.min(table.getn(pages), curPage)]
+
+	if page then
+		mainFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+		for i,v in ipairs(page) do
+			local filter = v:GetAttribute("SearchKeywords")
+			if not filter or (filter and Filter(filter)) then
+				v.Parent = mainFrame
+			end
+		end
+	end
+
+	objects.PageNumber.Text = "Page: " .. curPage .. "/" .. table.getn(pages)
+	FireEvent("Populate", page, curPage, pages)
+end
+
+function ClearContents()
+	for i,v in ipairs(mainFrame:GetChildren()) do
+		if v:IsA("GuiObject") then
+			v.Parent = nil
+		end
+	end
+
+	FireEvent("ClearContents")
+end
+
+function UpdateButtonsShown()
+	local numPages = table.getn(pages)
+	if numPages <= 1 then
+		objects.NextPage.Visible = false
+		objects.PreviousPage.Visible = false
+		objects.PageNumber.Visible = false
+		mainFrame.Size = UDim2.new(mainFrame.Size.X.Scale, mainFrame.Size.X.Offset, 1, -35)
+	else
+		objects.NextPage.Visible = true
+		objects.PreviousPage.Visible = true
+		objects.PageNumber.Visible = true
+		mainFrame.Size = UDim2.new(mainFrame.Size.X.Scale, mainFrame.Size.X.Offset, 1, -65)
+	end
+end
+
+function SetSearchEnabled(value)
+	local numPages = table.getn(pages)
+
+	objects.Search.Visible = value
+
+	if objects.Search.Visible then
+		mainFrame.Position = UDim2.new(mainFrame.Position.X.Scale, mainFrame.Position.X.Offset, 0, objects.Search.Visible.AbsoluteSize.Y)
+		if numPages <= 1 then
+			mainFrame.Size = UDim2.new(mainFrame.Size.X.Scale, mainFrame.Size.X.Offset, 1, -35)
+		else
+			mainFrame.Size = UDim2.new(mainFrame.Size.X.Scale, mainFrame.Size.X.Offset, 1, -65)
+		end
+	else
+		mainFrame.Position = UDim2.new(mainFrame.Position.X.Scale, mainFrame.Position.X.Offset, 0, 0)
+		if numPages <= 1 then
+			mainFrame.Size = UDim2.new(mainFrame.Size.X.Scale, mainFrame.Size.X.Offset, 1, -5)
+		else
+			mainFrame.Size = UDim2.new(mainFrame.Size.X.Scale, mainFrame.Size.X.Offset, 1, -30)
+		end
+	end
+end
+
+--// Input handlers
+local function NextPage()
+	local newPage = curPage + 1
+	local numPages = table.getn(pages)
+
+	UpdateButtonsShown()
+
+	if numPages > 1 then
+		if newPage > numPages then
+			newPage = 1
+		end
+	end
+
+	curPage = newPage
+	Populate()
+	FireEvent("NextPage", newPage)
+end
+
+local function PreviousPage()
+	local newPage = curPage - 1
+	local numPages = table.getn(pages)
+
+	UpdateButtonsShown()
+
+	if numPages > 1 then
+		if newPage < 1 then
+			newPage = numPages
+		end
+	end
+
+	curPage = newPage
+	Populate()
+	FireEvent("PreviousPage", newPage)
+end
+
+--// Init
+local function Init()
+	UIEvent.Name = "UIEvent"
+
+	for i,obj in ipairs(prefab:GetChildren()) do
+		objects[obj.Name] = obj
+	end
+
+	objects.NextPage.Activated:Connect(NextPage)
+	objects.PreviousPage.Activated:Connect(PreviousPage)
+
+	UpdateButtonsShown()
+
+	FireEvent("Init")
+end
+
+
+--// Property handlers
+local PropertyHandlers = {
+	Contents = function(value)
+		contents = value
+		pages = Batchify(contents, pageSize)
+		Populate()
+		FireEvent("SetContents", value)
+	end,
+
+	Page = function(value)
+		curPage = value
+		Populate()
+		FireEvent("SetPage", value)
+	end,
+
+	PageSize = function(value)
+		pageSize = value
+		pages = Batchify(contents, pageSize)
+		Populate()
+		FireEvent("SetPageSize", value)
+	end,
+}
+
+return {
 	Prefab = prefab,
 	UIEvent = UIEvent,
-	UIFunction = UIFunction,
-	
-	SetEnabled = SetEnabled,
+
+	Init = Init,
 	FireEvent = FireEvent,
 	HookEvent = HookEvent,
 	HookFullEvent = HookFullEvent,
-	FireFunction = FireFunction,
-}, {
-	__index = function(self, index)
-		local cached = indexMethodCache[index]
-		if cached then
-			return cached
-		else
-			local new = function(self, ...) return FireFunction(self, index, ...) end
-			indexMethodCache[index] = new 
-			return new
+
+	SetProperties = function(self, properties)
+		for prop,val in pairs(properties) do
+			local handler = PropertyHandlers[prop]
+			if handler then
+				handler(val)
+			else
+				prefab[prop] = val
+			end
 		end
 	end,
-})]]></ProtectedString>
+
+	GetCurrentPage = function(self)
+		return curPage
+	end,
+
+	GetPages = function(self)
+		return pages
+	end,
+
+	GetContents = function(self)
+		return contents
+	end,
+
+	SetContents = function(self, value)
+		PropertyHandlers.Contents(value)
+	end,
+
+	SetPage = function(self, value)
+		PropertyHandlers.Page(value)
+	end,
+
+	SetPageSize = function(self, value)
+		PropertyHandlers.PageSize(value)
+	end,
+
+	SetSearchEnabled = function(self, value)
+		SetSearchEnabled(value)
+	end,
+}]]></ProtectedString>
 					<int64 name="SourceAssetId">-1</int64>
 					<BinaryString name="Tags"></BinaryString>
 				</Properties>
 			</Item>
 		</Item>
-		<Item class="Frame" referent="RBXEED3AAB2DE604EEC9BA558D37B1E8852">
+		<Item class="Frame" referent="RBXA72B91EED76F4C2D99DBE58119D66F31">
 			<Properties>
 				<bool name="Active">false</bool>
 				<Vector2 name="AnchorPoint">
@@ -822,7 +1038,7 @@ return setmetatable({
 				<bool name="Visible">true</bool>
 				<int name="ZIndex">1</int>
 			</Properties>
-			<Item class="TextBox" referent="RBXB1401DB49A9F4D318F77BB30E75EE5A5">
+			<Item class="TextBox" referent="RBX6B3D05A2E03B444E8E70E8E7AF927CCE">
 				<Properties>
 					<bool name="Active">true</bool>
 					<Vector2 name="AnchorPoint">
@@ -909,7 +1125,7 @@ eHRDb2xvcgIKAAAAVGV4dENvbG9yMw==]]></BinaryString>
 					<bool name="Visible">true</bool>
 					<int name="ZIndex">1</int>
 				</Properties>
-				<Item class="UICorner" referent="RBX2066EEAACA81453799F851B116AD7C8F">
+				<Item class="UICorner" referent="RBXF23E9A03E5EC49CAB4181D29EE863707">
 					<Properties>
 						<BinaryString name="AttributesSerialize"></BinaryString>
 						<UDim name="CornerRadius">

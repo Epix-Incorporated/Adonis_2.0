@@ -69,7 +69,7 @@ local Methods = {
 			end
 		end;
 
-		ConnectEvent = function(self, ...)
+		ConnectEvent = function(self, func)
 			assert(not self.Ended, "Cannot connect session event: Session Ended")
 
 			local connection = self.SessionEvent.Event:Connect(func)

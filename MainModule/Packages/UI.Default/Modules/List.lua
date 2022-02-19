@@ -1,13 +1,14 @@
 --[[
 
-	Description: List window.
+	Description: UI module.
 	Author: Sceleratis
 	Date: 2/12/2022
 
 --]]
 
 return {
-	OnLoad = function(self, Root, gTable, data, ...)
+	Name = "List";
+	LoadModule = function(self, Root, moduleData, data, ...)
 		--// Window
 		local window = Root.UI:GetPrefab("Window")
 		local contentFrame = window:GetContentFrame()
@@ -20,13 +21,15 @@ return {
 
 		--// Paged list
 		local pagedList = Root.UI:GetPrefab("PagedList")
+		pagedList.Prefab.Parent = contentFrame
 
 		local function Generate()
 			for i,entry in ipairs(data.List) do
 				if type(entry) == "table" then
 					local main = entry.Text
 					local sub = entry.Expanded
-					
+
+					--// TODO: create elements, toss at paged list
 				else
 					local val = tostring(entry)
 				end
@@ -53,6 +56,7 @@ return {
 			end
 		end
 
+		--// Init window prefab, set properties, and hook it's OnClose event
 		window:Init()
 		window:SetProperties(windowProperties)
 		window:HookEvent("Closed", function()
@@ -66,7 +70,10 @@ return {
 		end)
 
 		Generate()
-		window.Prefab.Parent = Root.Services
+
+		--// Tag ScreenGui as "List" and set parent
+		Root.UI:Tag(window, "List")
+		window.Prefab.Parent = Root.UI:GetParent(window)
 
         print("WINDOW", tostring(window))
 	end,

@@ -10,9 +10,9 @@
 local Root, Utilities, Service, Package;
 
 local RemoteCommands = {
-	GUI = function(uiName, data, ...)
-		Root.DebugWarn("CREATE UI ELEMENT", uiName, data, ...)
-		return Root.UI:NewElement(uiName, data, ...);
+	UI_LoadModule = function(data, ...)
+		Root.DebugWarn("LOAD UI MODULE", data, ...)
+		return Root.UI:LoadModule(data, ...);
 	end;
 }
 
@@ -20,59 +20,174 @@ local Methods = {
 }
 
 local UI = {
-	DeclaredThemes = {};
-	DeclaredPrefabs = { Default = {} };
-	ActiveObjects = {};
+	DeclaredModules = {};
+	DeclaredPrefabs = {};
+
+	DeclarePrefabGroup = function(self, groupData)
+		local groupName = groupData.Name;
+
+		if self.DeclaredPrefabs[groupName] then
+			Root.Warn("Prefab group already declared. Overwriting group:", groupName);
+			Utilities.Events.UIWarning:Fire("Overwriting existing prefab group", groupName);
+		end
+
+		self.DeclaredPrefabs[groupName] = {
+			Name = groupName,
+			Fallback = groupData.Fallback,
+			GroupData = groupData,
+			Prefabs = {}
+		}
+
+		Utilities.Events.UI_DeclaredPrefabGroup:Fire(groupData)
+	end,
+
+	DeclareModuleGroup = function(self, groupData)
+		local groupName = groupData.Name;
+
+		if self.DeclaredModules[groupName] then
+			Root.Warn("Prefab group already declared. Overwriting group:", groupName);
+			Utilities.Events.UIWarning:Fire("Overwriting existing prefab group", groupName);
+		end
+
+		self.DeclaredModules[groupName] = {
+			Name = groupName,
+			Fallback = groupData.Fallback,
+			GroupData = groupData,
+			Modules = {}
+		}
+
+		Utilities.Events.UI_DeclaredModuleGroup:Fire(groupData)
+	end,
 
 	DeclarePrefab = function(self, groupName, name, prefab)
 		if not self.DeclaredPrefabs[groupName] then
-			self.DeclaredPrefabs[groupName] = {}
+			self.DeclaredPrefabs[groupName] = {
+				Name = groupName,
+				Prefabs = {}
+			}
 		end
 
-		if self.DeclaredPrefabs[groupName][name] then
+		if self.DeclaredPrefabs[groupName].Prefabs[name] then
 			Root.Warn("Prefab for group already declared. Overwriting. Prefab Name:", name, "| Group Name:", groupName);
 			Utilities.Events.UIWarning:Fire("Overwriting existing prefab", name, groupName);
 		end
 
-		self.DeclaredPrefabs[groupName][name] = prefab
-		Utilities.Events.DeclaredPrefab:Fire(groupName, name, prefab)
+		self.DeclaredPrefabs[groupName].Prefabs[name] = prefab
+
+		Utilities.Events.UI_DeclaredPrefab:Fire(groupName, name, prefab)
 	end;
 
-	DeclareTheme = function(self, themeName, themeFolder)
-		if self.DeclaredThemes[themeName] then
-			Root.Warn("Theme already declared. Overwriting. ThemeName: ", themeName);
-			Utilities.Events.UIWarning:Fire("Overwriting existing theme", themeName, themeFolder);
+	DeclareModule = function(self, groupName, name, module)
+		if not self.DeclaredModules[groupName] then
+			self.DeclaredModules[groupName] = {
+				Name = groupName,
+				Modules = {}
+			}
 		end
 
-		self.DeclaredThemes[themeName] = themeFolder;
-		Utilities.Events.DeclaredTheme:Fire(themeName, themeFolder);
-	end;
-
-	GetTheme = function(self)
-		local theme = Root.Settings.Theme or Root.Remote:Get("Setting", "Theme") or "Default"
-
-		if theme then
-			self.CachedTheme = theme
+		if self.DeclaredModules[groupName].Modules[name] then
+			Root.Warn("UI module for group already declared. Overwriting. Module Name:", name, "| Group Name:", groupName);
+			Utilities.Events.UIWarning:Fire("Overwriting existing UI module", name, groupName);
 		end
 
-		return theme or "Default"
+		self.DeclaredModules[groupName].Modules[name] = module
+
+		Utilities.Events.UI_DeclaredModule:Fire(groupName, name, module)
 	end;
 
-	GetPrefab = function(self, prefabName, prefabGroupName)
-		local prefabGroupName = prefabGroupName or Root.Globals.PrefabOverride or Root.Globals.ThemeOverride or self.CachedTheme or Root.Settings.Theme
-		local prefabGroup = self.DeclaredPrefabs[prefabGroupName] or self.DeclaredPrefabs.Default
+	GetPrefab = function(self, prefabName, groupName)
+		local defaultGroup = self.DecalredPrefabs.Default
+		local prefabGroupName = groupName or Root.Globals.UI_PrefabGroupOverride or self.CachedPrefabGroup or Root.Settings.UI_PrefabGroup
+		local prefabGroup = self.DeclaredPrefabs[groupName] or defaultGroup
+		local fallbackGroupName = prefabGroup.Fallback
+		local fallbackGroup = if fallbackGroupName then self.DeclaredPrefabs[fallbackGroupName] else nil
+
+		Root.DebugWarn("GETTING PREFAB", prefabName, groupName)
+
 		if prefabGroup then
-			local found = prefabGroup[prefabName]
+			local found = prefabGroup.Prefabs[prefabName] or (fallbackGroup and fallbackGroup.Prefabs[prefabName]) or (defaultGroup and defaultGroup.Prefabs[prefabName])
+
 			if found then
 				local prefab = found:Clone()
 				local controller = prefab:FindFirstChild("Controller")
 				local interface = if controller then controller:FindFirstChild("Interface") else nil
+
+				if prefab:IsA("ScreenGui") then
+					self:Tag(prefab)
+				end
+
 				return (interface and require(interface)) or {
 					Prefab = prefab,
 					Controller = controller
 				}
+			else
+				Root.Warn("UI prefab not found! prefab:", prefabName, " | Group:", groupName);
+				Utilities.Events.UIWarning:Fire("Prefab not found", prefabName, groupName);
+			end
+		else
+			Root.Warn("No UI prefab group found! Prefab:", prefabName, " | Group:", groupName);
+			Utilities.Events.UIWarning:Fire("Prefab group not found", prefabName, groupName);
+		end
+	end;
+
+	GetModule = function(self, moduleName, groupName)
+		local defaultGroup = self.DeclaredModules.Default
+		local moduleGroupName = groupName or Root.Globals.UI_ModuleGroupOverride or self.CachedModuleGroup or Root.Settings.UI_ModuleGroup
+		local moduleGroup = self.DeclaredModules[groupName] or defaultGroup
+		local fallbackGroupName = moduleGroup.Fallback
+		local fallbackGroup = if fallbackGroupName then self.DeclaredModules[fallbackGroupName] else nil
+
+		Root.DebugWarn("GETTING UI MODULE", moduleName, groupName)
+
+		if moduleGroup then
+			local found = moduleGroup.Modules[moduleName] or (fallbackGroup and fallbackGroup.Modules[moduleName]) or (defaultGroup and defaultGroup.Modules[moduleName])
+
+			if found then
+				return found
+			else
+				Root.Warn("UI module not found! Module:", moduleName, " | Group:", groupName);
+				Utilities.Events.UIWarning:Fire("Module not found", moduleName, groupName);
+			end
+		else
+			Root.Warn("No UI module group found! Module:", moduleName, " | Group:", groupName);
+			Utilities.Events.UIWarning:Fire("Module group not found", moduleName, groupName);
+		end
+	end;
+
+	LoadModule = function(self, moduleData, ...)
+		local module = self:GetModule(moduleData.Name, moduleData.Group)
+		if module then
+			Root.DebugWarn("REQUIRING UI MODULE", moduleData)
+			local handler = require(module)
+			if handler and type(handler) == "table" and handler.LoadModule then
+				Root.DebugWarn("LOADING UI MODULE", moduleData)
+				Utilities.Events.UI_LoadingModule:Fire(moduleData, module, ...)
+				return handler:LoadModule(Root, moduleData, ...)
 			end
 		end
+	end;
+
+	--// Finds any objects in PlayerGui that have the UI attribute tag
+	FindElements = function(self, name, ignore, returnOne)
+		local found = {}
+		for i, child in ipairs(self:GetPlayerGui():GetDescendants()) do
+			if child ~= ignore and child.Name ~= ignore then
+				local attribute = child:GetAttribute("ADONIS_UI")
+				if attribute and (child.Name == name or attribute == name) then
+					if returnOne then
+						return child
+					else
+						found[attribute or child.Name] = child
+					end
+				end
+			end
+		end
+		return found
+	end;
+
+	--// Adds an attribute to the specified object indicating that this is an Adonis UI object
+	Tag = function(self, obj, name)
+		obj:SetAttribute("ADONIS_UI", name or obj.Name)
 	end;
 
 	Colorize = function(self, obj, colors)
@@ -91,99 +206,12 @@ local UI = {
 	    end
 	end;
 
-	GetThemeElement = function(self, uiName, theme, ...)
-		local theme = self.DeclaredThemes[theme] or self.DeclaredThemes.Default
-
-		Root.DebugWarn("UI THEME FOUND", theme, "FOR", uiName)
-
-		if theme then
-			if theme:IsA("ModuleScript") then
-				Root.DebugWarn("THEME IS MODULESCRIPT")
-				return require(theme)(uiName, theme, ...)
-			else
-				local baseThemeObj = theme:FindFirstChild("BaseTheme");
-				local baseTheme = if baseThemeObj then baseThemeObj.Value else "Default"
-				local targObj = theme:FindFirstChild(uiName) or (if baseTheme and baseTheme ~= theme then self:GetUIElement(uiName, Utilities:MergeTables({}, theme, baseTheme), ...) else nil);
-				if targObj then
-					Root.DebugWarn("Return Element", targObj)
-					return targObj;
-				else
-					Root.Warn("Theme object not found:", uiName)
-				end
-			end
-		else
-			Root.Warn("Theme not found:", theme);
-		end
-	end;
-
-	LoadElement = function(self, obj, uiName, ...)
-		Root.DebugWarn("LOADING ELEMENT", obj, uiName, ...)
-
-		if obj:IsA("ModuleScript") then
-			Root.DebugWarn("IS MODULESCRIPT", obj)
-
-			return self:LoadModule(obj, obj, ...)
-		else
-			Root.DebugWarn("IS NOT MODULESCRIPT", obj)
-
-			local configMod = obj:FindFirstChild("Config")
-			if configMod and configMod:IsA("ModuleScript") then
-				Root.DebugWarn("CONFIGMOD IS MODULESCRIPT, LOADMODULE", configMod)
-				return self:LoadModule(obj, configMod, ...)
-			else
-				Root.Warn("Config module not found for:", uiName)
-			end
-		end
-	end;
-
-	NewElement = function(self, uiName, ...)
-		local theme = Root.Settings.Theme
-		local obj = self:GetThemeElement(uiName, theme, ...)
-		if obj and type(obj) == "function" then
-			Root.DebugWarn("GUI Object is function, return after call");
-			return obj(Root, uiName, theme, ...)
-		elseif obj then
-			Root.DebugWarn("LoadElement", obj)
-			return self:LoadElement(obj, uiName, theme, ...)
-		end
-	end;
-
-	GetElement = function(self, uiNameOrObj, ignore, returnOne)
-		local found = {}
-		for ind,gTable in pairs(self.ActiveObjects) do
-			if (gTable.Name == uiNameOrObj or gTable.Object == uiNameOrObj) and gTable.Name ~= ignore and gTable.Object ~= ignore then
-				if returnOne then
-					return gTable
-				else
-					table.insert(found, gTable)
-				end
-			end
-		end
-		return found
-	end;
-
-	LoadModule = function(self, gui, configMod, ...)
-		local config = require(configMod);
-
-		Root.DebugWarn("GOT CONFIG", config)
-		if config and type(config) == "table" then
-			local func = config.OnLoad;
-			local gTable = self:GetHandler(gui, config, ...);
-
-			Root.DebugWarn("GOT GUI HANDLER:", gTable)
-			if func then
-				Root.DebugWarn("LOADMODULE RUN FUNC", Root, gTable, ...)
-				return func(config, Root, gTable, ...)
-			else
-				Root.Warn("OnLoad method not found for: ", tostring(gui))
-			end
-		end
-	end;
-
+	--// Returns LocalPlayer's PlayerGui
 	GetPlayerGui = function(self)
 		return Service.Players.LocalPlayer:FindFirstChildOfClass("PlayerGui")
 	end;
 
+	--// Given an object, determine and return appropriate parent
 	GetParent = function(self, obj)
 		local playerGui = Service.Players.LocalPlayer:FindFirstChildOfClass("PlayerGui")
 		if playerGui then
@@ -209,6 +237,7 @@ local UI = {
 		end
 	end;
 
+	--// Currently unused
 	GetHandler = function(self, gui, config, ...)
 		local gIndex = Utilities:RandomString()
 		local gTable = {

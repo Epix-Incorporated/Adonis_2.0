@@ -14,7 +14,7 @@ local Package = {
 	Metadata = require(PackageFolder.Metadata);
 
 	Client = PackageFolder.Client;
-	Theme = PackageFolder:FindFirstChild("Theme");
+	Modules = PackageFolder:FindFirstChild("Modules");
 	Prefabs = PackageFolder:FindFirstChild("Prefabs");
 }
 
@@ -49,14 +49,31 @@ return {
 		RootTable = Root
 		Verbose = if Root.Verbose ~= nil then Root.Verbose else Verbose
 
+		if Package.Metadata.ModuleGroup and not Root.UI.DeclaredModuleGroups[Package.Metadata.ModuleGroup] then
+			Root.UI:DeclareModuleGroup({
+				Name = Package.Metadata.ModuleGroup,
+				Fallback = Package.Metadata.ModuleFallback
+			})
+		end
 
-		if Package.Theme then
-			Root.UI:DeclareTheme(Package.Metadata.ThemeName, Package.Theme)
+		if Package.Metadata.PrefabGroup and not Root.UI.DeclaredPrefabGroups[Package.Metadata.PrefabGroup] then
+			Root.UI:DeclarePrefabGroup({
+				Name = Package.Metadata.PrefabGroup,
+				Fallback = Package.Metadata.PrefabFallback
+			})
+		end
+
+		if Package.Modules then
+			for i,child in ipairs(Package.Modules:GetChildren()) do
+				if child:IsA("ModuleScript") then
+					Root.UI:DeclareModule(Package.Metadata.ModuleGroup, child.Name, child)
+				end
+			end
 		end
 
 		if Package.Prefabs then
 			for i,obj in ipairs(Package.Prefabs:GetChildren()) do
-				Root.UI:DeclarePrefab(Package.Theme, obj.Name, obj)
+				Root.UI:DeclarePrefab(Package.Metadata.PrefabGroup, obj.Name, obj)
 			end
 		end
 

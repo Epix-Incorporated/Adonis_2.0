@@ -19,15 +19,18 @@ local UI = {
 }
 
 local Remote = {
-	MakeGui = function(self, p: Player, uiName, ...)
-		local theme = UI:GetTheme(p)
-		Root.DebugWarn("SENDING: ", p, "GUI", uiName, ...)
-		self:Send(p, "GUI", uiName, ...)
+	MakeUI = function(self, p: Player, moduleName, ...)
+		Root.DebugWarn("SENDING: ", p, "GUI", moduleName, ...)
+		self:Send(p, "UI_LoadModule", {
+			Name = moduleName
+		}, ...)
 	end;
 
-	GetGui = function(self, p: Player, uiName, ...)
-		local data = Root.Core:GetPlayerData(p)
-		return self:Get(p, "GUI", uiName, ...)
+	MakeUI_Return = function(self, p: Player, moduleName, ...)
+		Root.DebugWarn("SENDING: ", p, "UI_LoadModule", moduleName, ...)
+		return self:Get(p, "UI_LoadModule", {
+			Name = moduleName
+		}, ...)
 	end;
 }
 
