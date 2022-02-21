@@ -15,7 +15,7 @@
     </a>
 </div>
 <hr/>
-
+<!--moonwave-hide-before-this-line-->
 Adonis is a server moderation and management system created for use on the Roblox platform.
 
 # NOTICE
