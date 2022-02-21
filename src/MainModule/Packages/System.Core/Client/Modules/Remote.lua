@@ -6,6 +6,21 @@
 
 --]]
 
+--// Class definitions
+--- Responsible for basic client-server communication.
+--- @class Client.Remote
+--- @client
+--- @tag Core
+
+--- Remote (server-to-client) commands
+--- @class Client.Remote.Commands
+--- @tag Remote Commands
+--- @client
+
+--- Responsible for handling temporary client-server communication channels.
+--- @class ClientSession
+--- @client
+--- @tag Remote
 
 local Package, Utilities, Service, Root
 
@@ -13,87 +28,61 @@ local GettingEvent = false
 local PlayerData = {}
 local Sessions = {}
 
---// Remote (server-to-client) commands
-local RemoteCommands = setmetatable({
-	SessionData = function(sessionKey, ...)
-		if sessionKey then
-			if Sessions[sessionKey] then
-				local session = Root.Remote:GetSession(sessionKey)
-				if session then
-					session:FireEvent(...)
-				end
-			end
-		end
-	end,
-
-	ErrorMessage = function(data)
-		Utilities.Events.ServerError:Fire(data)
-	end,
-
-	DeclareSettings = function(settings)
-		if Root.Settings then
-			for setting,value in pairs(settings) do
-				rawset(Root.Settings, setting, value)
-			end
-			Utilities.Events.SettingsDeclared:Fire(settings)
-		end
-	end,
-
-	UpdateSetting = function(setting, value)
-		rawset(Root.Settings, setting, value)
-	end,
-},{
-	__newindex = function(self, ind, value)
-		if self[ind] ~= nil then
-			Root.Warn("RemoteCommand index already declared. Overwriting...", ind)
-		end
-
-		rawset(self, ind, value)
-
-		Utilities.Events.RemoteCommandDeclared:Fire(ind, value)
-	end
-})
-
 --// Methods
 local Methods = {
-	Session = {
-		SendToServer = function(self, ...)
-			if not self.Ended then
-				Root.Remote:Send("SessionData", ...)
-			end
-		end,
-
-		FireEvent = function(self, ...)
-			if not self.Ended then
-				self.SessionEvent:Fire(...)
-			end
-		end;
-
-		ConnectEvent = function(self, func)
-			assert(not self.Ended, "Cannot connect session event: Session Ended")
-
-			local connection = self.SessionEvent.Event:Connect(func)
-			table.insert(self.Events, connection)
-
-			return connection
-		end;
-
-		End = function(self)
-			if not self.Ended then
-				for t, event in pairs(self.Events) do
-					event:Disconnect()
-					self.Events[t] = nil
-				end
-
-				self:SendToServer("LeftSession")
-				self.SessionEvent:Destroy()
-				self.Ended = true
-
-				Sessions[self.SessionKey] = nil
-			end
-		end;
-	}
+	Session = {}
 }
+
+--- Send data to the server
+--- @within ClientSession
+--- @param self table
+--- @param ... any
+function Methods.Session:SendToServer(self, ...)
+	if not self.Ended then
+		Root.Remote:Send("SessionData", ...)
+	end
+end
+
+--- Fire session event
+--- @within ClientSession
+--- @param self table
+--- @param ... any
+function Methods.Session:FireEvent(self, ...)
+	if not self.Ended then
+		self.SessionEvent:Fire(...)
+	end
+end
+
+--- Connect session event
+--- @within ClientSession
+--- @param self table
+--- @param func function -- Function to connect
+function Methods.Session:ConnectEvent(self, func)
+	assert(not self.Ended, "Cannot connect session event: Session Ended")
+
+	local connection = self.SessionEvent.Event:Connect(func)
+	table.insert(self.Events, connection)
+
+	return connection
+end
+
+--- End session
+--- @within ClientSession
+--- @param self table
+function Methods.Session:End(self)
+	if not self.Ended then
+		for t, event in pairs(self.Events) do
+			event:Disconnect()
+			self.Events[t] = nil
+		end
+
+		self:SendToServer("LeftSession")
+		self.SessionEvent:Destroy()
+		self.Ended = true
+
+		Sessions[self.SessionKey] = nil
+	end
+end
 
 --// Remote
 local Remote = {
@@ -276,6 +265,47 @@ local Remote = {
 		end
 	end,
 }
+
+--// Remote Commands \\--
+local RemoteCommands = setmetatable({},{
+	__newindex = function(self, ind, value)
+		if self[ind] ~= nil then
+			Root.Warn("RemoteCommand index already declared. Overwriting...", ind)
+		end
+
+		rawset(self, ind, value)
+
+		Utilities.Events.RemoteCommandDeclared:Fire(ind, value)
+	end
+})
+
+RemoteCommands.SessionData = function(sessionKey, ...)
+	if sessionKey then
+		if Sessions[sessionKey] then
+			local session = Root.Remote:GetSession(sessionKey)
+			if session then
+				session:FireEvent(...)
+			end
+		end
+	end
+end
+
+RemoteCommands.ErrorMessage = function(data)
+	Utilities.Events.ServerError:Fire(data)
+end
+
+RemoteCommands.DeclareSettings = function(settings)
+	if Root.Settings then
+		for setting,value in pairs(settings) do
+			rawset(Root.Settings, setting, value)
+		end
+		Utilities.Events.SettingsDeclared:Fire(settings)
+	end
+end
+
+RemoteCommands.UpdateSetting = function(setting, value)
+	rawset(Root.Settings, setting, value)
+end
 
 return {
 	Init = function(cRoot, cPackage)

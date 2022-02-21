@@ -8,6 +8,9 @@
 
 --- @class PackageHandler
 --- Responsible for package dependency resolution and package initialization.
+--- @client
+--- @server
+--- @tag Core
 
 local oWarn = warn
 local Verbose = false

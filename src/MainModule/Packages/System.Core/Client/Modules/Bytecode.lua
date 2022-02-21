@@ -6,34 +6,54 @@
 
 --]]
 
+--- Bytecode-related functionality.
+--- @class Client.Bytecode
+--- @tag Core
+--- @client
+
 local Root, Package, Utilities, Service
 
-local RemoteCommands = {
-	RunBytecode = function(str, ...)
-		Utilities.Events.RunningBytecode:Fire(str, ...)
-		return Root.Bytecode:LoadBytecode(str, Utilities:MergeTables(Root.ByteCode:GetVirtualEnv(false), {
-			Root = Root,
-			script = Instance.new("LocalScript"),
-			Data = table.pack(...)
-		}))()
-	end,
-}
-local Bytecode = {
+local Bytecode = {}
+local RemoteCommands = {}
 
-	-- // Gets a virtual env instead of a function env to not disable optimisations
-	GetVirtualEnv = function(self, returnInstance)
-		local vEnvModule = Package.SharedAssets.VirtualEnv:Clone() :: ModuleScript
-		return returnInstance == true and vEnvModule or returnInstance == false and require(vEnvModule)()
-	end,
 
-	--// Load bytecode
-	LoadBytecode = function(self, bytecode: string, envData: {})
-		local fiOneMod = Package.SharedAssets.FiOne:Clone()
-		local fiOne = require(fiOneMod)
+--// Bytecode Methods
 
-		return fiOne(bytecode, envData)
-	end,
-}
+--- Gets a virtual env instead of a function env to not disable optimisations
+--- @within Client.Bytecode
+--- @param self table -- Self
+--- @param returnInstance Instance
+function Bytecode:GetVirtualEnv(self, returnInstance)
+	local vEnvModule = Package.SharedAssets.VirtualEnv:Clone() :: ModuleScript
+	return returnInstance == true and vEnvModule or returnInstance == false and require(vEnvModule)()
+end
+
+--- Load bytecode
+--- @within Client.Bytecode
+--- @param self table -- Self
+function Bytecode:LoadBytecode(self, bytecode: string, envData: {})
+	local fiOneMod = Package.SharedAssets.FiOne:Clone()
+	local fiOne = require(fiOneMod)
+	return fiOne(bytecode, envData)
+end
+
+
+--// Remote Commands
+
+--- Run bytecode
+--- @function RunBytecode
+--- @within Client.Remote.Commands
+--- @tag Remote Command
+--- @param str string -- Bytecode to execute
+--- @param ... any -- Additional arguments
+RemoteCommands.RunBytecode = function(str, ...)
+	Utilities.Events.RunningBytecode:Fire(str, ...)
+	return Root.Bytecode:LoadBytecode(str, Utilities:MergeTables(Root.ByteCode:GetVirtualEnv(false), {
+		Root = Root,
+		script = Instance.new("LocalScript"),
+		Data = table.pack(...)
+	}))()
+end
 
 return {
 	Init = function(cRoot, cPackage)
