@@ -41,7 +41,6 @@ end
 
 --- Runs the given function and calls FormatError for any errors.
 --- @within PackageHandler
---- @yields
 --- @param func function -- The function to run
 --- @param ... any -- Package arguments
 local function RunFunction(func: ()->(), ...)
@@ -57,7 +56,6 @@ end
 
 --- Returns the metadata for a given package
 --- @within PackageHandler
---- @yields
 --- @param Package -- The package folder we're getting metadata from.
 --- @return table --  Metadata table
 local function GetMetadata(Package: Folder): {[string]:any}
