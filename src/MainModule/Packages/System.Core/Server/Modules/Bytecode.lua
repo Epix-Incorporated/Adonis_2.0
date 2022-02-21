@@ -34,7 +34,7 @@ local Bytecode = {
 	GetVirtualEnv = function(self, returnInstance)
 		local vEnvModule = Package.SharedAssets.VirtualEnv:Clone() :: ModuleScript
 		return returnInstance == true and vEnvModule or returnInstance == false and require(vEnvModule)()
-	end
+	end,
 
 	--// Load bytecode
 	LoadBytecode = function(self, bytecode: string, envData: {})
