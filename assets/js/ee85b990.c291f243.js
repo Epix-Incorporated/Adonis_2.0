@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkdocs=self.webpackChunkdocs||[]).push([[525],{7868:function(s){s.exports=JSON.parse('{"sourceUrl":"https://github.com/Sceleratis/Adonis_2.0/blob/release","baseUrl":"/Adonis_2.0/","classOrder":[],"apiCategories":[]}')}}]);
