@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkdocs=self.webpackChunkdocs||[]).push([[824],{90081:function(e){e.exports=JSON.parse('{"functions":[],"properties":[],"types":[],"name":"Client.Remote","desc":"Responsible for basic client-server communication.","tags":["Core"],"realm":["Client"],"source":{"line":14,"path":"src/MainModule/Packages/System.Core/Client/Modules/Remote.lua"}}')}}]);
