@@ -3,11 +3,11 @@
     "tree": {
         "$className": "Folder",
         "MainModule": {
-            "$path": "../MainModule"
+            "$path": "../src/MainModule"
         },
         "Adonis2.0_Loader": {
             "$className": "Model",
-            "$path": "../Loader"
+            "$path": "../src/Loader"
         }
     }
 }
