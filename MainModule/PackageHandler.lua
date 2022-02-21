@@ -1,13 +1,16 @@
 --[[
 
-	Description: Responsible for resolving package dependency resolution and package initialization.
+	Description: Responsible for package dependency resolution and package initialization.
 	Author: Sceleratis
 	Date: 11/20/2021
-	
+
 --]]
 
-local oWarn = warn;
-local Verbose = false;
+--- @class PackageHandler
+--- Responsible for package dependency resolution and package initialization.
+
+local oWarn = warn
+local Verbose = false
 
 --// Warn
 local function warn(...)
@@ -33,23 +36,31 @@ end
 
 --// Formatted error
 local function FormatError(...)
-	error(string.format(...))
+	error(string.format(...), 2)
 end
 
---// Runs the given function and calls FormatError for any errors
-local function RunFunction(Function, ...) 
+--- Runs the given function and calls FormatError for any errors.
+--- @within PackageHandler
+--- @yields
+--- @param func function -- The function to run
+--- @param ... any -- Package arguments
+local function RunFunction(func: ()->(), ...)
 	--//xpcall(Function, function(err)
 	--//	FormatError("Loading Error: %s", err)
 	--//end, ...)
-	local ran,err = pcall(Function, ...)
-	
+	local ran, err = pcall(func, ...)
+
 	if not ran then
 		FormatError("Loading Error: %s", err)
 	end
 end
 
---// Returns the metadata for a given package
-local function GetMetadata(Package: Folder)
+--- Returns the metadata for a given package
+--- @within PackageHandler
+--- @yields
+--- @param Package -- The package folder we're getting metadata from.
+--- @return table --  Metadata table
+local function GetMetadata(Package: Folder): {[string]:any}
 	local metaMod = Package:FindFirstChild("Metadata")
 	if metaMod and metaMod:IsA("ModuleScript") then
 		local metaData = require(metaMod)
@@ -63,40 +74,50 @@ local function GetMetadata(Package: Folder)
 	end
 end
 
---// For a given folder, returns a list of all packages within that folder which are intended to be ran by the server
---// Result table format: {[name .. "==" .. version] = package }
+--- For a given folder, returns a list of all packages within that folder which are intended to be ran by the server.
+--- Result table format: {[name .. "==" .. version] = package }
+--- @within PackageHandler
+--- @param Packages table -- Table containing packages from which we will extract only server packages.
+--- @return table -- Table containing found server packages.
 local function GetServerPackages(Packages: {})
 	local found = {}
 
 	debug("GET SERVER PACKAGES")
-	
-	for i,v in ipairs(Packages) do
+
+	for i, v in ipairs(Packages) do
 		debug("CHECK PACKAGE FOR SERVER", v)
-		
+
 		if v:FindFirstChild("Server") then
 			debug("IS SERVER PACKAGE", v)
-			
+
 			local metadata = GetMetadata(v)
 			local pkgString = metadata.Name .. "==" .. metadata.Version
-			
+
 			debug("METADATA: ", metadata)
 			debug("PKGSTRING: ", pkgString)
-			
+
 			if not found[pkgString] then
 				found[pkgString] = v
 			else
-				FormatOut("Warning! Conflicting Name and Version for Package {} found!", pkgString)
+				FormatOut("Warning! Conflicting Name and Version for Package %s found!", pkgString)
 			end
 		end
 	end
 	return found
 end
 
---// For a given folder, returns a list of all packages within that folder which are intended to be ran by the client
---// Result table format: {[name .. "==" .. version] = package }
+--- For a given folder, returns a list of all packages within that folder which are intended to be ran by the client.
+--- Result table format: {[name .. "==" .. version] = package }
+--- @within PackageHandler
+--- @param Packages table -- Table containing packages to extract client packages from.
+--- @return table -- Table containing found client packages.
 local function GetClientPackages(Packages: {})
 	local found = {}
-	for i,v in ipairs(Packages) do
+
+	debug("GET CLIENT PACKAGES")
+
+	for i, v in ipairs(Packages) do
+		debug("FOUND PACKAGE", v)
 		if v:FindFirstChild("Client") then
 			local metadata = GetMetadata(v)
 			local pkgString = metadata.Name .. "==" .. metadata.Version
@@ -104,40 +125,49 @@ local function GetClientPackages(Packages: {})
 			if not found[pkgString] then
 				found[pkgString] = v
 			else
-				FormatOut("Warning! Conflicting Name and Version for Package {} found!", pkgString)
+				FormatOut("Warning! Conflicting Name and Version for Package %s found!", pkgString)
 			end
 		end
 	end
 	return found
 end
 
---// Given a list of packages, this method will remove anything matching the provided "Remove" string and return a list of package clones without the removed object
---// This is primarily used to strip the "Server" folder from packages which are shared by the server and client before sending said packages to the client
+--- Given a list of packages, this method will remove anything matching the provided "Remove" string and return a list of package clones without the removed object
+--- This is primarily used to strip the "Server" folder from packages which are shared by the server and client before sending said packages to the client
+--- @within PackageHandler
+--- @param Packages table -- Table containing packages.
+--- @param Remove string -- Name of children to remove.
+--- @return table -- Packages that were stripped.
 local function StripPackages(Packages: {}, Remove: string)
 	local found = {}
 	for i,v in pairs(Packages) do
 		local metadata = GetMetadata(v)
 		local pkgString = metadata.Name .. "==" .. metadata.Version
-		
+
 		local new = v:Clone()
 		local remove = new:FindFirstChild(Remove)
 		if remove then
 			remove:Destroy()
 		end
-		
+
 		if not found[pkgString] then
 			found[pkgString] = new
 		else
-			FormatOut("Warning! Conflicting Name and Version for Package {} found!", pkgString)
+			FormatOut("Warning! Conflicting Name and Version for Package %s found!", pkgString)
 		end
 	end
 	return found
 end
 
---// Given a list of packages (Packages), a package name (DepedencyName), and a package version (DepdencyVersion)
---// Checks if any packages in the provided package list match the provided name and version
---// This is used during dependency resolution
-local function FindDependency(Packages: {}, DependencyName: string, DependencyVersion) 
+--- Given a list of packages (Packages), a package name (DepedencyName), and a package version (DepdencyVersion.)
+--- Checks if any packages in the provided package list match the provided name and version.
+--- This is used during dependency resolution.
+--- @within PackageHandler
+--- @param Packages table -- Table of packages.
+--- @param DependencyName string -- Searches for this dependency name.
+--- @param DependencyVersion number -- Searches for this depdendency version (optional.)
+--- @return string, package -- Returns the found package string (name==version) and the package itself.
+local function FindDependency(Packages: {}, DependencyName: string, DependencyVersion)
 	debug("FIND DEPENDENCY: ", Packages, DependencyName, DependencyVersion)
 
 	for pkgString, pkg in pairs(Packages) do
@@ -156,12 +186,16 @@ local function FindDependency(Packages: {}, DependencyName: string, DependencyVe
 	end
 end
 
---// Given a list of packages (Packages) and a package (Package) checks if the package's depdencies are in the given package list
---// This is used when loading packages to check if a given package's dependencies were correctly resolved and loaded before attempting to load the package that needs them
+--- Given a list of packages (Packages) and a package (Package) checks if the package's depdencies are in the given package list
+--- This is used when loading packages to check if a given package's dependencies were correctly resolved and loaded before attempting to load the package that needs them
+--- @within PackageHandler
+--- @param Packages table -- Table of packages
+--- @param Package Folder -- Package
+--- return bool -- Returns true if package passes dependency check and returns false if it fails.
 local function CheckDependencies(Packages: {}, Package: Folder)
 	local metadata = GetMetadata(Package)
 	local dependencies = metadata.Dependencies
-	
+
 	debug("Checking package depdencies", Package)
 	if dependencies then
 		for i,depString in pairs(dependencies) do
@@ -174,7 +208,7 @@ local function CheckDependencies(Packages: {}, Package: Folder)
 				return false
 			end
 		end
-		
+
 		debug("Dependency check passed")
 		return true
 	else
@@ -241,24 +275,32 @@ local Resolve; Resolve = function(Packages: {}, ResultList: {}, Package: Folder,
 	end
 end
 
---// Given a table of packages (Packages), Resolves package dependencies and produces an ordered list the places packages after all of their dependencies
---// The results of this method determine load order, based on depedency resolution
+--- Given a table of packages (Packages), Resolves package dependencies and produces an ordered list the places packages after all of their dependencies.
+--- The results of this method determine load order, based on depedency resolution.
+--- @within PackageHandler
+--- @param Packages table -- Table of packages
+--- @return table -- Ordered table of packages based on depdency resolution.
 local function GetOrderedPackageList(Packages: {})
 	local ResultList = {}
-	
+
 	debugLine()
 	debug("GETTING ORDERED PACKAGE LIST", Packages)
-	
+
 	for i,v in pairs(Packages) do
 		debug("RESOLVE PACKAGE: ", v)
 		Resolve(Packages, ResultList, v)
 		debugLine()
 	end
-	
+
 	return ResultList
 end
 
---// Given a package (Package) and a PackageType (Server, Client) this method will find and required the Initializer module for the given package and return the package's Init & AfterInit functions in a table
+--- Given a package (Package) and a PackageType (Server, Client) this method will find and required the Initializer module for the given package and return the package's Init & AfterInit functions in a table.
+--- @within PackageHandler
+--- @param Package Folder -- Package to initialize
+--- @param PackageType string -- Package type (Client or Server)
+--- @param ... any -- Package arguments
+--- return table -- Returned package init table
 local function InitPackage(Package: Folder, PackageType: string, ...)
 	local targetFolder = Package:FindFirstChild(PackageType)
 	if targetFolder then
@@ -283,16 +325,20 @@ local function InitPackage(Package: Folder, PackageType: string, ...)
 	end
 end
 
---// Given a table of packages, performs dependency resolution and loads all packages provided matching PackageType in order.
+--- Given a table of packages, performs dependency resolution and loads all packages provided matching PackageType in order.
+--- @within PackageHandler
+--- @param Packages table -- Table of packages
+--- @param PackageType string -- Package type (Server, Client)
+--- @param ... any -- Package arguments
 local function LoadPackages(Packages: {}, PackageType: string, ...)
 	local initFuncs = {}
 	local loadedPackages = {}
-	
+
 	--// Organize packages according to their depdendencies
 	local ordered = GetOrderedPackageList(Packages)
-	
+
 	debug("GOT ORDERED LIST", ordered)
-	
+
 	--// Load all packages
 	for i, package in pairs(ordered) do
 		if CheckDependencies(loadedPackages, package) then
@@ -307,9 +353,9 @@ local function LoadPackages(Packages: {}, PackageType: string, ...)
 			elseif res and type(res) == "table" then
 				local metadata = GetMetadata(package)
 				local pkgString = metadata.Name .. "==" .. metadata.Version
-				
+
 				loadedPackages[pkgString] = package
-				
+
 				table.insert(initFuncs, {
 					Package = package;
 					Init = res.Init;
@@ -320,7 +366,7 @@ local function LoadPackages(Packages: {}, PackageType: string, ...)
 			warn("Package dependency check failed", package)
 		end
 	end
-	
+
 	--// Initialize packages
 	for i,v in ipairs(initFuncs) do
 		debug("INIT", v)
@@ -334,7 +380,7 @@ local function LoadPackages(Packages: {}, PackageType: string, ...)
 			})
 		end
 	end
-	
+
 	--// After all packages are initialized
 	for i,v in ipairs(initFuncs) do
 		debug("AFTERINIT", v)
@@ -359,6 +405,7 @@ return table.freeze {
 	StripPackages = StripPackages;
 	GetMetadata = GetMetadata;
 	FindDependency = FindDependency;
+	CheckDependencies = CheckDependencies;
 	GetOrderedPackageList = GetOrderedPackageList;
 	LoadPackages = LoadPackages;
 }

@@ -11,38 +11,44 @@
 	-- If you break something, it's on you to debug it. 								--
 	-- Do NOT submit issues or demand help for problems you created. 					--
 	-- Continuing means you accept any risk that comes with this.						--
-	-- Proceed with caution. 															--
+	-- Proceed with caution.												--
 	--																					--
 	--!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!--
 --]]
 
 
 --// Precursory variables/functions
+local AppName = "Adonis Server"
 local oWarn = warn
 
 local function warn(...)
-	oWarn(":: Adonis ::", ...)
+	oWarn(":: ".. AppName .." ::", ...)
 end
 
 local function addRange(tab, ...)
-	table.foreachi(table.pack(...), function(i,t)
-		table.foreachi(t, function(k,v)
+	for i,t in ipairs(table.pack(...)) do
+		for k,v in ipairs(t) do
 			table.insert(tab, v)
-		end)
-	end)
+		end
+	end
+	return tab
 end
 
 --// Table shared with all packages which acts as the root table for all others
 local Root = {
-	Verbose = true;
+	AppName = AppName;
+	Verbose = false;
+	Globals = {};
 	Packages = {};
+	Libraries = {};
+	LibraryObjects = {};
 	PackageHandlerModule = script.PackageHandler;
 }
 
 --// Returns to the loader
 return function(Loader: {}, Settings: {}, Packages: Folder)
 	--// Begin loading
-	warn("Loading packages...");
+	if Root.Verbose then warn("Loading packages...") end
 
 	--// Set variables
 	local start = os.clock();
@@ -58,6 +64,19 @@ return function(Loader: {}, Settings: {}, Packages: Folder)
 	--// Get all packages
 	addRange(Root.Packages, script.Packages:GetChildren(), Packages:GetChildren());
 
+	--// Remove disabled packages
+	if Settings.DisabledPackages and table.getn(Settings.DisabledPackages) > 0 then
+		for i,package in ipairs(Root.Packages) do
+			local metadata = PackageHandler.GetMetadata(package)
+			for k,disabled in ipairs(Settings.DisabledPackages) do
+				if metadata.Name == disabled or metadata.Name .. "==" .. metadata.Version == disabled then
+					table.remove(Root.Packages, i)
+					break
+				end
+			end
+		end
+	end
+
 	--// Get server packages
 	local Packages = PackageHandler.GetServerPackages(Root.Packages);
 
@@ -65,7 +84,7 @@ return function(Loader: {}, Settings: {}, Packages: Folder)
 	PackageHandler.LoadPackages(Packages, "Server", Root, Packages);
 
 	--// Loading complete
-	warn("Loading complete; Elapsed:", os.clock() - start);
+	warn("Loading complete :: Elapsed:", os.clock() - start);
 
 	return true;
 end

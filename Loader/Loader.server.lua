@@ -3,7 +3,7 @@
 	Description: Responsible for loading Adonis's MainModule
 	Author: Sceleratis
 	Date: 12/05/2021
-	
+
 	--!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!--
 	--																			--
 	-- Non-developers should only edit the contents of the 'Config' folder. 	--
@@ -22,22 +22,23 @@ local LocalMode = true;
 
 --// Loader
 local Loader = {
-	
+
 	--// Adonis's MainModule
 	MainModule = if LocalMode then script.Parent.Parent.MainModule else 0;
-	
+
+	--// Get settings
+	Settings = require(script.Parent.Config.Settings);
+
 	--// Loader object references
-	Settings = script.Parent.Config.Settings;
-	Packages = script.Parent.Config.Packages;
 	LoaderModel = script.Parent;
 	ConfigFolder = script.Parent.Config;
-	
+	Packages = script.Parent.Config.Packages;
+
 	--// Method which handles MainModule loading
-	LoadMainModule = function(self) 
+	LoadMainModule = function(self)
 		local moduleFunc = require(self.MainModule);
-		local settings = require(self.Settings);
-		local response = moduleFunc(self, settings, self.Packages);
-		
+		local response = moduleFunc(self, self.Settings, self.Packages);
+
 		if not response then
 			warn(":: Adonis Loader :: Something went wrong while loading.");
 		end
