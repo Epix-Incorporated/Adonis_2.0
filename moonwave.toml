@@ -9,3 +9,7 @@ includeReadme = false
 [docusaurus]
 tagline = "Roblox Server Administration System"
 favicon = "/favicon.png"
+
+[footer]
+style = "dark"
+copyright = "Copyright © 2022 Sceleratis/Epix Incorporated & The Adonis Development Community. Built with Moonwave and Docusaurus"
