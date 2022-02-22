@@ -336,7 +336,7 @@ end
 
 
 --- Triggers a remote command on the target player's client with the data specified and returns the result (if any)
---- @method Send
+--- @method Get
 --- @within Server.Remote
 --- @param p Player
 --- @param cmd string -- Remote command
