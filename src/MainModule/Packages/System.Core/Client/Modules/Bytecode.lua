@@ -6,12 +6,14 @@
 
 --]]
 
+local Root, Package, Utilities, Service
+
+
 --- Bytecode-related functionality.
 --- @class Client.Bytecode
 --- @tag Core
+--- @tag Package: System.Core
 --- @client
-
-local Root, Package, Utilities, Service
 
 local Bytecode = {}
 local RemoteCommands = {}
@@ -20,8 +22,8 @@ local RemoteCommands = {}
 --// Bytecode Methods
 
 --- Gets a virtual env instead of a function env to not disable optimisations
+--- @method GetVirtualEnv
 --- @within Client.Bytecode
---- @param self table -- Self
 --- @param returnInstance Instance
 function Bytecode:GetVirtualEnv(self, returnInstance)
 	local vEnvModule = Package.SharedAssets.VirtualEnv:Clone() :: ModuleScript
@@ -29,8 +31,8 @@ function Bytecode:GetVirtualEnv(self, returnInstance)
 end
 
 --- Load bytecode
+--- @method LoadBytecode
 --- @within Client.Bytecode
---- @param self table -- Self
 function Bytecode:LoadBytecode(self, bytecode: string, envData: {})
 	local fiOneMod = Package.SharedAssets.FiOne:Clone()
 	local fiOne = require(fiOneMod)
@@ -39,13 +41,13 @@ end
 
 
 --// Remote Commands
-
 --- Run bytecode
 --- @function RunBytecode
 --- @within Client.Remote.Commands
 --- @tag Remote Command
 --- @param str string -- Bytecode to execute
 --- @param ... any -- Additional arguments
+--- @return any -- Anything returned by executed bytecode
 RemoteCommands.RunBytecode = function(str, ...)
 	Utilities.Events.RunningBytecode:Fire(str, ...)
 	return Root.Bytecode:LoadBytecode(str, Utilities:MergeTables(Root.ByteCode:GetVirtualEnv(false), {

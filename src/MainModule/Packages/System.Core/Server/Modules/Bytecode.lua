@@ -3,48 +3,72 @@
 	Description: Contains bytecode/loadstring-related functionality
 	Author: Sceleratis
 	Date: 12/11/2021
-	
+
 --]]
 
 local Root, Package, Utilities, Service;
 
-local Bytecode = {
+--- Bytecode-related functionality.
+--- @class Server.Bytecode
+--- @server
+--- @tag Core
+--- @tag Package: System.Core
+local Bytecode = {}
 
-	--// Get loadstring function
-	GetLoadstring = function(self)
-		local module = Package.Assets.Loadstring:Clone() :: ModuleScript
-		local vEnvModule = Root.ByteCode:GetVirtualEnv(true) :: ModuleScript
-		local fiOne = Package.SharedAssets.FiOne:Clone() :: ModuleScript
 
-		fiOne.Parent = module
-		vEnvModule.Parent = module
+--- Clones and requires the loadstring module, returning it's main function.
+--- @method GetLoadstring
+--- @within Server.Bytecode
+--- @return function
+function Bytecode:GetLoadstring(self)
+	local module = Package.Assets.Loadstring:Clone() :: ModuleScript
+	local vEnvModule = Root.ByteCode:GetVirtualEnv(true) :: ModuleScript
+	local fiOne = Package.SharedAssets.FiOne:Clone() :: ModuleScript
 
-		return require(module)
-	end,
+	fiOne.Parent = module
+	vEnvModule.Parent = module
 
-	--// Get bytecode for str
-	GetBytecode = function(self, str: string)
-		local loadstring = self.Loadstring or self:GetLoadstring()
-		local f, buff = loadstring(str)
-		
-		return buff
-	end,
+	return require(module)
+end
 
-	-- // Gets a virtual env instead of a function env to not disable optimisations
-	GetVirtualEnv = function(self, returnInstance)
-		local vEnvModule = Package.SharedAssets.VirtualEnv:Clone() :: ModuleScript
-		return returnInstance == true and vEnvModule or returnInstance == false and require(vEnvModule)()
-	end,
 
-	--// Load bytecode
-	LoadBytecode = function(self, bytecode: string, envData: {})
-		local fiOneMod = Package.SharedAssets.FiOne:Clone()
-		local fiOne = require(fiOneMod)
-		
-		return fiOne(bytecode, envData)
-	end,
-	
-}
+--- Given a string of lua code, returns bytecode.
+--- @method GetBytecode
+--- @within Server.Bytecode
+--- @param str string -- Lua code to convert to bytecode equivalent
+--- @return Bytecode
+function Process:GetBytecode(self, str: string)
+	local loadstring = self.Loadstring or self:GetLoadstring()
+	local f, buff = loadstring(str)
+
+	return buff
+end
+
+
+--- Gets a virtual env instead of a function env to not disable optimisations
+--- @method GetVirtualEnv
+--- @within Server.Bytecode
+--- @param returnInstance bool
+--- return environment
+function Process:GetVirtualEnv(self, returnInstance)
+	local vEnvModule = Package.SharedAssets.VirtualEnv:Clone() :: ModuleScript
+	return returnInstance == true and vEnvModule or returnInstance == false and require(vEnvModule)()
+end
+
+
+--- Load bytecode
+--- @method LoadBytecode
+--- @within Server.Bytecode
+--- @param bytecode string
+--- @param envData table -- Environment
+--- @return result
+LoadBytecode = function(self, bytecode: string, envData: {})
+	local fiOneMod = Package.SharedAssets.FiOne:Clone()
+	local fiOne = require(fiOneMod)
+
+	return fiOne(bytecode, envData)
+end
+
 
 return {
 	Init = function(cRoot, cPackage)
@@ -52,10 +76,10 @@ return {
 		Package = cPackage
 		Utilities = Root.Utilities
 		Service = Root.Utilities.Services
-		
+
 		Root.Bytecode = Bytecode
 	end;
-	
+
 	AfterInit = function(Root, Package)
 		Bytecode.Loadstring = Bytecode:GetLoadstring()
 	end;

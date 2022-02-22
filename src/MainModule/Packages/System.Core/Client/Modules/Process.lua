@@ -11,45 +11,85 @@ local Root, Utilities, Package, Service, Events
 
 local EventConnections = {}
 
+--- Responsible for handling various Roblox events and passing them off to Utilities.Events equivilents
+--- @class Client.Process
+--- @client
+--- @tag Core
+--- @tag Package: System.Core
 local Process = {
-	EventConnections = EventConnections,
-
-	PlayerAdded = function(self, p: Player)
-		p.CharacterAdded:Connect(function()
-			self:CharacterAdded(p, p.Character)
-		end)
-
-		p.CharacterRemoving:Connect(function()
-			self:CharacterRemoving(p, p.Character)
-		end)
-
-		Events.PlayerAdded:Fire(p)
-	end,
-
-	PlayerRemoving = function(self, p)
-		Events.PlayerRemoving:Fire(p)
-	end,
-
-	PlayerRemoved = function(self, p)
-		Events.PlayerRemoved:Fire(p)
-	end,
-
-	CharacterAdded = function(self, p, c)
-		Events.CharacterAdded:Fire(p, c)
-	end,
-
-	CharacterRemoving = function(self, p, c)
-		Events.CharacterRemoving:Fire(p, c)
-	end,
-
-	LogMessage = function(self, msg, msgType, ...)
-		if string.find(msg, "Adonis") then
-			Events.AdonisLogMessage:Fire(msg, msgType, ...)
-		else
-			Events.LogMessage:Fire(msg, msgType, ...)
-		end
-	end,
+	EventConnections = EventConnections
 }
+
+
+--- PlayerAdded event handler
+--- @method PlayerAdded
+--- @within Client.Process
+--- @param p Player -- Player
+function Process:PlayerAdded(self, p: Player)
+	p.CharacterAdded:Connect(function()
+		self:CharacterAdded(p, p.Character)
+	end)
+
+	p.CharacterRemoving:Connect(function()
+		self:CharacterRemoving(p, p.Character)
+	end)
+
+	Events.PlayerAdded:Fire(p)
+end
+
+
+--- PlayerRemoving event handler
+--- @method PlayerRemoving
+--- @within Client.Process
+--- @param p Player -- Player
+function Process:PlayerRemoving(self, p: Player)
+	Events.PlayerRemoving:Fire(p)
+end
+
+
+--- PlayerRemoved event handler
+--- @method PlayerRemoved
+--- @within Client.Process
+--- @param p Player -- Player
+function Process:PlayerRemoved(self, p: Player)
+	Events.PlayerRemoved:Fire(p)
+end
+
+
+--- CharacterAdded event handler
+--- @method CharacterAdded
+--- @within Client.Process
+--- @param p Player -- Player
+--- @param c Character -- Character
+function Process:CharacterAdded(self, p: Player, c)
+	Events.CharacterAdded:Fire(p, c)
+end
+
+
+--- CharacterRemoving event handler
+--- @method CharacterRemoving
+--- @within Client.Process
+--- @param p Player
+--- @param c Character
+function Process:CharacterRemoving(self, p: Player, c)
+	Events.CharacterRemoving:Fire(p, c)
+end
+
+
+--- MessageOut event handler
+--- @method LogMessage
+--- @within Client.Process
+--- @param msg string -- Message string
+--- @param msgType Enum -- MessageType
+--- @param ... any
+function Process:LogMessage(self, msg, msgType, ...)
+	if string.find(msg, "Adonis") then
+		Events.AdonisLogMessage:Fire(msg, msgType, ...)
+	else
+		Events.LogMessage:Fire(msg, msgType, ...)
+	end
+end
+
 
 local function PlayerAdded(...)
 	Process:PlayerAdded(...)

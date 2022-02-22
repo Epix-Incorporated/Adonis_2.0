@@ -12,70 +12,130 @@ local Root, Utilities, Package, Service, Events
 local SetupComplete = false
 local ExistingPlayers = {}
 
+--- Responsible for the handling of various events.
+--- @class Server.Process
+--- @server
+--- @tag Core
+--- @tag Package: System.Core
 local Process = {
-	EventConnections = {},
-
-	PlayerAdded = function(self, p: Player)
-		if Root.Core:HandlePlayerPreLoadingProcesses(p) then
-			p.CharacterAdded:Connect(function(...)
-				self:CharacterAdded(p, ...)
-			end)
-
-			p.CharacterRemoving:Connect(function(...)
-				self:CharacterRemoving(p, ...)
-			end)
-
-			p.Chatted:Connect(function(...)
-				self:PlayerChatted(p, ...)
-			end)
-			
-			Events.PlayerAdded:Fire(p)
-		end
-	end,
-
-	PlayerChatted = function(self, p: Player, ...)
-		Events.PlayerChatted:Fire(p, ...)
-	end,
-
-	PlayerReady = function(self, p: Player)
-		Events.PlayerReady:Fire(p)
-	end,
-
-	PlayerRemoving = function(self, p: Player, ...)
-		Events.PlayerRemoving:Fire(p, ...)
-	end,
-
-	PlayerRemoved = function(self, p: Player?)
-		if p and p:IsA("Player") then
-			Events.PlayerRemoved:Fire(p)
-		end
-	end,
-
-	CharacterAdded = function(self, p: Player, ...)
-		Events.CharacterAdded:Fire(p, ...)
-	end,
-
-	CharacterRemoving = function(self, p: Player, ...)
-		Events.CharacterRemoving:Fire(p, ...)
-	end,
-
-	NetworkAdded = function(self, ...)
-		Events.NetworkAdded:Fire(...)
-	end,
-
-	NetworkRemoved = function(self, ...)
-		Events.NetworkRemoved:Fire(...)
-	end,
-
-	LogMessage = function(self, msg, msgType, ...)
-		if string.find(msg, "Adonis") then
-			Events.AdonisLogMessage:Fire(msg, msgType, ...)
-		else
-			Events.LogMessage:Fire(msg, msgType, ...)
-		end
-	end,
+	EventConnections = {}
 }
 
+
+--- PlayerAdded event handler
+--- @method PlayerAdded
+--- @within Server.Process
+--- @param p Player
+function Process:PlayerAdded(self, p: Player)
+	if Root.Core:HandlePlayerPreLoadingProcesses(p) then
+		p.CharacterAdded:Connect(function(...)
+			self:CharacterAdded(p, ...)
+		end)
+
+		p.CharacterRemoving:Connect(function(...)
+			self:CharacterRemoving(p, ...)
+		end)
+
+		p.Chatted:Connect(function(...)
+			self:PlayerChatted(p, ...)
+		end)
+
+		Events.PlayerAdded:Fire(p)
+	end
+end
+
+
+--- PlayerChatted event handler
+--- @method PlayerChatted
+--- @within Server.Process
+--- @param p Player
+function Process:PlayerChatted(self, p: Player, ...)
+	Events.PlayerChatted:Fire(p, ...)
+end
+
+
+--- PleaseReady event handler
+--- @method PlayerReady
+--- @within Server.Process
+--- @param p Player
+function Process:PlayerReady(self, p: Player)
+	Events.PlayerReady:Fire(p)
+end
+
+
+--- PlayerRemoving event handler
+--- @method PlayerRemoving
+--- @within Server.Process
+--- @param p Player
+function Process:PlayerRemoving(self, p: Player, ...)
+	Events.PlayerRemoving:Fire(p, ...)
+end
+
+
+--- PlayerRemoved event handler
+--- @method PlayerRemoved
+--- @within Server.Process
+--- @param p Player?
+function Process:PlayerRemoved(self, p: Player?)
+	if p and p:IsA("Player") then
+		Events.PlayerRemoved:Fire(p)
+	end
+end
+
+
+--- CharacterAdded event handler
+--- @method CharacterAdded
+--- @within Server.Process
+--- @param p Player
+function Process:CharacterAdded(self, p: Player, ...)
+	Events.CharacterAdded:Fire(p, ...)
+end
+
+
+--- CharacterRemoving event handler
+--- @method CharacterRemoving
+--- @within Server.Process
+--- @param p Player
+--- @param ... any
+function Process:CharacterRemoving(self, p: Player, ...)
+	Events.CharacterRemoving:Fire(p, ...)
+end
+
+
+--- NetworkAdded event handler
+--- @method NetworkAdded
+--- @within Server.Process
+--- @param ... any
+function Process:NetworkAdded(self, ...)
+	Events.NetworkAdded:Fire(...)
+end
+
+
+--- NetworkRemoved event handler
+--- @method NetworkRemoved
+--- @within Server.Process
+--- @param ... any
+function Process:NetworkRemoved(self, ...)
+	Events.NetworkRemoved:Fire(...)
+end
+
+
+--- MessageOut event handler
+--- @method LogMessage
+--- @within Server.Process
+--- @param msg string
+--- @param msgType MessageType
+--- @param ... any -- Additional data passed to Events.AdonisLogMessage or Events.LogMessage
+function Process:LogMessage(self, msg, msgType, ...)
+	if string.find(msg, "Adonis") then
+		Events.AdonisLogMessage:Fire(msg, msgType, ...)
+	else
+		Events.LogMessage:Fire(msg, msgType, ...)
+	end
+end
+
+
+--// Events
 local function PlayerAdded(p, ...)
 	--// Check ExistingPlayers so we don't accidentally (somehow) fire twice for this player during setup
 	if SetupComplete or (not SetupComplete and not ExistingPlayers[p]) then

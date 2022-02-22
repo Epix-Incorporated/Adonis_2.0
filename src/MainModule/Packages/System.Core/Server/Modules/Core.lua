@@ -14,6 +14,11 @@ local function delayedTimeoutMessage(stillWaiting: boolean, name: string, s: num
 	end
 end
 
+--- Responsible for important core system fucntionality.
+--- @class Server.Core
+--- @server
+--- @tag Core
+--- @tag Package: System.Core
 local Core = {
 	PlayerData = {};
 	PlayerDataCache = {};
@@ -23,142 +28,206 @@ local Core = {
 	DeclaredPlayerPreLoadingHandlers = {};
 	DeclaredPlayerDataHandlers = {};
 	DefaultPlayerDataTable = {};
-
-	DeclareDefaultPlayerData = function(self, ind, defaultValue)
-		if self.DeclaredDefaultPlayerData[ind] then
-			Root.Warn("DefaultPlayerData \"".. ind .."\" already delcared. Overwriting.")
-		end
-
-		self.DeclaredDefaultPlayerData[ind] = defaultValue
-
-		Utilities.Events.DefaultPlayerDataDeclared:Fire(ind, defaultValue)
-	end,
-
-	DeclarePlayerPreLoadProcess = function(self, ind, func)
-		if self.DeclaredPlayerPreLoadingHandlers[ind] then
-			Root.Warn("Player Pre-Loading Process \"".. ind .."\" already declared. Overwriting.")
-		end
-
-		self.DeclaredPlayerPreLoadingHandlers[ind] = func
-
-		Utilities.Events.PlayerPreLoadingHandlerDeclared:Fire(ind, func)
-	end,
-
-	DeclarePlayerDataHandler = function(self, ind, func)
-		if self.DeclaredPlayerDataHandlers[ind] then
-			Root.Warn("PlayerDataHandler \"".. ind .."\" already delcared. Overwriting.")
-		end
-
-		self.DeclaredPlayerDataHandlers[ind] = func
-
-		Utilities.Events.PlayerDataHandlerDeclared:Fire(ind, func)
-	end,
-
-	HandlePlayerPreLoadingProcesses = function(self, p)
-		for ind, handler in pairs(self.DeclaredPlayerPreLoadingHandlers) do
-			local waiting = true
-			task.delay(10, function() delayedTimeoutMessage(waiting, ind, 10) end)
-			Utilities:RunFunction(handler, p)
-			waiting = false
-		end
-
-		if p.Parent then
-			return true
-		end
-	end,
-
-	DefaultPlayerData = function(self, p)
-		local newData = {}
-
-		--// Merge default data table into new data table
-		Utilities:MergeTables(newData, self.DefaultPlayerDataTable)
-
-		for ind, value in pairs(self.DeclaredDefaultPlayerData) do
-			if type(value) == "function" then
-				local r, val = Utilities:RunFunction(value, p, newData)
-				if r then
-					newData[ind] = val
-				end
-			else
-				newData[ind] = value
-			end
-		end
-
-		for ind, func in pairs(self.DeclaredPlayerDataHandlers) do
-			Utilities:RunFunction(func, p, newData)
-		end
-
-		--// Fire an event letting all modules know that we are getting default player data so they can add anything they need
-		Utilities.Events.SetDefaultPlayerData:Fire(p, newData)
-
-		return newData
-	end,
-
-	GetPlayerData = function(self, p)
-		local cached = self.PlayerData:GetData(p.UserId)
-
-		if cached then
-			return cached
-		else
-			local defaultData = self:DefaultPlayerData(p)
-			self.PlayerData:SetData(p.UserId, defaultData)
-			return defaultData
-		end
-	end,
-
-	--// Declare new settings, their default value, and their description
-	DeclareSetting = function(self, setting, data)
-		if self.DeclaredSettings[setting] then
-			Root.Warn("Setting \"".. setting .."\" already delcared. Overwriting.")
-		end
-
-		if data.Package and type(data.Package) == "table" then
-			local realPackage = data.Package.Package or data.Package.Folder
-			if realPackage then
-				data.Package = realPackage
-			end
-		end
-
-		self.DeclaredSettings[setting] = data
-
-		Root.Logging:AddLog("Script", {
-			Text = "Declared setting: ".. tostring(setting),
-			Description = data.Description
-		})
-
-		Utilities.Events.SettingDeclared:Fire(setting, data)
-	end,
-
-	--// If a setting is not found, this is responsible for returning a value for it (or possibly, also setting it)
-	SettingsIndex = function(self, tab, ind)
-		local found = self.DeclaredSettings[ind]
-		if found then
-			return found.DefaultValue
-		else
-			Root.Warn("Unknown setting requested:", ind)
-		end
-	end,
-
-	GetAllSettings = function(self)
-		return Utilities:MergeTables({}, self.UserSettings, self.SettingsOverrides)
-	end,
-
-	GetSharedSettings = function(self, p: Player)
-		local result = {}
-		for ind, data in pairs(self.DeclaredSettings) do
-			if data.ClientAllowed then
-				result[ind] = Root.Settings[ind]
-			end
-		end
-		return result
-	end,
-
-	UpdateSetting = function(self, setting, value, save)
-		Root.Core.SettingsOverrides[setting] = value
-		Utilities.Events.SettingChanged:Fire(setting, value, save)
-	end,
 }
 
+
+--- Declares default player data
+--- @method DeclareDefaultPlayerData
+--- @within Server.Core
+--- @param ind string -- PlayerData index
+--- @param defaultValue any -- Default player data value (can be function which returns data (use for tables))
+function Core:DeclareDefaultPlayerData(self, ind, defaultValue)
+	if self.DeclaredDefaultPlayerData[ind] then
+		Root.Warn("DefaultPlayerData \"".. ind .."\" already delcared. Overwriting.")
+	end
+
+	self.DeclaredDefaultPlayerData[ind] = defaultValue
+
+	Utilities.Events.DefaultPlayerDataDeclared:Fire(ind, defaultValue)
+end
+
+
+--- Declares player pre-loading process functions
+--- @method DeclarePlayerPreLoadProcess
+--- @within Server.Core
+--- @param ind string -- PreLoad function name
+--- @param func function -- PreLoad function
+function Core:DeclarePlayerPreLoadProcess(self, ind, func)
+	if self.DeclaredPlayerPreLoadingHandlers[ind] then
+		Root.Warn("Player Pre-Loading Process \"".. ind .."\" already declared. Overwriting.")
+	end
+
+	self.DeclaredPlayerPreLoadingHandlers[ind] = func
+
+	Utilities.Events.PlayerPreLoadingHandlerDeclared:Fire(ind, func)
+end
+
+--- Declares player data handler functions
+--- @method DeclarePlayerDataHandler
+--- @within Server.Core
+--- @param ind string -- Handler name
+--- @param func function -- Handler function
+function Core:DeclarePlayerDataHandler(self, ind, func)
+	if self.DeclaredPlayerDataHandlers[ind] then
+		Root.Warn("PlayerDataHandler \"".. ind .."\" already delcared. Overwriting.")
+	end
+
+	self.DeclaredPlayerDataHandlers[ind] = func
+
+	Utilities.Events.PlayerDataHandlerDeclared:Fire(ind, func)
+end
+
+
+--- Handles player pre-loading processes
+--- @method HandlePlayerPreLoadingProcesses
+--- @within Server.Core
+--- @param p Player -- Player to perform processes for
+function Core:HandlePlayerPreLoadingProcesses(self, p)
+	for ind, handler in pairs(self.DeclaredPlayerPreLoadingHandlers) do
+		local waiting = true
+		task.delay(10, function() delayedTimeoutMessage(waiting, ind, 10) end)
+		Utilities:RunFunction(handler, p)
+		waiting = false
+	end
+
+	if p.Parent then
+		return true
+	end
+end
+
+
+--- Generates and returns default player data for the provided Player
+--- @method DefaultPlayerData
+--- @within Server.Core
+--- @param p Player
+--- @return PlayerData
+function Core:DefaultPlayerData(self, p: Player)
+	local newData = {}
+
+	--// Merge default data table into new data table
+	Utilities:MergeTables(newData, self.DefaultPlayerDataTable)
+
+	for ind, value in pairs(self.DeclaredDefaultPlayerData) do
+		if type(value) == "function" then
+			local r, val = Utilities:RunFunction(value, p, newData)
+			if r then
+				newData[ind] = val
+			end
+		else
+			newData[ind] = value
+		end
+	end
+
+	for ind, func in pairs(self.DeclaredPlayerDataHandlers) do
+		Utilities:RunFunction(func, p, newData)
+	end
+
+	--// Fire an event letting all modules know that we are getting default player data so they can add anything they need
+	Utilities.Events.SetDefaultPlayerData:Fire(p, newData)
+
+	return newData
+end
+
+
+--- Returns data for the provided Player
+--- @method GetPlayerData
+--- @within Server.Core
+--- @param p Player
+--- @return PlayerData
+function Core:GetPlayerData(self, p: Player)
+	local cached = self.PlayerData:GetData(p.UserId)
+
+	if cached then
+		return cached
+	else
+		local defaultData = self:DefaultPlayerData(p)
+		self.PlayerData:SetData(p.UserId, defaultData)
+		return defaultData
+	end
+end
+
+
+--- Declare new settings, their default value, and their description
+--- @method DeclareSetting
+--- @within Server.Core
+--- @param setting string -- Setting
+--- @param data table -- Setting data table
+function Core:DeclareSetting(self, setting, data)
+	if self.DeclaredSettings[setting] then
+		Root.Warn("Setting \"".. setting .."\" already delcared. Overwriting.")
+	end
+
+	if data.Package and type(data.Package) == "table" then
+		local realPackage = data.Package.Package or data.Package.Folder
+		if realPackage then
+			data.Package = realPackage
+		end
+	end
+
+	self.DeclaredSettings[setting] = data
+
+	Root.Logging:AddLog("Script", {
+		Text = "Declared setting: ".. tostring(setting),
+		Description = data.Description
+	})
+
+	Utilities.Events.SettingDeclared:Fire(setting, data)
+end
+
+
+--- If a setting is not found, this is responsible for returning a value for it (or possibly, also setting it)
+--- @method SettingsIndex
+--- @within Server.Core
+--- @param tab table
+--- @param ind string -- Setting
+--- @return DefaultSettingValue
+function Core:SettingsIndex(self, tab, ind)
+	local found = self.DeclaredSettings[ind]
+	if found then
+		return found.DefaultValue
+	else
+		Root.Warn("Unknown setting requested:", ind)
+	end
+end
+
+
+--- Returns all known settings
+--- @method GetAllSettings
+--- @within Server.Core
+function Core:GetAllSetting(self)
+	return Utilities:MergeTables({}, self.UserSettings, self.SettingsOverrides)
+end
+
+
+--- Get settings which should be shared with the client for the provided Player
+--- @method GetSharedSettings
+--- @within Server.Core
+--- @param p Player
+--- @return settings
+function Core:GetSharedSettings(self, p: Player)
+	local result = {}
+	for ind, data in pairs(self.DeclaredSettings) do
+		if data.ClientAllowed then
+			result[ind] = Root.Settings[ind]
+		end
+	end
+	return result
+end
+
+
+--- Update the specified setting to the provided value
+--- @method UpdateSetting
+--- @within Server.Core
+--- @param setting string
+--- @param value any
+--- @param save bool -- Whether or not this should be saved; Only takes effect if System.Data package is loaded
+function Core:UpdateSetting(self, setting, value, save)
+	Root.Core.SettingsOverrides[setting] = value
+	Utilities.Events.SettingChanged:Fire(setting, value, save)
+end
+
+
+--// Event functions
 local function PlayerAdded(p)
 	local data = Core:GetPlayerData(p)
 	Root.Logging:AddLog("Connections", "%s joined", p.Name)

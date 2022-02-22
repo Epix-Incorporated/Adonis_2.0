@@ -13,7 +13,11 @@ local Service
 
 local MakingEvent = false;
 
---// Remote (client-to-server) commands
+--- Remote (client-to-server) commands
+--- @class Server.Remote.Commands
+--- @server
+--- @tag Remote Commands
+--- @tag Package: System.Core
 local RemoteCommands = setmetatable({
 	GetKeys = function(p, ...)
 		local data = Root.Core:GetPlayerData(p)
@@ -89,6 +93,11 @@ local RemoteCommands = setmetatable({
 })
 
 --// Methods
+--- Server-side session handler
+--- @class ServerSession
+--- @server
+--- @tag Core
+--- @tag Package: System.Core
 local Methods = {
 	Session = {
 		AddUser = function(self, p: Player, defaultData)
@@ -195,7 +204,11 @@ local Methods = {
 	}
 }
 
---// Remote
+--- Responsible for server-side remote functionality.
+--- @class Server.Remote
+--- @server
+--- @tag Core
+--- @tag Package: System.Core
 local Remote = {
 	SharedKey = "";
 	EventObjectsName = "";

@@ -8,46 +8,74 @@
 
 local Root, Package, Utilities, Service
 
+--- Responsible for core functionality.
+--- @class Client.Core
+--- @client
+--- @tag Core
+--- @tag Package: System.Core
 local Core = {
 	SettingsOverrides = {},
-	DeclaredSettings = {},
-
-	--// Declare new settings, their default value, and their description
-	DeclareSetting = function(self, setting, data)
-		if self.DeclaredSettings[setting] then
-			Root.Warn("Setting \"".. setting .."\" already delcared. Overwriting.")
-		end
-
-		if data.Package and type(data.Package) == "table" then
-			local realPackage = data.Package.Package or data.Package.Folder
-			if realPackage then
-				data.Package = realPackage
-			end
-		end
-
-		self.DeclaredSettings[setting] = data
-		Utilities.Events.SettingDeclared:Fire(setting, data)
-	end,
-
-	--// If a setting is not found, this is responsible for returning a value for it (or possibly, also setting it)
-	SettingsIndex = function(self, tab, ind)
-		local found = self.DeclaredSettings[ind]
-		if found then
-			return found.DefaultValue
-		else
-			Root.Warn("Unknown setting requested:", ind)
-		end
-	end,
-
-	GetAllSettings = function(self)
-		return Utilities:MergeTables({}, self.UserSettings, self.SettingsOverrides)
-	end,
-
-	UpdateSetting = function(self, setting, value)
-		Root.Core.SettingsOverrides[setting] = value
-		Utilities.Events.SettingChanged:Fire(setting, value)
-	end,
+	DeclaredSettings = {}
 }
+
+
+--- Declare new settings, their default value, and their description
+--- @method DeclareSetting
+--- @within Client.Core
+--- @param setting string -- Setting to declare
+--- @param data table -- Setting information table
+function Core:DeclareSetting(self, setting, data)
+	if self.DeclaredSettings[setting] then
+		Root.Warn("Setting \"".. setting .."\" already delcared. Overwriting.")
+	end
+
+	if data.Package and type(data.Package) == "table" then
+		local realPackage = data.Package.Package or data.Package.Folder
+		if realPackage then
+			data.Package = realPackage
+		end
+	end
+
+	self.DeclaredSettings[setting] = data
+	Utilities.Events.SettingDeclared:Fire(setting, data)
+end
+
+
+--- If a setting is not found, this is responsible for returning a value for it (or possibly, also setting it)
+--- @method SettingsIndex
+--- @within Client.Core
+--- @param tab table
+--- @param ind string -- Setting
+--- @return any -- Default setting value
+function Core:SettingsIndex(self, tab, ind)
+	local found = self.DeclaredSettings[ind]
+	if found then
+		return found.DefaultValue
+	else
+		Root.Warn("Unknown setting requested:", ind)
+	end
+end
+
+
+--- Returns all currently known settings
+--- @method GetAllSettings
+--- @within Client.Core
+--- @return table -- All settings in the format [setting] = value
+function Core:GetAllSettings(self)
+	return Utilities:MergeTables({}, self.UserSettings, self.SettingsOverrides)
+end
+
+
+--- Updates the specified setting to the new value
+--- @method UpdateSetting
+--- @within Client.Core
+--- @param setting string -- Setting
+--- @param value any -- Value
+function Core:UpdateSetting(self, setting, value)
+	Root.Core.SettingsOverrides[setting] = value
+	Utilities.Events.SettingChanged:Fire(setting, value)
+end
+
 
 return {
 	Init = function(cRoot, cPackage)
