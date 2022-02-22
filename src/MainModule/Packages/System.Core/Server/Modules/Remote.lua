@@ -369,7 +369,7 @@ end
 
 
 --- Instructs the target client to run Lua code provided and returns the result
---- @method LoadCode
+--- @method LoadCodeWithReturn
 --- @within Server.Remote
 --- @param p Player
 --- @param code string -- Lua code
