@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkdocs=self.webpackChunkdocs||[]).push([[2966],{99577:function(e){e.exports=JSON.parse('{"functions":[],"properties":[],"types":[],"name":"ServerSession","desc":"Server-side session handler","tags":["Core","Package: System.Core"],"realm":["Server"],"source":{"line":101,"path":"src/MainModule/Packages/System.Core/Server/Modules/Remote.lua"}}')}}]);

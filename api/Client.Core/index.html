@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="generator" content="Docusaurus v2.0.0-beta.9">
+<title data-react-helmet="true">Client.Core | Adonis</title><meta data-react-helmet="true" property="og:title" content="Client.Core | Adonis"><meta data-react-helmet="true" name="twitter:card" content="summary_large_image"><meta data-react-helmet="true" name="description" content="Responsible for core functionality."><meta data-react-helmet="true" property="og:description" content="Responsible for core functionality."><meta data-react-helmet="true" property="og:url" content="https://Sceleratis.github.io/Adonis_2.0/api/Client.Core"><meta data-react-helmet="true" name="docusaurus_locale" content="en"><meta data-react-helmet="true" name="docusaurus_tag" content="default"><link data-react-helmet="true" rel="shortcut icon" href="/Adonis_2.0/favicon.png"><link data-react-helmet="true" rel="canonical" href="https://Sceleratis.github.io/Adonis_2.0/api/Client.Core"><link data-react-helmet="true" rel="alternate" href="https://Sceleratis.github.io/Adonis_2.0/api/Client.Core" hreflang="en"><link data-react-helmet="true" rel="alternate" href="https://Sceleratis.github.io/Adonis_2.0/api/Client.Core" hreflang="x-default"><link rel="stylesheet" href="/Adonis_2.0/assets/css/styles.302001c7.css">
+<link rel="preload" href="/Adonis_2.0/assets/js/runtime~main.422922f9.js" as="script">
+<link rel="preload" href="/Adonis_2.0/assets/js/main.84123818.js" as="script">
+</head>
+<body>
+<script>!function(){function e(e){document.documentElement.setAttribute("data-theme",e)}var t=function(){var e=null;try{e=localStorage.getItem("theme")}catch(e){}return e}();null!==t?e(t):window.matchMedia("(prefers-color-scheme: dark)").matches?e("dark"):(window.matchMedia("(prefers-color-scheme: light)").matches,e("light"))}()</script><div id="__docusaurus">
+<div><a href="#" class="skipToContent_1oUP">Skip to main content</a></div><nav class="navbar navbar--fixed-top"><div class="navbar__inner"><div class="navbar__items"><button aria-label="Navigation bar toggle" class="navbar__toggle clean-btn" type="button" tabindex="0"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" d="M4 7h22M4 15h22M4 23h22"></path></svg></button><a class="navbar__brand" href="/Adonis_2.0/"><b class="navbar__title">Adonis</b></a><a class="navbar__item navbar__link" href="/Adonis_2.0/docs/intro">Docs</a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/Adonis_2.0/api/">API</a></div><div class="navbar__items navbar__items--right"><a href="https://discord.gg/H5RvTP3" target="_blank" rel="noopener noreferrer" class="navbar__item navbar__link"><span>Discord<svg width="13.5" height="13.5" aria-hidden="true" viewBox="0 0 24 24" class="iconExternalLink_3J9K"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"></path></svg></span></a><a href="https://github.com/Sceleratis/Adonis_2.0" target="_blank" rel="noopener noreferrer" class="navbar__item navbar__link"><span>GitHub<svg width="13.5" height="13.5" aria-hidden="true" viewBox="0 0 24 24" class="iconExternalLink_3J9K"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"></path></svg></span></a><div class="toggle_71bT toggle_3Zt9 toggleDisabled_3cF-"><div class="toggleTrack_32Fl" role="button" tabindex="-1"><div class="toggleTrackCheck_3lV7"><span class="toggleIcon_O4iE">🌜</span></div><div class="toggleTrackX_S2yS"><span class="toggleIcon_O4iE">🌞</span></div><div class="toggleTrackThumb_xI_Z"></div></div><input type="checkbox" class="toggleScreenReader_28Tw" aria-label="Switch between dark and light mode"></div><div class="navbar__search"><span aria-label="expand searchbar" role="button" class="search-icon" tabindex="0"></span><input type="search" id="search_input_react" placeholder="Press S to Search..." aria-label="Search" class="navbar__search-input search-bar"></div></div></div><div role="presentation" class="navbar-sidebar__backdrop"></div></nav><div class="main-wrapper docPageContainer_2Kz0"><div class="docPage_1bdk"><div class="docSidebarContainer_1ykS"><div class="sidebar_15mo"><nav class="menu thin-scrollbar menu_Bmed"><ul class="theme-doc-sidebar-menu menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/Adonis_2.0/api/Client.Bytecode">​Client.​Bytecode</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link menu__link--active" aria-current="page" href="/Adonis_2.0/api/Client.Core">​Client.​Core</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/Adonis_2.0/api/Client.Process">​Client.​Process</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/Adonis_2.0/api/Client.Remote">​Client.​Remote</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/Adonis_2.0/api/Client.Remote.Commands">​Client.​Remote.​Commands</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/Adonis_2.0/api/ClientSession">​Client​Session</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/Adonis_2.0/api/PackageHandler">​Package​Handler</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/Adonis_2.0/api/Server.Bytecode">​Server.​Bytecode</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/Adonis_2.0/api/Server.Core">​Server.​Core</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/Adonis_2.0/api/Server.CrossServer">​Server.​Cross​Server</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/Adonis_2.0/api/Server.CrossServer.Commands">​Server.​Cross​Server.​Commands</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/Adonis_2.0/api/Server.Logging">​Server.​Logging</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/Adonis_2.0/api/Server.Process">​Server.​Process</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/Adonis_2.0/api/Server.Remote">​Server.​Remote</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/Adonis_2.0/api/Server.Remote.Commands">​Server.​Remote.​Commands</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/Adonis_2.0/api/ServerSession">​Server​Session</a></li></ul></nav><button type="button" title="Collapse sidebar" aria-label="Collapse sidebar" class="button button--secondary button--outline collapseSidebarButton_1CGd"><svg width="20" height="20" aria-hidden="true" class="collapseSidebarButtonIcon_3E-R"><g fill="#7a7a7a"><path d="M9.992 10.023c0 .2-.062.399-.172.547l-4.996 7.492a.982.982 0 01-.828.454H1c-.55 0-1-.453-1-1 0-.2.059-.403.168-.551l4.629-6.942L.168 3.078A.939.939 0 010 2.528c0-.548.45-.997 1-.997h2.996c.352 0 .649.18.828.45L9.82 9.472c.11.148.172.347.172.55zm0 0"></path><path d="M19.98 10.023c0 .2-.058.399-.168.547l-4.996 7.492a.987.987 0 01-.828.454h-3c-.547 0-.996-.453-.996-1 0-.2.059-.403.168-.551l4.625-6.942-4.625-6.945a.939.939 0 01-.168-.55 1 1 0 01.996-.997h3c.348 0 .649.18.828.45l4.996 7.492c.11.148.168.347.168.55zm0 0"></path></g></svg></button></div></div><main class="docMainContainer_28N5"><div class="container padding-vert--lg"><div class="row"><div class="col docItemCol_3WPG"><div class="docItemContainer_3XDu"><article><div class="member_qHIL markdown"><div class="tocCollapsible_1PrD theme-doc-toc-mobile tocMobile_3ryM"><button type="button" class="clean-btn tocCollapsibleButton_2O1e">On this page</button></div><header><h1 class="docTitle_1ddc" style="text-decoration:none"><span style="display:inline-block">Client.</span><span style="display:inline-block">Core</span></h1><div class="luaClassTags_2Zrs"><span class="badge_3ZFo" style="color:#349AD5"><span class="badgeTooltip_2qiw">This item only works when running on the client.</span><span class="badgeToolTipTail_2yaQ"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 337 304" fill="#349AD5" role="img" aria-label="This item only works when running on the client."><path d="M0 201h337v36H0v-36zm0 0zM0 0v188h337V0H0zM218 287h30c12 0 12 17 0 17H88c-11 0-11-17 0-17h31l10-39h79l10 39z"></path></svg> <!-- -->Client</span></span><span class="docTag_3qMS" style="border-color:#79b473;color:#79b473">Core</span><span class="docTag_3qMS" style="border-color:#00a1e4;color:#00a1e4">Package: System.Core</span></div><div>
+<p>Responsible for core functionality.</p>
+</div></header><h2 class="anchor anchorWithStickyNavbar_31ik" id="functions">Functions<a aria-hidden="true" class="hash-link" href="#functions" title="Direct link to heading">​</a></h2><div class="divider_3z1R"></div><h3 class="anchor anchorWithStickyNavbar_31ik" id="DeclareSetting"><code style="text-decoration:none">DeclareSetting</code><a aria-hidden="true" class="hash-link" href="#DeclareSetting" title="Direct link to heading">​</a></h3><div class="repositoryDetailsContainer_1UH0"><a class="sourceButton_2aE5" href="https://github.com/Sceleratis/Adonis_2.0/blob/main/src/MainModule/Packages/System.Core/Client/Modules/Core.lua#L27"><div class="sourceButtonText_monK">&lt;/&gt;</div></a></div><div class="memberString_P8-X"><code>Client.Core<!-- -->:</code><code class="green_3LnD">DeclareSetting</code><code>(</code><div class="inset_2cJr"><div><code>setting<!-- -->: </code><code class="blue_2Afy">string</code><code>,</code><span class="inlineDescription_17uy">-- <span>
+<p>Setting to declare</p>
+</span></span></div><div><code>data<!-- -->: </code><code class="blue_2Afy">table</code><span class="inlineDescription_17uy">-- <span>
+<p>Setting information table</p>
+</span></span></div></div><code>) → </code><code>(</code><code>)</code></div><div>
+<p>Declare new settings, their default value, and their description</p>
+</div><div class="divider_3z1R"></div><h3 class="anchor anchorWithStickyNavbar_31ik" id="SettingsIndex"><code style="text-decoration:none">SettingsIndex</code><a aria-hidden="true" class="hash-link" href="#SettingsIndex" title="Direct link to heading">​</a></h3><div class="repositoryDetailsContainer_1UH0"><a class="sourceButton_2aE5" href="https://github.com/Sceleratis/Adonis_2.0/blob/main/src/MainModule/Packages/System.Core/Client/Modules/Core.lua#L50"><div class="sourceButtonText_monK">&lt;/&gt;</div></a></div><div class="memberString_P8-X"><code>Client.Core<!-- -->:</code><code class="green_3LnD">SettingsIndex</code><code>(</code><div class="inset_2cJr"><div><code>tab<!-- -->: </code><code class="blue_2Afy">table</code><code>,</code></div><div><code>ind<!-- -->: </code><code class="blue_2Afy">string</code><span class="inlineDescription_17uy">-- <span>
+<p>Setting</p>
+</span></span></div></div><code>) → </code><code class="blue_2Afy">any</code><span class="inlineDescription_17uy">-- <span>
+<p>Default setting value</p>
+</span></span></div><div>
+<p>If a setting is not found, this is responsible for returning a value for it (or possibly, also setting it)</p>
+</div><div class="divider_3z1R"></div><h3 class="anchor anchorWithStickyNavbar_31ik" id="GetAllSettings"><code style="text-decoration:none">GetAllSettings</code><a aria-hidden="true" class="hash-link" href="#GetAllSettings" title="Direct link to heading">​</a></h3><div class="repositoryDetailsContainer_1UH0"><a class="sourceButton_2aE5" href="https://github.com/Sceleratis/Adonis_2.0/blob/main/src/MainModule/Packages/System.Core/Client/Modules/Core.lua#L64"><div class="sourceButtonText_monK">&lt;/&gt;</div></a></div><div class="memberString_P8-X"><code>Client.Core<!-- -->:</code><code class="green_3LnD">GetAllSettings</code><code>(</code><code>) → </code><code class="blue_2Afy">table</code><span class="inlineDescription_17uy">-- <span>
+<p>All settings in the format [setting] = value</p>
+</span></span></div><div>
+<p>Returns all currently known settings</p>
+</div><div class="divider_3z1R"></div><h3 class="anchor anchorWithStickyNavbar_31ik" id="UpdateSetting"><code style="text-decoration:none">UpdateSetting</code><a aria-hidden="true" class="hash-link" href="#UpdateSetting" title="Direct link to heading">​</a></h3><div class="repositoryDetailsContainer_1UH0"><a class="sourceButton_2aE5" href="https://github.com/Sceleratis/Adonis_2.0/blob/main/src/MainModule/Packages/System.Core/Client/Modules/Core.lua#L74"><div class="sourceButtonText_monK">&lt;/&gt;</div></a></div><div class="memberString_P8-X"><code>Client.Core<!-- -->:</code><code class="green_3LnD">UpdateSetting</code><code>(</code><div class="inset_2cJr"><div><code>setting<!-- -->: </code><code class="blue_2Afy">string</code><code>,</code><span class="inlineDescription_17uy">-- <span>
+<p>Setting</p>
+</span></span></div><div><code>value<!-- -->: </code><code class="blue_2Afy">any</code><span class="inlineDescription_17uy">-- <span>
+<p>Value</p>
+</span></span></div></div><code>) → </code><code>(</code><code>)</code></div><div>
+<p>Updates the specified setting to the new value</p>
+</div></div></article></div><details><summary>Show raw api</summary><pre style="max-width:100%;white-space:pre-wrap">{
+    &quot;functions&quot;: [
+        {
+            &quot;name&quot;: &quot;DeclareSetting&quot;,
+            &quot;desc&quot;: &quot;Declare new settings, their default value, and their description&quot;,
+            &quot;params&quot;: [
+                {
+                    &quot;name&quot;: &quot;setting&quot;,
+                    &quot;desc&quot;: &quot;Setting to declare&quot;,
+                    &quot;lua_type&quot;: &quot;string&quot;
+                },
+                {
+                    &quot;name&quot;: &quot;data&quot;,
+                    &quot;desc&quot;: &quot;Setting information table&quot;,
+                    &quot;lua_type&quot;: &quot;table&quot;
+                }
+            ],
+            &quot;returns&quot;: [],
+            &quot;function_type&quot;: &quot;method&quot;,
+            &quot;source&quot;: {
+                &quot;line&quot;: 27,
+                &quot;path&quot;: &quot;src/MainModule/Packages/System.Core/Client/Modules/Core.lua&quot;
+            }
+        },
+        {
+            &quot;name&quot;: &quot;SettingsIndex&quot;,
+            &quot;desc&quot;: &quot;If a setting is not found, this is responsible for returning a value for it (or possibly, also setting it)&quot;,
+            &quot;params&quot;: [
+                {
+                    &quot;name&quot;: &quot;tab&quot;,
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;table&quot;
+                },
+                {
+                    &quot;name&quot;: &quot;ind&quot;,
+                    &quot;desc&quot;: &quot;Setting&quot;,
+                    &quot;lua_type&quot;: &quot;string&quot;
+                }
+            ],
+            &quot;returns&quot;: [
+                {
+                    &quot;desc&quot;: &quot;Default setting value&quot;,
+                    &quot;lua_type&quot;: &quot;any&quot;
+                }
+            ],
+            &quot;function_type&quot;: &quot;method&quot;,
+            &quot;source&quot;: {
+                &quot;line&quot;: 50,
+                &quot;path&quot;: &quot;src/MainModule/Packages/System.Core/Client/Modules/Core.lua&quot;
+            }
+        },
+        {
+            &quot;name&quot;: &quot;GetAllSettings&quot;,
+            &quot;desc&quot;: &quot;Returns all currently known settings&quot;,
+            &quot;params&quot;: [],
+            &quot;returns&quot;: [
+                {
+                    &quot;desc&quot;: &quot;All settings in the format [setting] = value&quot;,
+                    &quot;lua_type&quot;: &quot;table&quot;
+                }
+            ],
+            &quot;function_type&quot;: &quot;method&quot;,
+            &quot;source&quot;: {
+                &quot;line&quot;: 64,
+                &quot;path&quot;: &quot;src/MainModule/Packages/System.Core/Client/Modules/Core.lua&quot;
+            }
+        },
+        {
+            &quot;name&quot;: &quot;UpdateSetting&quot;,
+            &quot;desc&quot;: &quot;Updates the specified setting to the new value&quot;,
+            &quot;params&quot;: [
+                {
+                    &quot;name&quot;: &quot;setting&quot;,
+                    &quot;desc&quot;: &quot;Setting&quot;,
+                    &quot;lua_type&quot;: &quot;string&quot;
+                },
+                {
+                    &quot;name&quot;: &quot;value&quot;,
+                    &quot;desc&quot;: &quot;Value&quot;,
+                    &quot;lua_type&quot;: &quot;any&quot;
+                }
+            ],
+            &quot;returns&quot;: [],
+            &quot;function_type&quot;: &quot;method&quot;,
+            &quot;source&quot;: {
+                &quot;line&quot;: 74,
+                &quot;path&quot;: &quot;src/MainModule/Packages/System.Core/Client/Modules/Core.lua&quot;
+            }
+        }
+    ],
+    &quot;properties&quot;: [],
+    &quot;types&quot;: [],
+    &quot;name&quot;: &quot;Client.Core&quot;,
+    &quot;desc&quot;: &quot;Responsible for core functionality.&quot;,
+    &quot;tags&quot;: [
+        &quot;Core&quot;,
+        &quot;Package: System.Core&quot;
+    ],
+    &quot;realm&quot;: [
+        &quot;Client&quot;
+    ],
+    &quot;source&quot;: {
+        &quot;line&quot;: 16,
+        &quot;path&quot;: &quot;src/MainModule/Packages/System.Core/Client/Modules/Core.lua&quot;
+    }
+}</pre></details></div><div class="col col--3"><div class="tableOfContents_35-E thin-scrollbar"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#types" class="table-of-contents__link toc-highlight">Types</a></li><li><a href="#properties" class="table-of-contents__link toc-highlight">Properties</a></li><li><a href="#functions" class="table-of-contents__link toc-highlight">Functions</a><ul><li><a href="#DeclareSetting" class="table-of-contents__link toc-highlight">:DeclareSetting</a></li><li><a href="#GetAllSettings" class="table-of-contents__link toc-highlight">:GetAllSettings</a></li><li><a href="#SettingsIndex" class="table-of-contents__link toc-highlight">:SettingsIndex</a></li><li><a href="#UpdateSetting" class="table-of-contents__link toc-highlight">:UpdateSetting</a></li></ul></li></ul></div></div></div></div></main></div></div><footer class="footer footer--dark"><div class="container"><div class="footer__bottom text--center"><div class="footer__copyright">Copyright © 2022 Epix Incorporated and Adonis Contributors. Built with Moonwave and Docusaurus</div></div></div></footer></div>
+<script src="/Adonis_2.0/assets/js/runtime~main.422922f9.js"></script>
+<script src="/Adonis_2.0/assets/js/main.84123818.js"></script>
+</body>
+</html>
