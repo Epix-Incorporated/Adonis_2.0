@@ -13,15 +13,6 @@ local PlayerData = {}
 local Sessions = {}
 local Methods = {}
 
---// Class definitions
---- Responsible for handling temporary client-server communication channels.
---- @class ClientSession
---- @client
---- @tag Core
---- @tag Package: System.Core
-
-Methods.Session = {}
-
 --- Remote (server-to-client) commands.
 --- These should be executed using Root.Remote:Send(COMMAND, DATA) or Root.Remote:Get(COMMAND, DATA)
 --- @class Client.Remote.Commands
@@ -31,13 +22,15 @@ Methods.Session = {}
 
 local RemoteCommands = setmetatable({},{
 	__newindex = function(self, ind, value)
-		if self[ind] ~= nil then
+		if self[ind] ~= nil and Root then
 			Root.Warn("RemoteCommand index already declared. Overwriting...", ind)
 		end
 
 		rawset(self, ind, value)
 
-		Utilities.Events.RemoteCommandDeclared:Fire(ind, value)
+		if Utilities then
+			Utilities.Events.RemoteCommandDeclared:Fire(ind, value)
+		end
 	end
 })
 
@@ -55,9 +48,19 @@ local Remote = {
 }
 
 
---// Methods
+-- #region Misc Class Methods
+
+--- Responsible for handling temporary client-server communication channels.
+--- @class Session-Client
+--- @client
+--- @tag Core
+--- @tag Package: System.Core
+
+Methods.Session = {}
+
+
 --- Send data to the server
---- @within ClientSession
+--- @within Session-Client
 --- @param self table
 --- @param ... any
 function Methods.Session:SendToServer(self, ...)
@@ -67,7 +70,7 @@ function Methods.Session:SendToServer(self, ...)
 end
 
 --- Fire session event
---- @within ClientSession
+--- @within Session-Client
 --- @param self table
 --- @param ... any
 function Methods.Session:FireEvent(self, ...)
@@ -77,7 +80,7 @@ function Methods.Session:FireEvent(self, ...)
 end
 
 --- Connect session event
---- @within ClientSession
+--- @within Session-Client
 --- @param self table
 --- @param func function -- Function to connect
 function Methods.Session:ConnectEvent(self, func)
@@ -89,7 +92,7 @@ function Methods.Session:ConnectEvent(self, func)
 end
 
 --- End session
---- @within ClientSession
+--- @within Session-Client
 --- @param self table
 function Methods.Session:End(self)
 	if not self.Ended then
@@ -107,7 +110,7 @@ function Methods.Session:End(self)
 end
 
 
---// Remote
+-- #region Remote Methods
 --- Sends a remote command to the server
 --- @method Send
 --- @within Client.Remote
@@ -144,7 +147,7 @@ end
 --- @method GetSession
 --- @within Client.Remote
 --- @param sessionKey string -- Session key
---- @return ClientSession
+--- @return Session-Client
 function Remote:GetSession(self, sessionKey)
 	if not Sessions[sessionKey] then
 		local session = {
@@ -319,7 +322,8 @@ function Remote:UpdateRemoteKey(self)
 end
 
 
---// Remote Commands
+-- #region Remote Commands
+
 --- Sends data to an active session (if any)
 --- @function SessionData
 --- @within Client.Remote.Commands
