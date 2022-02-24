@@ -1,6 +1,6 @@
 --!strict
 --[[
-	Description: Makes a virtual enviroment to replace the legacy function enviroment for running code
+	Description: Makes a virtual environment to replace the legacy function environment for running code
 	Author: github@ccuser44
 	Date: 15.2.2022
 --]]
