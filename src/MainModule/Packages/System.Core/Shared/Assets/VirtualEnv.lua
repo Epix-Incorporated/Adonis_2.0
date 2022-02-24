@@ -1,6 +1,6 @@
 --!strict
 --[[
-	Description: Contains bytecode/loadstring-related functionality
+	Description: Makes a virtual enviroment to replace the legacy function enviroment for running code
 	Author: github@ccuser44
 	Date: 15.2.2022
 --]]
@@ -48,7 +48,7 @@ local globalEnv: dictionary = {
 	xpcall = xpcall,
 	warn = warn,
 	gcinfo = gcinfo,
-	_G = _G,
+	--_G = _G,
 	_VERSION = _VERSION,
 
 	-- // Roblox globals
@@ -59,7 +59,7 @@ local globalEnv: dictionary = {
 	require = require,
 	game = game,
 	workspace = workspace,
-	shared = shared,
+	--shared = shared,
 
 	-- // Deprecated Roblox globals (Please don't use, use the alternative instead)
 	delay = task.delay,-- Use task.delay instead
@@ -125,9 +125,9 @@ return function()
 	end
 
 	env["setf".."env"] = function(target: func | number, newEnv: dictionary): ()
-		assert(type(newEnv) == "table", "invalid argument #2 to 'setfenv' (table expected, got "..type(newEnv)..")")
+		assert(type(newEnv) == "table", "invalid argument #2 to 'setf".."env' (table expected, got "..type(newEnv)..")")
 		assert(type(target) == "number" or type(target) == "function", "invalid argument #1 to 'setf".."env' (number expected, got "..type(target)..")")
-		assert(type(target) == "number" and target >= 0, "invalid argument #1 to 'setfenv' (level must be non-negative)")
+		assert(type(target) == "number" and target >= 0, "invalid argument #1 to 'setf".."env' (level must be non-negative)")
 
 		table.clear(env)
 
