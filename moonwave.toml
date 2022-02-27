@@ -20,4 +20,4 @@ position = "right"
 
 [footer]
 style = "dark"
-copyright = "Copyright © 2022 Epix Incorporated and Adonis Contributors. Built with Moonwave and Docusaurus"
+copyright = "Distributed under the <a href='https://github.com/Sceleratis/Adonis_2.0/blob/main/LICENSE' target='_blank'>MIT license.</a> Built with <a href='https://upliftgames.github.io/moonwave/' target='_blank'>Moonwave</a> and <a href='https://docusaurus.io/' target='_blank'>Docusaurus</a>"
