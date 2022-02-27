@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="generator" content="Docusaurus v2.0.0-beta.9">
+<title data-react-helmet="true">Event | Adonis</title><meta data-react-helmet="true" property="og:title" content="Event | Adonis"><meta data-react-helmet="true" name="twitter:card" content="summary_large_image"><meta data-react-helmet="true" name="description" content="Event object returned by Utilities.Events"><meta data-react-helmet="true" property="og:description" content="Event object returned by Utilities.Events"><meta data-react-helmet="true" property="og:url" content="https://Sceleratis.github.io/Adonis_2.0/api/Event"><meta data-react-helmet="true" name="docusaurus_locale" content="en"><meta data-react-helmet="true" name="docusaurus_tag" content="default"><link data-react-helmet="true" rel="shortcut icon" href="/Adonis_2.0/favicon.png"><link data-react-helmet="true" rel="canonical" href="https://Sceleratis.github.io/Adonis_2.0/api/Event"><link data-react-helmet="true" rel="alternate" href="https://Sceleratis.github.io/Adonis_2.0/api/Event" hreflang="en"><link data-react-helmet="true" rel="alternate" href="https://Sceleratis.github.io/Adonis_2.0/api/Event" hreflang="x-default"><link rel="stylesheet" href="/Adonis_2.0/assets/css/styles.302001c7.css">
+<link rel="preload" href="/Adonis_2.0/assets/js/runtime~main.af528a33.js" as="script">
+<link rel="preload" href="/Adonis_2.0/assets/js/main.b5ce830a.js" as="script">
+</head>
+<body>
+<script>!function(){function e(e){document.documentElement.setAttribute("data-theme",e)}var t=function(){var e=null;try{e=localStorage.getItem("theme")}catch(e){}return e}();null!==t?e(t):window.matchMedia("(prefers-color-scheme: dark)").matches?e("dark"):(window.matchMedia("(prefers-color-scheme: light)").matches,e("light"))}()</script><div id="__docusaurus">
+<div><a href="#" class="skipToContent_1oUP">Skip to main content</a></div><nav class="navbar navbar--fixed-top"><div class="navbar__inner"><div class="navbar__items"><button aria-label="Navigation bar toggle" class="navbar__toggle clean-btn" type="button" tabindex="0"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" d="M4 7h22M4 15h22M4 23h22"></path></svg></button><a class="navbar__brand" href="/Adonis_2.0/"><b class="navbar__title">Adonis</b></a><a class="navbar__item navbar__link" href="/Adonis_2.0/docs/intro">Docs</a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/Adonis_2.0/api/">API</a></div><div class="navbar__items navbar__items--right"><a href="https://discord.gg/H5RvTP3" target="_blank" rel="noopener noreferrer" class="navbar__item navbar__link"><span>Discord<svg width="13.5" height="13.5" aria-hidden="true" viewBox="0 0 24 24" class="iconExternalLink_3J9K"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"></path></svg></span></a><a href="https://github.com/Sceleratis/Adonis_2.0" target="_blank" rel="noopener noreferrer" class="navbar__item navbar__link"><span>GitHub<svg width="13.5" height="13.5" aria-hidden="true" viewBox="0 0 24 24" class="iconExternalLink_3J9K"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"></path></svg></span></a><div class="toggle_71bT toggle_3Zt9 toggleDisabled_3cF-"><div class="toggleTrack_32Fl" role="button" tabindex="-1"><div class="toggleTrackCheck_3lV7"><span class="toggleIcon_O4iE">🌜</span></div><div class="toggleTrackX_S2yS"><span class="toggleIcon_O4iE">🌞</span></div><div class="toggleTrackThumb_xI_Z"></div></div><input type="checkbox" class="toggleScreenReader_28Tw" aria-label="Switch between dark and light mode"></div><div class="navbar__search"><span aria-label="expand searchbar" role="button" class="search-icon" tabindex="0"></span><input type="search" id="search_input_react" placeholder="Press S to Search..." aria-label="Search" class="navbar__search-input search-bar"></div></div></div><div role="presentation" class="navbar-sidebar__backdrop"></div></nav><div class="main-wrapper docPageContainer_2Kz0"><div class="docPage_1bdk"><div class="docSidebarContainer_1ykS"><div class="sidebar_15mo"><nav class="menu thin-scrollbar menu_Bmed"><ul class="theme-doc-sidebar-menu menu__list"><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><a class="menu__link menu__link--sublist" href="#">System. Core</a></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item"><a class="menu__link menu__link--sublist menu__link--active" href="#">System. Utilities</a><ul style="display:block;overflow:visible;height:auto" class="menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link menu__link--active" aria-current="page" tabindex="0" href="/Adonis_2.0/api/Event">​Event</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/Adonis_2.0/api/MemoryCache">​Memory​Cache</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/Adonis_2.0/api/Utilities">​Utilities</a></li></ul></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/Adonis_2.0/api/PackageHandler">​Package​Handler</a></li></ul></nav><button type="button" title="Collapse sidebar" aria-label="Collapse sidebar" class="button button--secondary button--outline collapseSidebarButton_1CGd"><svg width="20" height="20" aria-hidden="true" class="collapseSidebarButtonIcon_3E-R"><g fill="#7a7a7a"><path d="M9.992 10.023c0 .2-.062.399-.172.547l-4.996 7.492a.982.982 0 01-.828.454H1c-.55 0-1-.453-1-1 0-.2.059-.403.168-.551l4.629-6.942L.168 3.078A.939.939 0 010 2.528c0-.548.45-.997 1-.997h2.996c.352 0 .649.18.828.45L9.82 9.472c.11.148.172.347.172.55zm0 0"></path><path d="M19.98 10.023c0 .2-.058.399-.168.547l-4.996 7.492a.987.987 0 01-.828.454h-3c-.547 0-.996-.453-.996-1 0-.2.059-.403.168-.551l4.625-6.942-4.625-6.945a.939.939 0 01-.168-.55 1 1 0 01.996-.997h3c.348 0 .649.18.828.45l4.996 7.492c.11.148.168.347.168.55zm0 0"></path></g></svg></button></div></div><main class="docMainContainer_28N5"><div class="container padding-vert--lg"><div class="row"><div class="col docItemCol_3WPG"><div class="docItemContainer_3XDu"><article><div class="member_qHIL markdown"><div class="tocCollapsible_1PrD theme-doc-toc-mobile tocMobile_3ryM"><button type="button" class="clean-btn tocCollapsibleButton_2O1e">On this page</button></div><header><h1 class="docTitle_1ddc" style="text-decoration:none"><span style="display:inline-block">Event</span></h1><div class="luaClassTags_2Zrs"><span class="badge_3ZFo" style="color:#349AD5"><span class="badgeTooltip_2qiw">This item only works when running on the client.</span><span class="badgeToolTipTail_2yaQ"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 337 304" fill="#349AD5" role="img" aria-label="This item only works when running on the client."><path d="M0 201h337v36H0v-36zm0 0zM0 0v188h337V0H0zM218 287h30c12 0 12 17 0 17H88c-11 0-11-17 0-17h31l10-39h79l10 39z"></path></svg> <!-- -->Client</span></span><span class="badge_3ZFo" style="color:#00CC67"><span class="badgeTooltip_2qiw">This item only works when running on the server.</span><span class="badgeToolTipTail_2yaQ"><svg fill="#00CC67" xmlns="http://www.w3.org/2000/svg" version="1.1" x="0px" y="0px" viewBox="0 0 90 90" role="img" aria-label="This item only works when running on the server."><polygon points="6.125,72.421 58.544,88.523 58.544,24.372 6.125,8.269 "></polygon><polygon points="79.818,15.77 79.868,15.755 29.615,1.453 10.328,6.318 60.102,21.609 "></polygon><path d="M61.643,78.738l22.232-6.582V17.801l-22.232,6.584V78.738z M73.811,69.257c-1.174,0-2.125-1.19-2.125-2.659  c0-1.468,0.951-2.658,2.125-2.658c1.172,0,2.123,1.19,2.123,2.658C75.934,68.066,74.982,69.257,73.811,69.257z M64.898,32.121  l16.336-4.41v7.117l-16.336,4.409V32.121z M64.898,41.292l16.336-4.41v7.116l-16.336,4.409V41.292z M64.898,50.463l16.336-4.411  v7.116l-16.336,4.411V50.463z"></path><polygon points="83.875,74.893 61.643,81.477 61.643,88.547 83.875,81.963 "></polygon></svg> <!-- -->Server</span></span><span class="docTag_3qMS" style="border-color:#79b473;color:#79b473">Core</span><span class="docTag_3qMS" style="border-color:#dc0073;color:#dc0073">Package: System.Utilities</span></div><div>
+<p>Event object returned by Utilities.Events</p>
+</div></header><h2 class="anchor anchorWithStickyNavbar_31ik" id="properties">Properties<a aria-hidden="true" class="hash-link" href="#properties" title="Direct link to heading">​</a></h2><div class="divider_3z1R"></div><h3 class="anchor anchorWithStickyNavbar_31ik" id="EventName"><code style="text-decoration:none">EventName</code><a aria-hidden="true" class="hash-link" href="#EventName" title="Direct link to heading">​</a></h3><div class="repositoryDetailsContainer_1UH0"><a class="sourceButton_2aE5" href="https://github.com/Sceleratis/Adonis_2.0/blob/main/src/MainModule/Packages/System.Utilities/Shared/Utilities.lua#L120"><div class="sourceButtonText_monK">&lt;/&gt;</div></a></div><div class="memberString_P8-X"><code>Event<!-- -->.<!-- -->EventName<!-- -->:<!-- --> </code> <code class="blue_2Afy">string</code></div><div>
+<p>Event name</p>
+</div><h2 class="anchor anchorWithStickyNavbar_31ik" id="functions">Functions<a aria-hidden="true" class="hash-link" href="#functions" title="Direct link to heading">​</a></h2><div class="divider_3z1R"></div><h3 class="anchor anchorWithStickyNavbar_31ik" id="Connect"><code style="text-decoration:none">Connect</code><a aria-hidden="true" class="hash-link" href="#Connect" title="Direct link to heading">​</a></h3><div class="repositoryDetailsContainer_1UH0"><a class="sourceButton_2aE5" href="https://github.com/Sceleratis/Adonis_2.0/blob/main/src/MainModule/Packages/System.Utilities/Shared/Utilities.lua#L125"><div class="sourceButtonText_monK">&lt;/&gt;</div></a></div><div class="memberString_P8-X"><code>Event<!-- -->:</code><code class="green_3LnD">Connect</code><code>(</code><div class="inset_2cJr"><div><code>func<!-- -->: </code><code class="blue_2Afy">function</code><span class="inlineDescription_17uy">-- <span>
+<p>Function to connect</p>
+</span></span></div></div><code>) → </code><code>(</code><code>)</code></div><div>
+<p>Connect event</p>
+</div><div class="divider_3z1R"></div><h3 class="anchor anchorWithStickyNavbar_31ik" id="Wait"><code style="text-decoration:none">Wait</code><a aria-hidden="true" class="hash-link" href="#Wait" title="Direct link to heading">​</a></h3><span class="badge_3ZFo" style="color:#f1c40f"><span class="badgeTooltip_2qiw">This is a yielding function. When called, it will pause the Lua thread that called the function until a result is ready to be returned, without interrupting other scripts.</span><span class="badgeToolTipTail_2yaQ"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="#f1c40f" role="img" aria-label="This is a yielding function. When called, it will pause the Lua thread that called the function until a result is ready to be returned, without interrupting other scripts."><path d="M96.4 11.9c-1.4-2.5-4-4-6.9-4H10.8c-2.9 0-5.4 1.5-6.9 4-1.4 2.5-1.4 5.5 0 7.9L43.3 88c1.4 2.5 4 4 6.9 4 2.9 0 5.4-1.5 6.9-4l39.3-68.2c1.4-2.4 1.4-5.4 0-7.9zM46.3 54.5c1.1-1.1 2.3-1.6 3.8-1.6s2.8.5 3.8 1.6c1.1 1.1 1.6 2.3 1.6 3.8s-.5 2.8-1.6 3.8c-1.1 1.1-2.3 1.6-3.8 1.6s-2.8-.5-3.8-1.6c-1.1-1.1-1.6-2.3-1.6-3.8.1-1.5.6-2.8 1.6-3.8zm-.5-4.9V21.8h8.8v27.8h-8.8z"></path></svg> <!-- -->Yields</span></span><div class="repositoryDetailsContainer_1UH0"><a class="sourceButton_2aE5" href="https://github.com/Sceleratis/Adonis_2.0/blob/main/src/MainModule/Packages/System.Utilities/Shared/Utilities.lua#L141"><div class="sourceButtonText_monK">&lt;/&gt;</div></a></div><div class="memberString_P8-X"><code>Event<!-- -->:</code><code class="green_3LnD">Wait</code><code>(</code><code>) → </code><code>(</code><code>)</code></div><div>
+<p>Waits for the event to fire</p>
+</div><div class="divider_3z1R"></div><h3 class="anchor anchorWithStickyNavbar_31ik" id="Fire"><code style="text-decoration:none">Fire</code><a aria-hidden="true" class="hash-link" href="#Fire" title="Direct link to heading">​</a></h3><div class="repositoryDetailsContainer_1UH0"><a class="sourceButton_2aE5" href="https://github.com/Sceleratis/Adonis_2.0/blob/main/src/MainModule/Packages/System.Utilities/Shared/Utilities.lua#L157"><div class="sourceButtonText_monK">&lt;/&gt;</div></a></div><div class="memberString_P8-X"><code>Event<!-- -->:</code><code class="green_3LnD">Fire</code><code>(</code><code>...<!-- -->: </code><code class="blue_2Afy">any</code><code>) → </code><code>(</code><code>)</code></div><div>
+<p>Fires the event, triggering and sending data to any connected function.</p>
+</div><div class="divider_3z1R"></div><h3 class="anchor anchorWithStickyNavbar_31ik" id="Destroy"><code style="text-decoration:none">Destroy</code><a aria-hidden="true" class="hash-link" href="#Destroy" title="Direct link to heading">​</a></h3><div class="repositoryDetailsContainer_1UH0"><a class="sourceButton_2aE5" href="https://github.com/Sceleratis/Adonis_2.0/blob/main/src/MainModule/Packages/System.Utilities/Shared/Utilities.lua#L168"><div class="sourceButtonText_monK">&lt;/&gt;</div></a></div><div class="memberString_P8-X"><code>Event<!-- -->:</code><code class="green_3LnD">Destroy</code><code>(</code><code>) → </code><code>(</code><code>)</code></div><div>
+<p>Destroys all connections for the event.</p>
+</div></div></article></div><details><summary>Show raw api</summary><pre style="max-width:100%;white-space:pre-wrap">{
+    &quot;functions&quot;: [
+        {
+            &quot;name&quot;: &quot;Connect&quot;,
+            &quot;desc&quot;: &quot;Connect event&quot;,
+            &quot;params&quot;: [
+                {
+                    &quot;name&quot;: &quot;func&quot;,
+                    &quot;desc&quot;: &quot;Function to connect&quot;,
+                    &quot;lua_type&quot;: &quot;function&quot;
+                }
+            ],
+            &quot;returns&quot;: [],
+            &quot;function_type&quot;: &quot;method&quot;,
+            &quot;source&quot;: {
+                &quot;line&quot;: 125,
+                &quot;path&quot;: &quot;src/MainModule/Packages/System.Utilities/Shared/Utilities.lua&quot;
+            }
+        },
+        {
+            &quot;name&quot;: &quot;Wait&quot;,
+            &quot;desc&quot;: &quot;Waits for the event to fire&quot;,
+            &quot;params&quot;: [],
+            &quot;returns&quot;: [],
+            &quot;function_type&quot;: &quot;method&quot;,
+            &quot;yields&quot;: true,
+            &quot;source&quot;: {
+                &quot;line&quot;: 141,
+                &quot;path&quot;: &quot;src/MainModule/Packages/System.Utilities/Shared/Utilities.lua&quot;
+            }
+        },
+        {
+            &quot;name&quot;: &quot;Fire&quot;,
+            &quot;desc&quot;: &quot;Fires the event, triggering and sending data to any connected function.&quot;,
+            &quot;params&quot;: [
+                {
+                    &quot;name&quot;: &quot;...&quot;,
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;any&quot;
+                }
+            ],
+            &quot;returns&quot;: [],
+            &quot;function_type&quot;: &quot;method&quot;,
+            &quot;source&quot;: {
+                &quot;line&quot;: 157,
+                &quot;path&quot;: &quot;src/MainModule/Packages/System.Utilities/Shared/Utilities.lua&quot;
+            }
+        },
+        {
+            &quot;name&quot;: &quot;Destroy&quot;,
+            &quot;desc&quot;: &quot;Destroys all connections for the event.&quot;,
+            &quot;params&quot;: [],
+            &quot;returns&quot;: [],
+            &quot;function_type&quot;: &quot;method&quot;,
+            &quot;source&quot;: {
+                &quot;line&quot;: 168,
+                &quot;path&quot;: &quot;src/MainModule/Packages/System.Utilities/Shared/Utilities.lua&quot;
+            }
+        }
+    ],
+    &quot;properties&quot;: [
+        {
+            &quot;name&quot;: &quot;EventName&quot;,
+            &quot;desc&quot;: &quot;Event name&quot;,
+            &quot;lua_type&quot;: &quot;string&quot;,
+            &quot;source&quot;: {
+                &quot;line&quot;: 120,
+                &quot;path&quot;: &quot;src/MainModule/Packages/System.Utilities/Shared/Utilities.lua&quot;
+            }
+        }
+    ],
+    &quot;types&quot;: [],
+    &quot;name&quot;: &quot;Event&quot;,
+    &quot;desc&quot;: &quot;Event object returned by Utilities.Events&quot;,
+    &quot;tags&quot;: [
+        &quot;Core&quot;,
+        &quot;Package: System.Utilities&quot;
+    ],
+    &quot;realm&quot;: [
+        &quot;Client&quot;,
+        &quot;Server&quot;
+    ],
+    &quot;source&quot;: {
+        &quot;line&quot;: 114,
+        &quot;path&quot;: &quot;src/MainModule/Packages/System.Utilities/Shared/Utilities.lua&quot;
+    }
+}</pre></details></div><div class="col col--3"><div class="tableOfContents_35-E thin-scrollbar"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#types" class="table-of-contents__link toc-highlight">Types</a></li><li><a href="#properties" class="table-of-contents__link toc-highlight">Properties</a><ul><li><a href="#EventName" class="table-of-contents__link toc-highlight">EventName</a></li></ul></li><li><a href="#functions" class="table-of-contents__link toc-highlight">Functions</a><ul><li><a href="#Connect" class="table-of-contents__link toc-highlight">:Connect</a></li><li><a href="#Destroy" class="table-of-contents__link toc-highlight">:Destroy</a></li><li><a href="#Fire" class="table-of-contents__link toc-highlight">:Fire</a></li><li><a href="#Wait" class="table-of-contents__link toc-highlight">:Wait</a></li></ul></li></ul></div></div></div></div></main></div></div><footer class="footer footer--dark"><div class="container"><div class="footer__bottom text--center"><div class="footer__copyright">Distributed under the <a href="https://github.com/Sceleratis/Adonis_2.0/blob/main/LICENSE" target="_blank">MIT license.</a> Built with <a href="https://upliftgames.github.io/moonwave/" target="_blank">Moonwave</a> and <a href="https://docusaurus.io/" target="_blank">Docusaurus</a></div></div></div></footer></div>
+<script src="/Adonis_2.0/assets/js/runtime~main.af528a33.js"></script>
+<script src="/Adonis_2.0/assets/js/main.b5ce830a.js"></script>
+</body>
+</html>
