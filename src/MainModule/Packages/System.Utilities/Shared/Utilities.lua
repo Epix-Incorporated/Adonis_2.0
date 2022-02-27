@@ -29,7 +29,7 @@ local Cache = {
 --- @class MemoryCache
 --- @server
 --- @client
---- @tag Core
+--- @tag Utilities
 --- @tag Package: System.Utilities
 
 --- Responsible for configuration of individual cache entries.
@@ -109,7 +109,7 @@ end
 --- @class Event
 --- @server
 --- @client
---- @tag Core
+--- @tag Utilities
 --- @tag Package: System.Utilities
 
 ObjectMethods.Event = {}
@@ -178,7 +178,7 @@ end
 --- @class Utilities
 --- @server
 --- @client
---- @tag Core
+--- @tag Utilities
 --- @tag Package: System.Utilities
 
 --- Console warnings
