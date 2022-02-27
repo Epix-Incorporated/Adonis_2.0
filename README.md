@@ -17,7 +17,7 @@
 <hr/>
 Adonis is a server moderation and management system created for use on the Roblox platform.
 <!--moonwave-hide-before-this-line-->
-
+##
 ## ⚠️ NOTICE
 This version of Adonis is a **WORK IN PROGRESS** and is missing many features. For the current version, see the [Adonis 1.0 repository](https://github.com/Sceleratis/Adonis).
 
