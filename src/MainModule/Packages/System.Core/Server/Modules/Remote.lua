@@ -104,7 +104,7 @@ function RemoteCommands.ClientReady(p: Player)
 end
 
 
---- Allows the client to send data to a session their player is a member of. Handled by Session-Server.
+--- Allows the client to send data to a session their player is a member of. Handled by ServerSession.
 --- @function SessionData
 --- @within Server.Remote.Commands
 --- @param p Player
@@ -152,16 +152,52 @@ end
 -- #region Misc Methods
 
 --- Server-side session handler
---- @class Session-Server
+--- @class ServerSession
 --- @server
 --- @tag Core
 --- @tag Package: System.Core
+
+--- Indicates whether this session has ended.
+--- @prop Ended bool
+--- @within ServerSession
+
+--- Number of users that are members of this session.
+--- @prop NumUsers int
+--- @within ServerSession
+
+--- Number of active users in this session.
+--- @prop NumActiveUsers int
+--- @within ServerSession
+
+--- Table that can be used to store session-specific data.
+--- @prop Data {}
+--- @within ServerSession
+
+--- Session users.
+--- @prop Users {}
+--- @within ServerSession
+
+--- Session event connections that will be cleaned up on session end.
+--- @prop Events {}
+--- @within ServerSession
+
+--- Active users.
+--- @prop ActiveUsers {}
+--- @within ServerSession
+
+--- Session key.
+--- @prop SessionKey string
+--- @within ServerSession
+
+--- Session event object.
+--- @prop SessionEvent BindableEvent
+--- @within ServerSession
 Methods.Session = {}
 
 
 --- Adds a user to the session
 --- @method AddUser
---- @within Session-Server
+--- @within ServerSession
 --- @param p Player
 --- @param defaultData table -- Optional table of default session data for the user
 function Methods.Session:AddUser(self, p: Player, defaultData)
@@ -175,7 +211,7 @@ end
 
 --- Removes a user from the session
 --- @method RemoveUser
---- @within Session-Server
+--- @within ServerSession
 --- @param p Player
 function Methods.Session:RemoveUser(self, p: Player)
 	assert(not self.Ended, "Cannot remove user from session: Session Ended")
@@ -197,7 +233,7 @@ end
 
 --- Sets session user as active
 --- @method SetActiveUser
---- @within Session-Server
+--- @within ServerSession
 --- @param p Player
 function Methods.Session:SetActiveUser(self, p: Player)
 	if not self.ActiveUsers[p] then
@@ -209,7 +245,7 @@ end
 
 --- Sets session user as inactive
 --- @method RemoveActiveUser
---- @within Session-Server
+--- @within ServerSession
 --- @param p Player
 function Methods.Session:RemoveActiveUser(self, p: Player)
 	if self.ActiveUsers[p] then
@@ -225,7 +261,7 @@ end
 
 --- Sends data to all active users in the session
 --- @method SendToUsers
---- @within Session-Server
+--- @within ServerSession
 --- @param ... any -- Data to send to users
 function Methods.Session:SendToUsers(self, ...)
 	if not self.Ended then
@@ -238,7 +274,7 @@ end
 
 --- Sends data to all users in a session, regardless of whether or not they are marked as active
 --- @method SendToAllUsers
---- @within Session-Server
+--- @within ServerSession
 --- @param ... any -- Data to send to users
 function Methods.Session:SendToAllUsers(self, ...)
 	if not self.Ended then
@@ -251,7 +287,7 @@ end
 
 --- Sends data to a specific user if they are a session member
 --- @method SendToUser
---- @within Session-Server
+--- @within ServerSession
 --- @param p Player
 --- @param ... any -- Data to send to use
 function Methods.Session:SendToUser(self, p: Player, ...)
@@ -263,7 +299,7 @@ end
 
 --- Fires the session event
 --- @method FireEvent
---- @within Session-Server
+--- @within ServerSession
 --- @param ... any -- Session data
 function Methods.Session:FireEvent(self, ...)
 	if not self.Ended then
@@ -274,7 +310,7 @@ end
 
 --- Ends the session
 --- @method End
---- @within Session-Server
+--- @within ServerSession
 function Methods.Session:End(self)
 	if not self.Ended then
 		for t, event in pairs(self.Events) do
@@ -300,7 +336,7 @@ end
 
 --- Connects a function to the session event
 --- @method ConnectEvent
---- @within Session-Server
+--- @within ServerSession
 --- @param func function -- Function
 function Methods.Session:ConnectEvent(self, func)
 	assert(not self.Ended, "Cannot connect session event: Session Ended")
@@ -395,17 +431,18 @@ end
 --- @method GetSession
 --- @within Server.Remote
 --- @param sessionKey string -- Session key
---- @return Session-Server
+--- @return ServerSession
 function Remote:GetSession(self, sessionKey: string)
 	return self.Sessions:GetData(sessionKey);
 end
 
+--- Session Object
 
 --- Creates a new session and returns its handler
 --- @method NewSession
 --- @within Server.Remote
 --- @param users table -- Optional table of users to add to the session on creation
---- @return Session-Server
+--- @return ServerSession
 function Remote:NewSession(self, users)
 	local session = {
 		Ended = false;

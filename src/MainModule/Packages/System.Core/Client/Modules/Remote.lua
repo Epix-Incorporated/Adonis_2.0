@@ -51,16 +51,28 @@ local Remote = {
 -- #region Misc Class Methods
 
 --- Responsible for handling temporary client-server communication channels.
---- @class Session-Client
+--- @class ClientSession
 --- @client
 --- @tag Core
 --- @tag Package: System.Core
+
+--- Session event connections that will be cleaned up on session end.
+--- @prop Events {}
+--- @within ClientSession
+
+--- Session key.
+--- @prop SessionKey string
+--- @within ClientSession
+
+--- Session event object.
+--- @prop SessionEvent BindableEvent
+--- @within ClientSession
 
 Methods.Session = {}
 
 
 --- Send data to the server
---- @within Session-Client
+--- @within ClientSession
 --- @param self table
 --- @param ... any
 function Methods.Session:SendToServer(self, ...)
@@ -70,7 +82,7 @@ function Methods.Session:SendToServer(self, ...)
 end
 
 --- Fire session event
---- @within Session-Client
+--- @within ClientSession
 --- @param self table
 --- @param ... any
 function Methods.Session:FireEvent(self, ...)
@@ -80,7 +92,7 @@ function Methods.Session:FireEvent(self, ...)
 end
 
 --- Connect session event
---- @within Session-Client
+--- @within ClientSession
 --- @param self table
 --- @param func function -- Function to connect
 function Methods.Session:ConnectEvent(self, func)
@@ -92,7 +104,7 @@ function Methods.Session:ConnectEvent(self, func)
 end
 
 --- End session
---- @within Session-Client
+--- @within ClientSession
 --- @param self table
 function Methods.Session:End(self)
 	if not self.Ended then
@@ -147,7 +159,7 @@ end
 --- @method GetSession
 --- @within Client.Remote
 --- @param sessionKey string -- Session key
---- @return Session-Client
+--- @return ClientSession
 function Remote:GetSession(self, sessionKey)
 	if not Sessions[sessionKey] then
 		local session = {
