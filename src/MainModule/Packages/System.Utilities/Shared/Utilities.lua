@@ -9,6 +9,7 @@
 local Root = {}
 local EventObjects = {}
 local InitFunctions = {}
+local ObjectMethods = {}
 local oWarn = warn
 
 local function warn(...)
@@ -24,147 +25,241 @@ local Cache = {
 	KnownServices = {}
 }
 
---// Utility Object Methods
-local ObjectMethods = {
+--- Responsible for temporary memory storage.
+--- @class MemoryCache
+--- @server
+--- @client
+--- @tag Core
+--- @tag Package: System.Utilities
 
-	--// Event methods
-	Event = {
-		Connect = function(self, func)
-			local eventObject = EventObjects[self.EventName]
+--- Responsible for configuration of individual cache entries.
+--- @interface CacheEntryData
+--- @within MemoryCache
+--- @field Value any -- Cache entry value
+--- @field Timeout int -- Optional timeout for this specific cache entry
+--- @field AccessResetsTimer bool -- If true, this entry's timeout timer will be reset whenever data is accessed
+--- @field CacheTime int -- os.time() when the cache was last updated (or accessed)
 
-			if not eventObject then
-				eventObject = Instance.new("BindableEvent")
-				EventObjects[self.EventName] = eventObject
-			end
+--- MemoryCache default data
+--- @interface DefaultCacheData
+--- @within Utilities
+--- @field Cache {} -- Optional table to use for caching
+--- @field Timeout int -- Optional default timeout for cache items; Defaults to infinite if no timeout is provided
+--- @field AccessResetsTimer bool -- Bool indicated whether or not cache timers should be reset on data access
 
-			return eventObject.Event:Connect(func)
-		end;
+ObjectMethods.MemoryCache = {
+	__index = function(self, ind)
+		return self:GetData(ind)
+	end,
 
-		Wait = function(self)
-			local eventObject = EventObjects[self.EventName]
-
-			if not eventObject then
-				eventObject = Instance.new("BindableEvent")
-				EventObjects[self.EventName] = eventObject
-			end
-
-			return eventObject.Event:Wait()
-		end;
-
-		Fire = function(self, ...)
-			local eventObject = EventObjects[self.EventName]
-			if eventObject then
-				return eventObject:Fire(...)
-			end
-		end;
-
-		Destroy = function(self, ...)
-			local eventObject = EventObjects[self.EventName]
-			if eventObject then
-				EventObjects[self.EventName] = nil
-				return eventObject:Destroy()
-			end
-		end
-	},
-
-	--// MemoryCache
-	MemoryCache = {
-		CleanCache = function(self)
-			for ind,data in pairs(self.__Cache) do
-				if os.time() - data.CacheTime > data.Timeout then
-					self.__Cache[ind] = nil
-				end
-			end
-		end,
-
-		SetData = function(self, key: any, value: any?, data)
-			self:CleanCache()
-			self.__Cache[key] = if value ~= nil then {
-				Value = value,
-				Timeout = (data and data.Timeout) or self.__DefaultTimeout,
-				AccessResetsTimer = if data and data.AccessResetsTimer ~= nil then data.AccessResetsTimer else self.__AccessResetsTimer,
-				CacheTime = os.time()
-			} else nil
-		end,
-
-		GetData = function(self, key: any)
-			local found = self.__Cache[key]
-			if found and os.time() - found.CacheTime <= found.Timeout then
-				if found.AccessResetsTimer then
-					found.CacheTime = os.time()
-				end
-				return found.Value
-			elseif found then
-				self.__Cache[key] = nil
-			end
-		end,
-
-		__index = function(self, ind)
-			return self:GetData(ind)
-		end,
-
-		__newindex = function(self, ind, value)
-			self:SetData(ind, value)
-		end
-	},
+	__newindex = function(self, ind, value)
+		self:SetData(ind, value)
+	end
 }
 
---// Utilities
-local Utilities = {
-	Warn = warn,
 
-	--// Caches and returns Roblox services retrieved via game:GetService()
-	Services = table.freeze(setmetatable({}, {
-		__index = function(self, ind)
-			local cached = Cache.KnownServices[ind]
-			local service = cached or game:GetService(ind)
-			if not cached then
-				Cache.KnownServices[ind] = service
-			end
-			return service
-		end,
-	})),
-
-	--// Responsible for all non-Roblox system events
-	Events = table.freeze(setmetatable({},{
-		__index = function(self, EventName)
-			local methods = ObjectMethods.Event
-			return table.freeze({
-				EventName = EventName;
-				Fire = methods.Fire;
-				Wait = methods.Wait;
-				Connect = methods.Connect;
-			})
+--- Clears any expired cache entries. This is called automatically when data is set.
+--- @method CleanCache
+--- @within MemoryCache
+function ObjectMethods.MemoryCache:CleanCache(self)
+	for ind,data in pairs(self.__Cache) do
+		if os.time() - data.CacheTime > data.Timeout then
+			self.__Cache[ind] = nil
 		end
-	})),
+	end
+end
 
-	--// Handles data caching
-	MemoryCache = function(self, data)
-		return setmetatable({
-			__Cache = (data and data.Cache) or {},
-			__DefaultTimeout = (data and data.Timeout) or 0,
-			__AccessResetsTimer = if data and data.AccessResetsTimer ~= nil then data.AccessResetsTimer else false,
 
-			CleanCache = ObjectMethods.MemoryCache.CleanCache,
-			SetData = ObjectMethods.MemoryCache.SetData,
-			GetData = ObjectMethods.MemoryCache.GetData
-		}, {
-			__index = ObjectMethods.MemoryCache.__index,
-			__newindex = ObjectMethods.MemoryCache.__newindex
+--- Sets the given index in the cache to the value provided.
+--- @method SetData
+--- @within MemoryCache
+--- @param key any -- Cache key used to update and retrieve stored values
+--- @param value any -- Value to store
+--- @param data CacheEntryData -- Optional table describing how to handle stored data
+function ObjectMethods.MemoryCache:SetData(self, key: any, value: any?, data)
+	self:CleanCache()
+	self.__Cache[key] = if value ~= nil then {
+		Value = value,
+		Timeout = (data and data.Timeout) or self.__DefaultTimeout,
+		AccessResetsTimer = if data and data.AccessResetsTimer ~= nil then data.AccessResetsTimer else self.__AccessResetsTimer,
+		CacheTime = os.time()
+	} else nil
+end
+
+
+--- Returns the value associated with the provided key.
+--- @method GetData
+--- @within MemoryCache
+--- @param key any
+--- @return any
+function ObjectMethods.MemoryCache:GetData(self, key: any)
+	local found = self.__Cache[key]
+	if found and os.time() - found.CacheTime <= found.Timeout then
+		if found.AccessResetsTimer then
+			found.CacheTime = os.time()
+		end
+		return found.Value
+	elseif found then
+		self.__Cache[key] = nil
+	end
+end
+
+
+--- Event object returned by Utilities.Events
+--- @class Event
+--- @server
+--- @client
+--- @tag Core
+--- @tag Package: System.Utilities
+
+ObjectMethods.Event = {}
+
+--- Event name
+--- @prop EventName string
+--- @within Event
+
+--- Connect event
+--- @method Connect
+--- @within Event
+--- @param func function -- Function to connect
+function ObjectMethods.Event:Connect(self, func)
+	local eventObject = EventObjects[self.EventName]
+
+	if not eventObject then
+		eventObject = Instance.new("BindableEvent")
+		EventObjects[self.EventName] = eventObject
+	end
+
+	return eventObject.Event:Connect(func)
+end
+
+
+--- Waits for the event to fire
+--- @method Wait
+--- @within Event
+--- @yields
+function ObjectMethods.Event:Wait(self)
+	local eventObject = EventObjects[self.EventName]
+
+	if not eventObject then
+		eventObject = Instance.new("BindableEvent")
+		EventObjects[self.EventName] = eventObject
+	end
+
+	return eventObject.Event:Wait()
+end
+
+
+--- Fires the event, triggering and sending data to any connected function.
+--- @method Fire
+--- @within Event
+--- @param ... any
+function ObjectMethods.Event:Fire(self, ...)
+	local eventObject = EventObjects[self.EventName]
+	if eventObject then
+		return eventObject:Fire(...)
+	end
+end
+
+
+--- Destroys all connections for the event.
+--- @method Destroy
+--- @within Event
+function ObjectMethods.Event:Destroy(self)
+	local eventObject = EventObjects[self.EventName]
+	if eventObject then
+		EventObjects[self.EventName] = nil
+		return eventObject:Destroy()
+	end
+end
+
+
+--- Responsible for various utility methods and objects used throughout the system.
+--- @class Utilities
+--- @server
+--- @client
+--- @tag Core
+--- @tag Package: System.Utilities
+
+--- Console warnings
+--- @function Warn
+--- @within Utilities
+--- @param ... any
+
+local Utilities = { Warn = warn }
+
+--- Caches and returns Roblox services retrieved via game:GetService()
+--- @interface Services
+--- @within Utilities
+--- @field index string -- Table index corresponding to the requested service
+
+Utilities.Services = table.freeze(setmetatable({}, {
+	__index = function(self, ind)
+		local cached = Cache.KnownServices[ind]
+		local service = cached or game:GetService(ind)
+		if not cached then
+			Cache.KnownServices[ind] = service
+		end
+		return service
+	end
+}))
+
+
+--- Responsible for all non-Roblox system events; Returns Event
+--- @interface Events
+--- @within Utilities
+--- @field index string -- Index corresponding to requested event
+
+Utilities.Events = table.freeze(setmetatable({},{
+	__index = function(self, EventName)
+		local methods = ObjectMethods.Event
+		return table.freeze({
+			EventName = EventName;
+			Fire = methods.Fire;
+			Wait = methods.Wait;
+			Connect = methods.Connect;
 		})
-	end,
+	end
+}))
 
-	--// Runs the given function and outputs any errors
-	RunFunction = function(self, func, ...)
-		return xpcall(func, function(err)
-			if self.Services.RunService:IsStudio() then
-				warn("Error while running function; Expand for more info", {Error = tostring(err), Raw = err})
-			else --// The in-game developer console does not support viewing of table contents.
-				warn("Error while running function;", err)
-			end
-		end, ...)
-	end,
-}
+
+--- Returns a new MemoryCache object.
+--- @method MemoryCache
+--- @within Utilities
+--- @param data DefaultCacheData
+--- @return MemoryCache
+function Utilities:MemoryCache(self, data)
+	return setmetatable({
+		__Cache = (data and data.Cache) or {},
+		__DefaultTimeout = (data and data.Timeout) or 0,
+		__AccessResetsTimer = if data and data.AccessResetsTimer ~= nil then data.AccessResetsTimer else false,
+
+		CleanCache = ObjectMethods.MemoryCache.CleanCache,
+		SetData = ObjectMethods.MemoryCache.SetData,
+		GetData = ObjectMethods.MemoryCache.GetData
+	}, {
+		__index = ObjectMethods.MemoryCache.__index,
+		__newindex = ObjectMethods.MemoryCache.__newindex
+	})
+end
+
+
+--- Runs the given function and outputs any errors.
+--- @method RunFunction
+--- @within Utilities
+--- @param func function -- Function to run
+--- @param ... any -- Data to pass to ran function
+--- @yields
+function Utilities:RunFunction(self, func, ...)
+	return xpcall(func, function(err)
+		if self.Services.RunService:IsStudio() then
+			warn("Error while running function; Expand for more info", {Error = tostring(err), Raw = err})
+		else --// The in-game developer console does not support viewing of table contents.
+			warn("Error while running function;", err)
+		end
+	end, ...)
+end
+
 
 --// Requires a given ModuleScript; If a function is returned immediately, run it
 --// If a table is returned, assume deferred execution
