@@ -8,6 +8,7 @@
 
 local Root
 local Queues = {}
+local Utilities = {}
 local RateLimits = {}
 local ParentTester = Instance.new("Folder")
 local __RANDOM_CHARSET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -23,9 +24,8 @@ local Cache = {
 	Decrypt = {},
 }
 
---// Misc Helper Methods
-local Utilities = {}
 
+--// Misc Helper Methods
 
 --- Generates a random string
 --- @method RandomString

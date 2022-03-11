@@ -8,28 +8,33 @@
 
 
 local Root, Utilities, Service, Package;
+local RemoteCommands = {}
+local Remote = {}
 
-local RemoteCommands = {
 
-}
+--//// Command-related Client.Remote methods.
 
-local Remote = {
-	GetPermissions = function(self)
-		local cached = Root.Cache:GetData("Permissions")
-		if cached then
-			return cached
-		else
-			local perms = self:Get("Permissions")
-			if perms then
-				Root.Cache:SetData("GetPermissions", perms, {
-					Timeout = Root.Timeouts.GetPermissions
-				})
-				return perms
-			end
+--- Retrieves current user permissions from the server. Caches for duration determined by Root.Timeouts.GetPermissions
+--- @method GetPermissions
+--- @within Client.Remote
+--- @return {}
+function Remote:GetPermissions(self)
+	local cached = Root.Cache:GetData("Permissions")
+	if cached then
+		return cached
+	else
+		local perms = self:Get("Permissions")
+		if perms then
+			Root.Cache:SetData("GetPermissions", perms, {
+				Timeout = Root.Timeouts.GetPermissions
+			})
+			return perms
 		end
 	end
-}
+end
 
+
+--//// Return initializer
 return {
 	Init = function(cRoot, cPackage)
 		Root = cRoot
