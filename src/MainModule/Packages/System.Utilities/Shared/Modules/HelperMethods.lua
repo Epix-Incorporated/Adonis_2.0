@@ -346,25 +346,33 @@ function Utilities:GetFormattedTime(self, optTime: number?, withDate: boolean?):
 end
 
 
---- Returns a formatted string of the provided number; Ex: 100000 -> "100,000"
+--- Returns a formatted string of the provided number; Ex: 1000000.124 -> "1,000,000.124"
 --- @method FormatNumber
 --- @within Utilities
 --- @param num number
+--- @param string separator -- Optional; defaults to ","
 --- @return string
-function Utilities:FormatNumber(self, num: number): string
+function Utilities:FormatNumber(self, num: number?, separator: string?): string
+	num = tonumber(num)
 	if not num then return "NaN" end
-	num = tostring(num):reverse()
+	if num >= 1e150 then return "Inf" end
+
+	local int, dec = unpack(tostring(num):split("."))
+
+	int = int:reverse()
 	local new = ""
 	local counter = 1
-	for i = 1, #num do
+	separator = separator or ","
+	for i = 1, #int do
 		if counter > 3 then
-			new ..= ","
+			new ..= separator
 			counter = 1
 		end
-		new ..= num:sub(i, i)
+		new ..= int:sub(i, i)
 		counter += 1
 	end
-	return new:reverse()
+
+	return new:reverse() .. if dec then "."..dec else ""
 end
 
 
@@ -523,7 +531,7 @@ end
 --- @param ... {} -- Tables to merge from
 --- @return tab
 function Utilities:MergeTablesRecursive(self, tab, ...)
-	for i,t in ipairs(table.pack(...)) do
+	for _, t in ipairs(table.pack(...)) do
 		for k,v in pairs(t) do
 			if tab[k] ~= nil and type(v) == "table" and type(tab[k]) == "table" then
 				tab[k] = self:MergeTablesRecursive(tab[k], v)
