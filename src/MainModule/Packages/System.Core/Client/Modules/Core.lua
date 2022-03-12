@@ -24,7 +24,7 @@ local Core = {
 --- @within Client.Core
 --- @param setting string -- Setting to declare
 --- @param data table -- Setting information table
-function Core:DeclareSetting(self, setting, data)
+function Core.DeclareSetting(self, setting, data)
 	if self.DeclaredSettings[setting] then
 		Root.Warn("Setting \"".. setting .."\" already delcared. Overwriting.")
 	end
@@ -47,7 +47,7 @@ end
 --- @param tab table
 --- @param ind string -- Setting
 --- @return any -- Default setting value
-function Core:SettingsIndex(self, tab, ind)
+function Core.SettingsIndex(self, tab, ind)
 	local found = self.DeclaredSettings[ind]
 	if found then
 		return found.DefaultValue
@@ -61,7 +61,7 @@ end
 --- @method GetAllSettings
 --- @within Client.Core
 --- @return table -- All settings in the format [setting] = value
-function Core:GetAllSettings(self)
+function Core.GetAllSettings(self)
 	return Utilities:MergeTables({}, self.UserSettings, self.SettingsOverrides)
 end
 
@@ -71,7 +71,7 @@ end
 --- @within Client.Core
 --- @param setting string -- Setting
 --- @param value any -- Value
-function Core:UpdateSetting(self, setting, value)
+function Core.UpdateSetting(self, setting, value)
 	Root.Core.SettingsOverrides[setting] = value
 	Utilities.Events.SettingChanged:Fire(setting, value)
 end

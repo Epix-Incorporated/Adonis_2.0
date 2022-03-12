@@ -61,7 +61,7 @@ ObjectMethods.MemoryCache = {
 --- Clears any expired cache entries. This is called automatically when data is set.
 --- @method CleanCache
 --- @within MemoryCache
-function ObjectMethods.MemoryCache:CleanCache(self)
+function ObjectMethods.MemoryCache.CleanCache(self)
 	for ind,data in pairs(self.__Cache) do
 		if os.time() - data.CacheTime > data.Timeout then
 			self.__Cache[ind] = nil
@@ -76,7 +76,7 @@ end
 --- @param key any -- Cache key used to update and retrieve stored values
 --- @param value any -- Value to store
 --- @param data CacheEntryData -- Optional table describing how to handle stored data
-function ObjectMethods.MemoryCache:SetData(self, key: any, value: any?, data)
+function ObjectMethods.MemoryCache.SetData(self, key: any, value: any?, data)
 	self:CleanCache()
 	self.__Cache[key] = if value ~= nil then {
 		Value = value,
@@ -92,7 +92,7 @@ end
 --- @within MemoryCache
 --- @param key any
 --- @return any
-function ObjectMethods.MemoryCache:GetData(self, key: any)
+function ObjectMethods.MemoryCache.GetData(self, key: any)
 	local found = self.__Cache[key]
 	if found and os.time() - found.CacheTime <= found.Timeout then
 		if found.AccessResetsTimer then
@@ -122,7 +122,7 @@ ObjectMethods.Event = {}
 --- @method Connect
 --- @within Event
 --- @param func function -- Function to connect
-function ObjectMethods.Event:Connect(self, func)
+function ObjectMethods.Event.Connect(self, func)
 	local eventObject = EventObjects[self.EventName]
 
 	if not eventObject then
@@ -138,7 +138,7 @@ end
 --- @method Wait
 --- @within Event
 --- @yields
-function ObjectMethods.Event:Wait(self)
+function ObjectMethods.Event.Wait(self)
 	local eventObject = EventObjects[self.EventName]
 
 	if not eventObject then
@@ -154,7 +154,7 @@ end
 --- @method Fire
 --- @within Event
 --- @param ... any
-function ObjectMethods.Event:Fire(self, ...)
+function ObjectMethods.Event.Fire(self, ...)
 	local eventObject = EventObjects[self.EventName]
 	if eventObject then
 		return eventObject:Fire(...)
@@ -165,7 +165,7 @@ end
 --- Destroys all connections for the event.
 --- @method Destroy
 --- @within Event
-function ObjectMethods.Event:Destroy(self)
+function ObjectMethods.Event.Destroy(self)
 	local eventObject = EventObjects[self.EventName]
 	if eventObject then
 		EventObjects[self.EventName] = nil
@@ -228,7 +228,7 @@ Utilities.Events = table.freeze(setmetatable({},{
 --- @within Utilities
 --- @param data DefaultCacheData
 --- @return MemoryCache
-function Utilities:MemoryCache(self, data)
+function Utilities.MemoryCache(self, data)
 	return setmetatable({
 		__Cache = (data and data.Cache) or {},
 		__DefaultTimeout = (data and data.Timeout) or 0,
@@ -250,7 +250,7 @@ end
 --- @param func function -- Function to run
 --- @param ... any -- Data to pass to ran function
 --- @yields
-function Utilities:RunFunction(self, func, ...)
+function Utilities.RunFunction(self, func, ...)
 	return xpcall(func, function(err)
 		if self.Services.RunService:IsStudio() then
 			warn("Error while running function; Expand for more info", {Error = tostring(err), Raw = err})

@@ -37,7 +37,7 @@ local CrossServer = {
 --- @method SendMessage
 --- @within Server.CrossServer
 --- @param ... any
-function CrossServer:SendMessage(self, ...)
+function CrossServer.SendMessage(self, ...)
 	local data = {ServerId, ...};
 
 	Utilities:Queue("CrossServerMessageQueue", function()
@@ -67,7 +67,7 @@ end
 --- @method ProcessCrossServerMessage
 --- @within Server.CrossServer
 --- @param msg string -- Message
-function CrossServer:ProcessCrossServerMessage(self, msg)
+function CrossServer.ProcessCrossServerMessage(self, msg)
 	local data = msg.Data;
 	if not data or type(data) ~= "table" then error("CrossServer: Invalid Data Type ".. type(data)); end
 	local command = data[2];

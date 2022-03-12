@@ -36,7 +36,7 @@ local Core = {
 --- @within Server.Core
 --- @param ind string -- PlayerData index
 --- @param defaultValue any -- Default player data value (can be function which returns data (use for tables))
-function Core:DeclareDefaultPlayerData(self, ind, defaultValue)
+function Core.DeclareDefaultPlayerData(self, ind, defaultValue)
 	if self.DeclaredDefaultPlayerData[ind] then
 		Root.Warn("DefaultPlayerData \"".. ind .."\" already delcared. Overwriting.")
 	end
@@ -52,7 +52,7 @@ end
 --- @within Server.Core
 --- @param ind string -- PreLoad function name
 --- @param func function -- PreLoad function
-function Core:DeclarePlayerPreLoadProcess(self, ind, func)
+function Core.DeclarePlayerPreLoadProcess(self, ind, func)
 	if self.DeclaredPlayerPreLoadingHandlers[ind] then
 		Root.Warn("Player Pre-Loading Process \"".. ind .."\" already declared. Overwriting.")
 	end
@@ -67,7 +67,7 @@ end
 --- @within Server.Core
 --- @param ind string -- Handler name
 --- @param func function -- Handler function
-function Core:DeclarePlayerDataHandler(self, ind, func)
+function Core.DeclarePlayerDataHandler(self, ind, func)
 	if self.DeclaredPlayerDataHandlers[ind] then
 		Root.Warn("PlayerDataHandler \"".. ind .."\" already delcared. Overwriting.")
 	end
@@ -82,7 +82,7 @@ end
 --- @method HandlePlayerPreLoadingProcesses
 --- @within Server.Core
 --- @param p Player -- Player to perform processes for
-function Core:HandlePlayerPreLoadingProcesses(self, p)
+function Core.HandlePlayerPreLoadingProcesses(self, p)
 	for ind, handler in pairs(self.DeclaredPlayerPreLoadingHandlers) do
 		local waiting = true
 		task.delay(10, function() delayedTimeoutMessage(waiting, ind, 10) end)
@@ -101,7 +101,7 @@ end
 --- @within Server.Core
 --- @param p Player
 --- @return PlayerData
-function Core:DefaultPlayerData(self, p: Player)
+function Core.DefaultPlayerData(self, p: Player)
 	local newData = {}
 
 	--// Merge default data table into new data table
@@ -134,7 +134,7 @@ end
 --- @within Server.Core
 --- @param p Player
 --- @return PlayerData
-function Core:GetPlayerData(self, p: Player)
+function Core.GetPlayerData(self, p: Player)
 	local cached = self.PlayerData:GetData(p.UserId)
 
 	if cached then
@@ -152,7 +152,7 @@ end
 --- @within Server.Core
 --- @param setting string -- Setting
 --- @param data table -- Setting data table
-function Core:DeclareSetting(self, setting, data)
+function Core.DeclareSetting(self, setting, data)
 	if self.DeclaredSettings[setting] then
 		Root.Warn("Setting \"".. setting .."\" already delcared. Overwriting.")
 	end
@@ -181,7 +181,7 @@ end
 --- @param tab table
 --- @param ind string -- Setting
 --- @return DefaultSettingValue
-function Core:SettingsIndex(self, tab, ind)
+function Core.SettingsIndex(self, tab, ind)
 	local found = self.DeclaredSettings[ind]
 	if found then
 		return found.DefaultValue
@@ -194,7 +194,7 @@ end
 --- Returns all known settings
 --- @method GetAllSettings
 --- @within Server.Core
-function Core:GetAllSetting(self)
+function Core.GetAllSetting(self)
 	return Utilities:MergeTables({}, self.UserSettings, self.SettingsOverrides)
 end
 
@@ -204,7 +204,7 @@ end
 --- @within Server.Core
 --- @param p Player
 --- @return settings
-function Core:GetSharedSettings(self, p: Player)
+function Core.GetSharedSettings(self, p: Player)
 	local result = {}
 	for ind, data in pairs(self.DeclaredSettings) do
 		if data.ClientAllowed then
@@ -221,7 +221,7 @@ end
 --- @param setting string
 --- @param value any
 --- @param save bool -- Whether or not this should be saved; Only takes effect if System.Data package is loaded
-function Core:UpdateSetting(self, setting, value, save)
+function Core.UpdateSetting(self, setting, value, save)
 	Root.Core.SettingsOverrides[setting] = value
 	Utilities.Events.SettingChanged:Fire(setting, value, save)
 end

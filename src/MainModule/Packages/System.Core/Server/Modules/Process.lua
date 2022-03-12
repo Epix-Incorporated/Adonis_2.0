@@ -26,7 +26,7 @@ local Process = {
 --- @method PlayerAdded
 --- @within Server.Process
 --- @param p Player
-function Process:PlayerAdded(self, p: Player)
+function Process.PlayerAdded(self, p: Player)
 	if Root.Core:HandlePlayerPreLoadingProcesses(p) then
 		p.CharacterAdded:Connect(function(...)
 			self:CharacterAdded(p, ...)
@@ -49,7 +49,7 @@ end
 --- @method PlayerChatted
 --- @within Server.Process
 --- @param p Player
-function Process:PlayerChatted(self, p: Player, ...)
+function Process.PlayerChatted(self, p: Player, ...)
 	Events.PlayerChatted:Fire(p, ...)
 end
 
@@ -58,7 +58,7 @@ end
 --- @method PlayerReady
 --- @within Server.Process
 --- @param p Player
-function Process:PlayerReady(self, p: Player)
+function Process.PlayerReady(self, p: Player)
 	Events.PlayerReady:Fire(p)
 end
 
@@ -67,7 +67,7 @@ end
 --- @method PlayerRemoving
 --- @within Server.Process
 --- @param p Player
-function Process:PlayerRemoving(self, p: Player, ...)
+function Process.PlayerRemoving(self, p: Player, ...)
 	Events.PlayerRemoving:Fire(p, ...)
 end
 
@@ -76,7 +76,7 @@ end
 --- @method PlayerRemoved
 --- @within Server.Process
 --- @param p Player?
-function Process:PlayerRemoved(self, p: Player?)
+function Process.PlayerRemoved(self, p: Player?)
 	if p and p:IsA("Player") then
 		Events.PlayerRemoved:Fire(p)
 	end
@@ -87,7 +87,7 @@ end
 --- @method CharacterAdded
 --- @within Server.Process
 --- @param p Player
-function Process:CharacterAdded(self, p: Player, ...)
+function Process.CharacterAdded(self, p: Player, ...)
 	Events.CharacterAdded:Fire(p, ...)
 end
 
@@ -97,7 +97,7 @@ end
 --- @within Server.Process
 --- @param p Player
 --- @param ... any
-function Process:CharacterRemoving(self, p: Player, ...)
+function Process.CharacterRemoving(self, p: Player, ...)
 	Events.CharacterRemoving:Fire(p, ...)
 end
 
@@ -106,7 +106,7 @@ end
 --- @method NetworkAdded
 --- @within Server.Process
 --- @param ... any
-function Process:NetworkAdded(self, ...)
+function Process.NetworkAdded(self, ...)
 	Events.NetworkAdded:Fire(...)
 end
 
@@ -115,7 +115,7 @@ end
 --- @method NetworkRemoved
 --- @within Server.Process
 --- @param ... any
-function Process:NetworkRemoved(self, ...)
+function Process.NetworkRemoved(self, ...)
 	Events.NetworkRemoved:Fire(...)
 end
 
@@ -126,7 +126,7 @@ end
 --- @param msg string
 --- @param msgType MessageType
 --- @param ... any -- Additional data passed to Events.AdonisLogMessage or Events.LogMessage
-function Process:LogMessage(self, msg, msgType, ...)
+function Process.LogMessage(self, msg, msgType, ...)
 	if string.find(msg, "Adonis") then
 		Events.AdonisLogMessage:Fire(msg, msgType, ...)
 	else

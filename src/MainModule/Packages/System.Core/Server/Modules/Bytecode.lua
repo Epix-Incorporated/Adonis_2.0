@@ -20,7 +20,7 @@ local Bytecode = {}
 --- @method GetLoadstring
 --- @within Server.Bytecode
 --- @return function
-function Bytecode:GetLoadstring(self)
+function Bytecode.GetLoadstring(self)
 	local module = Package.Assets.Loadstring:Clone() :: ModuleScript
 	local vEnvModule = Root.ByteCode:GetVirtualEnv(true) :: ModuleScript
 	local fiOne = Package.SharedAssets.FiOne:Clone() :: ModuleScript
@@ -37,7 +37,7 @@ end
 --- @within Server.Bytecode
 --- @param str string -- Lua code to convert to bytecode equivalent
 --- @return Bytecode
-function Process:GetBytecode(self, str: string)
+function Bytecode.GetBytecode(self, str: string)
 	local loadstring = self.Loadstring or self:GetLoadstring()
 	local f, buff = loadstring(str)
 
@@ -50,7 +50,7 @@ end
 --- @within Server.Bytecode
 --- @param returnInstance bool
 --- return environment
-function Process:GetVirtualEnv(self, returnInstance)
+function Bytecode.GetVirtualEnv(self, returnInstance)
 	local vEnvModule = Package.SharedAssets.VirtualEnv:Clone() :: ModuleScript
 	return returnInstance == true and vEnvModule or returnInstance == false and require(vEnvModule)()
 end
@@ -62,7 +62,7 @@ end
 --- @param bytecode string
 --- @param envData table -- Environment
 --- @return result
-LoadBytecode = function(self, bytecode: string, envData: {})
+function Bytecode.LoadBytecode(self, bytecode: string, envData: {})
 	local fiOneMod = Package.SharedAssets.FiOne:Clone()
 	local fiOne = require(fiOneMod)
 

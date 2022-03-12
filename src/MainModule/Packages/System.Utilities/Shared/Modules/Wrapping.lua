@@ -58,7 +58,7 @@ local Wrapping = { }
 --- @method GetMetatable
 --- @within Wrapper
 --- @return metatable
-function ObjectMethods.Wrapper:GetMetatable(self)
+function ObjectMethods.Wrapper.GetMetatable(self)
 	return self.__NewMeta
 end
 
@@ -66,7 +66,7 @@ end
 --- Caches the wrapper and object so subsequent wraps for the same object will return the same wrapper.
 --- @method AddToCache
 --- @within Wrapper
-function ObjectMethods.Wrapper:AddToCache(self)
+function ObjectMethods.Wrapper.AddToCache(self)
 	Wrappers[self.__Object] = self.__Proxy;
 end
 
@@ -74,7 +74,7 @@ end
 --- Removes the wrapper and object from the wrapping cache. Subsequent wraps on the same object will return a new wrapper.
 --- @method RemoveFromCache
 --- @within Wrapper
-function ObjectMethods.Wrapper:RemoveFromCache(self)
+function ObjectMethods.Wrapper.RemoveFromCache(self)
 	Wrappers[self.__Object] = nil
 end
 
@@ -84,7 +84,7 @@ end
 --- @method GetObject
 --- @within Wrapper
 --- @return userdata
-function ObjectMethods.Wrapper:GetObject(self)
+function ObjectMethods.Wrapper.GetObject(self)
 	return self.__Object
 end
 
@@ -94,7 +94,7 @@ end
 --- @within Wrapper
 --- @param raw boolean -- If true, returns an unwrapped clone.
 --- @return Wrapper|userdata
-function Objectmethods.Wrapper:Clone(self, raw)
+function Objectmethods.Wrapper.Clone(self, raw)
 	local new = self.__Object:Clone()
 	return if raw or not Root or not Root.Utilities or not Root.Utilities.Wrapping then new else Root.Utilities.Wrapping:Wrap(new)
 end
@@ -108,7 +108,7 @@ end
 --- @param obj1 userdata -- Comparison Object A
 --- @param obj2 userdata -- Comparison Object B
 --- @return boolean
-function Wrapping:RawEqual(self, obj1, obj2)
+function Wrapping.RawEqual(self, obj1, obj2)
 	return self:UnWrap(obj1) == self:UnWrap(obj2)
 end
 
@@ -118,7 +118,7 @@ end
 --- @within Utilities.Wrapping
 --- @param tab {} -- Table to ignore wrapping for.
 --- @return {}
-function Wrapping:WrapIgnore(self, tab)
+function Wrapping.WrapIgnore(self, tab)
 	return setmetatable(tab, {__metatable = "Ignore"})
 end
 
@@ -128,7 +128,7 @@ end
 --- @within Utilities.Wrapping
 --- @param object userdata -- Object to check for wrapping
 --- @return boolean
-function Wrapping:IsWrapped(self, object)
+function Wrapping.IsWrapped(self, object)
 	return getmetatable(object) == "Adonis_Proxy"
 end
 
@@ -138,7 +138,7 @@ end
 --- @within Utilities.Wrapping
 --- @param object userdata -- Object or table to unwrap.
 --- @return userdata
-function Wrapping:UnWrap(self, object)
+function Wrapping.UnWrap(self, object)
 	local OBJ_Type = typeof(object)
 
 	if OBJ_Type == "Instance" then
@@ -163,7 +163,7 @@ end
 --- @within Utilities.Wrapping
 --- @param object userdata -- Object or table to wrap.
 --- @return Wrapper
-function Wrapping:Wrap(self, object)
+function Wrapping.Wrap(self, object)
 	if getmetatable(object) == "Ignore" or getmetatable(object) == "ReadOnly_Table" then
 		return object
 	elseif Wrappers[object] then

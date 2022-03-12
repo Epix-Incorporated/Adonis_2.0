@@ -24,7 +24,7 @@ local Logging = {
 --- @param logType string -- Log type (Script, Command, etc)
 --- @param logEntry {Text: string?, Description: string?, Time: number?, NoTime: boolean?}|string -- Log entry
 --- @param ... any -- Additional data
-function Logging:AddLog(self, logType: string, logEntry: {Text: string?, Description: string?, Time: number?, NoTime: boolean?}|string, ...)
+function Logging.AddLog(self, logType: string, logEntry: {Text: string?, Description: string?, Time: number?, NoTime: boolean?}|string, ...)
 	local logTable = self.Logs[logType]
 
 	if not logTable then
@@ -68,7 +68,7 @@ end
 --- @within Server.Logging
 --- @param Type string -- Log type
 --- @return LogTable
-function Logging:GetLogs(self, Type: string)
+function Logging.GetLogs(self, Type: string)
 	local logTable = self.Logs[Type]
 	if logTable and type(logTable) == "table" then
 		return logTable

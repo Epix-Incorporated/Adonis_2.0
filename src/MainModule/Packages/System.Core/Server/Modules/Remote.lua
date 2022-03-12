@@ -200,7 +200,7 @@ Methods.Session = {}
 --- @within ServerSession
 --- @param p Player
 --- @param defaultData table -- Optional table of default session data for the user
-function Methods.Session:AddUser(self, p: Player, defaultData)
+function Methods.Session.AddUser(self, p: Player, defaultData)
 	assert(not self.Ended, "Cannot add user to session: Session Ended")
 	if not self.Users[p] then
 		self.Users[p] = defaultData or {}
@@ -213,7 +213,7 @@ end
 --- @method RemoveUser
 --- @within ServerSession
 --- @param p Player
-function Methods.Session:RemoveUser(self, p: Player)
+function Methods.Session.RemoveUser(self, p: Player)
 	assert(not self.Ended, "Cannot remove user from session: Session Ended")
 	if self.Users[p] then
 		self.Users[p] = nil
@@ -235,7 +235,7 @@ end
 --- @method SetActiveUser
 --- @within ServerSession
 --- @param p Player
-function Methods.Session:SetActiveUser(self, p: Player)
+function Methods.Session.SetActiveUser(self, p: Player)
 	if not self.ActiveUsers[p] then
 		self.NumActiveUsers += 1
 		self.ActiveUsers[p] = true
@@ -247,7 +247,7 @@ end
 --- @method RemoveActiveUser
 --- @within ServerSession
 --- @param p Player
-function Methods.Session:RemoveActiveUser(self, p: Player)
+function Methods.Session.RemoveActiveUser(self, p: Player)
 	if self.ActiveUsers[p] then
 		self.NumActiveUsers -= 1
 		self.ActiveUsers[p] = nil
@@ -263,7 +263,7 @@ end
 --- @method SendToUsers
 --- @within ServerSession
 --- @param ... any -- Data to send to users
-function Methods.Session:SendToUsers(self, ...)
+function Methods.Session.SendToUsers(self, ...)
 	if not self.Ended then
 		for p in pairs(self.ActiveUsers) do
 			self:SendToUser(p, ...)
@@ -276,7 +276,7 @@ end
 --- @method SendToAllUsers
 --- @within ServerSession
 --- @param ... any -- Data to send to users
-function Methods.Session:SendToAllUsers(self, ...)
+function Methods.Session.SendToAllUsers(self, ...)
 	if not self.Ended then
 		for p in pairs(self.Users) do
 			self:SendToUser(p, ...);
@@ -290,7 +290,7 @@ end
 --- @within ServerSession
 --- @param p Player
 --- @param ... any -- Data to send to use
-function Methods.Session:SendToUser(self, p: Player, ...)
+function Methods.Session.SendToUser(self, p: Player, ...)
 	if not self.Ended and self.Users[p] then
 		Root.Remote:Send(p, "SessionData", self.SessionKey, ...)
 	end
@@ -301,7 +301,7 @@ end
 --- @method FireEvent
 --- @within ServerSession
 --- @param ... any -- Session data
-function Methods.Session:FireEvent(self, ...)
+function Methods.Session.FireEvent(self, ...)
 	if not self.Ended then
 		self.SessionEvent:Fire(...)
 	end
@@ -311,7 +311,7 @@ end
 --- Ends the session
 --- @method End
 --- @within ServerSession
-function Methods.Session:End(self)
+function Methods.Session.End(self)
 	if not self.Ended then
 		for t, event in pairs(self.Events) do
 			event:Disconnect()
@@ -338,7 +338,7 @@ end
 --- @method ConnectEvent
 --- @within ServerSession
 --- @param func function -- Function
-function Methods.Session:ConnectEvent(self, func)
+function Methods.Session.ConnectEvent(self, func)
 	assert(not self.Ended, "Cannot connect session event: Session Ended")
 
 	local connection = self.SessionEvent.Event:Connect(func)
@@ -357,7 +357,7 @@ end
 --- @param p Player
 --- @param cmd string -- Remote command
 --- @param ... any -- Data
-function Remote:Send(self, p: Player, cmd: string, ...)
+function Remote.Send(self, p: Player, cmd: string, ...)
 	if p:IsA("Player") and not Utilities.Wrapping:IsWrapped(p) then
 		local curEvent = self:WaitForEvent();
 		if curEvent then
@@ -378,7 +378,7 @@ end
 --- @param cmd string -- Remote command
 --- @param ... any -- Data
 --- @yields
-function Remote:Get(self, p: Player, cmd: string, ...)
+function Remote.Get(self, p: Player, cmd: string, ...)
 	if p:IsA("Player") and not Utilities.Wrapping:IsWrapped(p) then
 		local curEvent = self:WaitForEvent();
 		if curEvent then
@@ -398,7 +398,7 @@ end
 --- @param p Player
 --- @param code string -- Lua code
 --- @param ... any -- Additional data
-function Remote:LoadCode(self, p, code, ...)
+function Remote.LoadCode(self, p, code, ...)
 	local bytecode = Root.Bytecode:GetBytecode(code)
 	self:Send(p, "RunBytecode", bytecode, ...)
 end
@@ -411,7 +411,7 @@ end
 --- @param code string -- Lua code
 --- @param ... any -- Additional data
 --- @yields
-function Remote:LoadCodeWithReturn(self, p, code, ...)
+function Remote.LoadCodeWithReturn(self, p, code, ...)
 	local bytecode = Root.Bytecode:GetBytecode(code)
 	return self:Get(p, "RunBytecode", bytecode, ...)
 end
@@ -422,7 +422,7 @@ end
 --- @within Server.Remote
 --- @param player Player
 --- @param data table -- Error data
-function Remote:SendError(self, player: Player, data: {})
+function Remote.SendError(self, player: Player, data: {})
 	self:Send(player, "ErrorMessage", data)
 end
 
@@ -432,7 +432,7 @@ end
 --- @within Server.Remote
 --- @param sessionKey string -- Session key
 --- @return ServerSession
-function Remote:GetSession(self, sessionKey: string)
+function Remote.GetSession(self, sessionKey: string)
 	return self.Sessions:GetData(sessionKey);
 end
 
@@ -443,7 +443,7 @@ end
 --- @within Server.Remote
 --- @param users table -- Optional table of users to add to the session on creation
 --- @return ServerSession
-function Remote:NewSession(self, users)
+function Remote.NewSession(self, users)
 	local session = {
 		Ended = false;
 		NumUsers = 0;
@@ -503,7 +503,7 @@ end
 --- @param cmd string -- Remote command recieved
 --- @param args any -- Additional remote command arguments
 --- @return any
-function Remote:ProcessRemoteCommand(self, p: Player, cmd: string, args)
+function Remote.ProcessRemoteCommand(self, p: Player, cmd: string, args)
 	local data = Root.Core:GetPlayerData(p)
 	local cmd = Utilities:Decrypt(cmd, data.RemoteKey or self.SharedKey)
 	local command = self.Commands[cmd]
@@ -525,7 +525,7 @@ end
 --- Yields the current thread until the RemoteEvent and RemoteFunction objects exist and are ready for usage
 --- @method WaitForEvent
 --- @within Server.Remote
-function Remote:WaitForEvent(self)
+function Remote.WaitForEvent(self)
 	while not self.CurrentEvent or not self.CurrentEvent.RemoteEvent or not self.CurrentEvent.RemoteFunction or MakingEvent do
 		Utilities.Services.RunService.Heartbeat:Wait()
 	end
@@ -539,7 +539,7 @@ end
 --- @within Server.Remote
 --- @param p Player
 --- @yields
-function Remote:SetupClient(self, p: Player)
+function Remote.SetupClient(self, p: Player)
 	local handler = Package.Handlers.ClientHandler:Clone()
 	local packageHandler = Root.PackageHandlerModule:Clone()
 	local clientPackages = Root.PackageHandler.GetClientPackages(Root.Packages)
@@ -576,7 +576,7 @@ end
 --- @method RemoteChangeDetected
 --- @within Server.Remote
 --- @param c PropertyName
-function Remote:EventChangeDetected(self, c)
+function Remote.EventChangeDetected(self, c)
 	local curEvent = self.CurrentEvent
 	if curEvent and not MakingEvent then
 		local rEvent = curEvent.RemoteEvent
@@ -596,7 +596,7 @@ end
 --- @method SetupRemote
 --- @within Server.Remote
 --- @yields
-function Remote:SetupRemote(self)
+function Remote.SetupRemote(self)
 	if not MakingEvent then
 		MakingEvent = true
 

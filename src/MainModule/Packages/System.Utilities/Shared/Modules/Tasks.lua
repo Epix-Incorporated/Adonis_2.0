@@ -81,7 +81,7 @@ local Tasks = { ActiveTasks = ActiveTasks }
 --- @method Trigger
 --- @within TaskScheduler
 --- @param ... any
-function ObjectMethods.TaskScheduler:Trigger(self, ...)
+function ObjectMethods.TaskScheduler.Trigger(self, ...)
 	self.Event:Fire(...)
 end
 
@@ -89,7 +89,7 @@ end
 --- Deletes associated TaskScheduler
 --- @method Delete
 --- @within TaskScheduler
-function ObjectMethods.TaskScheduler:Delete(self)
+function ObjectMethods.TaskScheduler.Delete(self)
 	if not self.Properties.Temporary then
 		TaskSchedulers[self.Name] = nil
 	end
@@ -110,7 +110,7 @@ end
 --- @within Task
 --- @param ... any
 --- @return ... -- Task function result
-function ObjectMethods.Task:RunTaskFunction(self, ...)
+function ObjectMethods.Task.RunTaskFunction(self, ...)
 	ActiveTasks[self.Index] = self
 
 	Utilities.Events.TaskStarted:Fire(self, ...)
@@ -136,7 +136,7 @@ end
 --- Resumes suspended task
 --- @method Resume
 --- @within Task
-function ObjectMethods.Task:Resume(self)
+function ObjectMethods.Task.Resume(self)
 	if self.Thread then
 		Utilities.Events.TaskResumed:Fire(self)
 		return coroutine.resume(self.Thread)
@@ -149,7 +149,7 @@ end
 --- Yields running task
 --- @method Yield
 --- @within Task
-function ObjectMethods.Task:Yield(self)
+function ObjectMethods.Task.Yield(self)
 	if self.Thread then
 		coroutine.yield(self.Thread)
 		Utilities.Events.TaskYielded:Fire(self)
@@ -162,7 +162,7 @@ end
 --- Stops running task
 --- @method Stop
 --- @within Task
-function ObjectMethods.Task:Stop(self)
+function ObjectMethods.Task.Stop(self)
 	if self.Thread then
 		coroutine.close(self.Thread)
 		Utilities.Events.TaskStopped:Fire(self)
@@ -182,7 +182,7 @@ end
 --- @param func function -- Task function
 --- @param ... any -- Task arguments
 --- @return result
-function Tasks:NewTask(self, name: string, func, ...)
+function Tasks.NewTask(self, name: string, func, ...)
 	local index = Utilities:RandomString()
 	local isThread = string.sub(name, 1, 7) == "Thread:"
 	local data = {
@@ -211,7 +211,7 @@ end
 --- @within Utilities.Tasks
 --- @param name string -- Task name
 --- @param func function -- Task function
-function Tasks:EventTask(self, name: string, func)
+function Tasks.EventTask(self, name: string, func)
 	local newTask = self.NewTask
 	return function(...)
 		return newTask(self, name, func, ...)
@@ -223,7 +223,7 @@ end
 --- @method GetActiveTasks
 --- @within Utilities.Tasks
 --- @return ActiveTasks
-function Tasks:GetActiveTasks(self)
+function Tasks.GetActiveTasks(self)
 	return ActiveTasks
 end
 
@@ -233,7 +233,7 @@ end
 --- @within Utilities.Tasks
 --- @param taskName string -- Task name
 --- @param props TaskSchedulerProperties -- Task properties
-function Tasks:TaskScheduler(self, taskName: string, props)
+function Tasks.TaskScheduler(self, taskName: string, props)
 	local props = props or {}
 	if not props.Temporary and TaskSchedulers[taskName] then return TaskSchedulers[taskName] end
 

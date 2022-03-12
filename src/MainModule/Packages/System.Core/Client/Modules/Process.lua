@@ -25,7 +25,7 @@ local Process = {
 --- @method PlayerAdded
 --- @within Client.Process
 --- @param p Player -- Player
-function Process:PlayerAdded(self, p: Player)
+function Process.PlayerAdded(self, p: Player)
 	p.CharacterAdded:Connect(function()
 		self:CharacterAdded(p, p.Character)
 	end)
@@ -42,7 +42,7 @@ end
 --- @method PlayerRemoving
 --- @within Client.Process
 --- @param p Player -- Player
-function Process:PlayerRemoving(self, p: Player)
+function Process.PlayerRemoving(self, p: Player)
 	Events.PlayerRemoving:Fire(p)
 end
 
@@ -51,7 +51,7 @@ end
 --- @method PlayerRemoved
 --- @within Client.Process
 --- @param p Player -- Player
-function Process:PlayerRemoved(self, p: Player)
+function Process.PlayerRemoved(self, p: Player)
 	Events.PlayerRemoved:Fire(p)
 end
 
@@ -61,7 +61,7 @@ end
 --- @within Client.Process
 --- @param p Player -- Player
 --- @param c Character -- Character
-function Process:CharacterAdded(self, p: Player, c)
+function Process.CharacterAdded(self, p: Player, c)
 	Events.CharacterAdded:Fire(p, c)
 end
 
@@ -71,7 +71,7 @@ end
 --- @within Client.Process
 --- @param p Player
 --- @param c Character
-function Process:CharacterRemoving(self, p: Player, c)
+function Process.CharacterRemoving(self, p: Player, c)
 	Events.CharacterRemoving:Fire(p, c)
 end
 
@@ -82,7 +82,7 @@ end
 --- @param msg string -- Message string
 --- @param msgType Enum -- MessageType
 --- @param ... any
-function Process:LogMessage(self, msg, msgType, ...)
+function Process.LogMessage(self, msg, msgType, ...)
 	if string.find(msg, "Adonis") then
 		Events.AdonisLogMessage:Fire(msg, msgType, ...)
 	else

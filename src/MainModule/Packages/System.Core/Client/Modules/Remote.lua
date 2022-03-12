@@ -75,7 +75,7 @@ Methods.Session = {}
 --- @within ClientSession
 --- @param self table
 --- @param ... any
-function Methods.Session:SendToServer(self, ...)
+function Methods.Session.SendToServer(self, ...)
 	if not self.Ended then
 		Root.Remote:Send("SessionData", ...)
 	end
@@ -85,7 +85,7 @@ end
 --- @within ClientSession
 --- @param self table
 --- @param ... any
-function Methods.Session:FireEvent(self, ...)
+function Methods.Session.FireEvent(self, ...)
 	if not self.Ended then
 		self.SessionEvent:Fire(...)
 	end
@@ -95,7 +95,7 @@ end
 --- @within ClientSession
 --- @param self table
 --- @param func function -- Function to connect
-function Methods.Session:ConnectEvent(self, func)
+function Methods.Session.ConnectEvent(self, func)
 	assert(not self.Ended, "Cannot connect session event: Session Ended")
 
 	local connection = self.SessionEvent.Event:Connect(func)
@@ -106,7 +106,7 @@ end
 --- End session
 --- @within ClientSession
 --- @param self table
-function Methods.Session:End(self)
+function Methods.Session.End(self)
 	if not self.Ended then
 		for t, event in pairs(self.Events) do
 			event:Disconnect()
@@ -128,7 +128,7 @@ end
 --- @within Client.Remote
 --- @param cmd string -- Remote command
 --- @param ... any -- Arguments
-function Remote:Send(self, cmd, ...)
+function Remote.Send(self, cmd, ...)
 	local curEvent = self:WaitForEvent()
 	if curEvent then
 		local cmd = Utilities:Encrypt(cmd, self.RemoteKey)
@@ -145,7 +145,7 @@ end
 --- @param cmd string -- Remote command
 --- @param ... any -- Arguments
 --- @return result
-function Remote:Get(self, cmd, ...)
+function Remote.Get(self, cmd, ...)
 	local curEvent = self:WaitForEvent()
 	if curEvent then
 		local cmd = Utilities:Encrypt(cmd, self.RemoteKey);
@@ -160,7 +160,7 @@ end
 --- @within Client.Remote
 --- @param sessionKey string -- Session key
 --- @return ClientSession
-function Remote:GetSession(self, sessionKey)
+function Remote.GetSession(self, sessionKey)
 	if not Sessions[sessionKey] then
 		local session = {
 			SessionKey = sessionKey;
@@ -195,7 +195,7 @@ end
 --- @param cmd string -- Remote command to run
 --- @param args table -- Arguments table
 --- @return any -- Returns whatever the triggered remote command returns (if anything)
-function Remote:ProcessRemoteCommand(self, cmd, args)
+function Remote.ProcessRemoteCommand(self, cmd, args)
 	local cmd = Utilities:Decrypt(cmd, self.RemoteKey)
 	local command = self.Commands[cmd]
 
@@ -215,7 +215,7 @@ end
 --- @method WaitForEvent
 --- @within Client.Remote
 --- @yields
-function Remote:WaitForEvent(self)
+function Remote.WaitForEvent(self)
 	while not self.CurrentEvent or not self.CurrentEvent.RemoteEvent or not self.CurrentEvent.RemoteFunction or GettingEvent do
 		Service.RunService.Heartbeat:Wait()
 	end
@@ -227,7 +227,7 @@ end
 --- @method EventChangeDetected
 --- @within Client.Remote
 --- @param c string -- Property changed
-function Remote:EventChangeDetected(self, c)
+function Remote.EventChangeDetected(self, c)
 	local curEvent = self.CurrentEvent
 	if curEvent and not GettingEvent then
 		local rEvent = curEvent.RemoteEvent
@@ -246,7 +246,7 @@ end
 --- @method SetupRemote
 --- @within Client.Remote
 --- @yields
-function Remote:SetupRemote(self)
+function Remote.SetupRemote(self)
 	if not GettingEvent then
 		GettingEvent = true
 
@@ -326,7 +326,7 @@ end
 --- @method UpdateRemoteKey
 --- @within Client.Remote
 --- @yields
-function Remote:UpdateRemoteKey(self)
+function Remote.UpdateRemoteKey(self)
 	if not self.ObtainedKeys then
 		self.RemoteKey = self:Get("GetKeys")
 		self.ObtainedKeys = true

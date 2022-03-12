@@ -33,7 +33,7 @@ local Cache = {
 --- @param len int -- String length
 --- @param charset string -- Character set to use for random generation
 --- @return string
-function Utilities:RandomString(self, len: number, charset: string): string
+function Utilities.RandomString(self, len: number, charset: string): string
 	len = len or 9
 	charset = charset or __RANDOM_CHARSET
 
@@ -80,7 +80,7 @@ end
 --- @method Waiter
 --- @within Utilities
 --- @return Waiter
-function Utilities:Waiter(self)
+function Utilities.Waiter(self)
 	return {
 		Event = Instance.new("BindableEvent");
 		Release = function(self, ...) self.Event:Fire(...) end;
@@ -95,7 +95,7 @@ end
 --- @within Utilities
 --- @param tab {}
 --- @return any
-function Utilities:Pop(self, tab)
+function Utilities.Pop(self, tab)
 	return table.remove(tab, 1)
 end
 
@@ -108,7 +108,7 @@ end
 --- @param noYield bool -- If this is true, this will not yield until queued function execution is complete
 --- @return any -- Function results
 --- @yields
-function Utilities:Queue(self, key: string, func, noYield)
+function Utilities.Queue(self, key: string, func, noYield)
 	if not Queues[key] then
 		Queues[key] = {
 			Processing = false;
@@ -142,7 +142,7 @@ end
 --- @within Utilities
 --- @param queue {} -- Queue table
 --- @param key string -- Queue key
-function Utilities:ProcessQueue(self, queue: {}, key: string)
+function Utilities.ProcessQueue(self, queue: {}, key: string)
 	if queue then
 		if queue.Processing then
 			return "Processing"
@@ -191,7 +191,7 @@ end
 --- @param key string -- Rate limit key
 --- @param data RateLimitOptions
 --- @return bool
-function Utilities:RateLimit(self, key: string, data: {})
+function Utilities.RateLimit(self, key: string, data: {})
 	local cache = data.Cache or RateLimits
 	local found = cache[key]
 
@@ -223,7 +223,7 @@ end
 --- @param object Instance
 --- @param properties {[string]:any}?): (Instance, {[string]:RBXScriptConnection}
 --- @return Instance
-function Utilities:EditInstance(self, object: Instance, properties: {[string]:any}?): (Instance, {[string]:RBXScriptConnection})
+function Utilities.EditInstance(self, object: Instance, properties: {[string]:any}?): (Instance, {[string]:RBXScriptConnection})
 	local connections = {}
 
 	if self.Wrapping:IsWrapped(object) then
@@ -282,7 +282,7 @@ end
 --- @param class string -- Instance ClassName
 --- @param properties {} -- Instance properties
 --- @return Instance
-function Utilities:CreateInstance(self, class: string, properties: {})
+function Utilities.CreateInstance(self, class: string, properties: {})
 	return self:EditInstance(Instance.new(class), properties)
 end
 
@@ -291,7 +291,7 @@ end
 --- @method IsServer
 --- @within Utilities
 --- @return boolean
-function Utilities:IsServer(self): boolean
+function Utilities.IsServer(self): boolean
 	return self.Services.RunService:IsServer()
 end
 
@@ -300,7 +300,7 @@ end
 --- @method IsClient
 --- @within Utilities
 --- @return boolean
-function Utilities:IsClient(self): boolean
+function Utilities.IsClient(self): boolean
 	return self.Services.RunService:IsClient()
 end
 
@@ -309,7 +309,7 @@ end
 --- @method IsStudio
 --- @within Utilities
 --- @return boolean
-function Utilities:IsStudio(self): boolean
+function Utilities.IsStudio(self): boolean
 	return self.Services.RunService:IsStudio()
 end
 
@@ -318,7 +318,7 @@ end
 --- @method GetTime
 --- @within Utilities
 --- @return number
-function Utilities:GetTime(self): number
+function Utilities.GetTime(self): number
 	return os.time()
 end
 
@@ -329,7 +329,7 @@ end
 --- @param optTime number -- Optional seconds since epoch
 --- @param withDate boolean -- If true, output string includes date
 --- @return string
-function Utilities:GetFormattedTime(self, optTime: number?, withDate: boolean?): string
+function Utilities.GetFormattedTime(self, optTime: number?, withDate: boolean?): string
 	local formatString = withDate and "L LT" or "LT"
 	local tim = DateTime.fromUnixTimestamp(optTime or self:GetTime())
 
@@ -352,7 +352,7 @@ end
 --- @param num number
 --- @param string separator -- Optional; defaults to ","
 --- @return string
-function Utilities:FormatNumber(self, num: number?, separator: string?): string
+function Utilities.FormatNumber(self, num: number?, separator: string?): string
 	num = tonumber(num)
 	if not num then return "NaN" end
 	if num >= 1e150 then return "Inf" end
@@ -383,7 +383,7 @@ end
 --- @param plr Player
 --- @param withUserId boolean
 --- @return string
-function Utilities:FormatPlayer(self, plr: Player, withUserId: boolean?): string
+function Utilities.FormatPlayer(self, plr: Player, withUserId: boolean?): string
 	local str = if plr.DisplayName == plr.Name then "@"..plr.Name else string.format("%s (@%s)", plr.DisplayName, plr.Name)
 	if withUserId then str ..= string.format(" [%d]", plr.UserId) end
 	return str
@@ -395,7 +395,7 @@ end
 --- @within Utilities
 --- @param str string -- Input string
 --- @return string
-function Utilities:FormatStringForRichText(self, str: string): string
+function Utilities.FormatStringForRichText(self, str: string): string
 	return str:gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;"):gsub("\"", "&quot;"):gsub("'", "&apos;")
 end
 
@@ -406,7 +406,7 @@ end
 --- @param tab {} -- Table to insert subsequent table contents into
 --- @param ... {} -- Ordered tables whos contents will be inserted into the first table
 --- @return tab
-function Utilities:AddRange(self, tab, ...)
+function Utilities.AddRange(self, tab, ...)
 	for i,t in ipairs(table.pack(...)) do
 		for k,v in ipairs(t) do
 			table.insert(tab, v)
@@ -424,7 +424,7 @@ end
 --- @param startPos number
 --- @param endPos number -- Optional
 --- @return subset
-function Utilities:TableSub(self, tab: {}, startPos: number, endPos: number?)
+function Utilities.TableSub(self, tab: {}, startPos: number, endPos: number?)
 	return table.pack(table.unpack(tab, startPos, endPos))
 end
 
@@ -434,7 +434,7 @@ end
 --- @within Utilities
 --- @param str string
 --- @return string
-function Utilities:Trim(self, str: string)
+function Utilities.Trim(self, str: string)
 	return string.match(str, "^%s*(.-)%s*$")
 end
 
@@ -446,7 +446,7 @@ end
 --- @param chars {}
 --- @param replaceWith string
 --- @return string
-function Utilities:ReplaceCharacters(self, str: string, chars: {}, replaceWith: string?)
+function Utilities.ReplaceCharacters(self, str: string, chars: {}, replaceWith: string?)
 	for i, char in ipairs(chars) do
 		str = string.gsub(str, char, replaceWith or "")
 	end
@@ -459,7 +459,7 @@ end
 --- @within Utilities
 --- @param str string
 --- @return string
-function Utilities:RemoveQuotes(self, str: string)
+function Utilities.RemoveQuotes(self, str: string)
 	return self:ReplaceCharacters(str, {'^"(.+)"$', "^'(.+)'$"}, "%1")
 end
 
@@ -471,7 +471,7 @@ end
 --- @param splitChar string -- Split character
 --- @param removeQuotes boolean -- If true, substrings surrounded by quotes will have their quotation marks removed in the output string
 --- @return string
-function Utilities:SplitString(self, str: string, splitChar: string, removeQuotes: boolean)
+function Utilities.SplitString(self, str: string, splitChar: string, removeQuotes: boolean)
 	local segments = {}
 	local sentinel = string.char(0)
 	local function doSplitSentinelCheck(x: string) return string.gsub(x, splitChar, sentinel) end
@@ -493,7 +493,7 @@ end
 --- @param joiner string -- String inserted between joined strings
 --- @param ... string[] -- Strings to join
 --- @return string
-function Utilities:JoinStrings(self, joiner: string?, ...)
+function Utilities.JoinStrings(self, joiner: string?, ...)
 	local result = nil
 	local strList = table.pack(...)
 	for i, str in ipairs(strList) do
@@ -514,7 +514,7 @@ end
 --- @param tab {} -- Table to merge subsequent tables into
 --- @param ... {} -- Tables to merge into the first table; Each subsequent table overwrites keys set by previous tables
 --- @return tab
-function Utilities:MergeTables(self, tab, ...)
+function Utilities.MergeTables(self, tab, ...)
 	for i,t in ipairs(table.pack(...)) do
 		for k,v in pairs(t) do
 			tab[k] = v
@@ -530,7 +530,7 @@ end
 --- @param tab {} -- Table to merge into
 --- @param ... {} -- Tables to merge from
 --- @return tab
-function Utilities:MergeTablesRecursive(self, tab, ...)
+function Utilities.MergeTablesRecursive(self, tab, ...)
 	for _, t in ipairs(table.pack(...)) do
 		for k,v in pairs(t) do
 			if tab[k] ~= nil and type(v) == "table" and type(tab[k]) == "table" then
@@ -550,7 +550,7 @@ end
 --- @param tab {[any]:any}
 --- @param excludeNumIndices boolean -- Exclude non-string indeces
 --- @return number
-function Utilities:CountTable(tab: {[any]:any}, excludeNumIndices: boolean?): number
+function Utilities.CountTable(tab: {[any]:any}, excludeNumIndices: boolean?): number
 	local n = 0
 	for i, v in pairs(tab) do
 		if not excludeNumIndices or type(i) ~= "number" then
@@ -566,7 +566,7 @@ end
 --- @within Utilities
 --- @param array {[number]:any})
 --- @return {[number]:any}
-function Utilities:ReverseTable(array: {[number]:any}): {[number]:any}
+function Utilities.ReverseTable(array: {[number]:any}): {[number]:any}
 	local len: number = #array
 	local reversed = {}
 	for i = 1, len do
@@ -583,7 +583,7 @@ end
 --- @param key string -- Key
 --- @param cache {}? -- Optional cache table used to speed up future calls by storing inputs used to generate outputs
 --- @return string
-function Utilities:Encrypt(self, str: string, key: string, cache: {}?): string
+function Utilities.Encrypt(self, str: string, key: string, cache: {}?): string
 	cache = cache or Cache.Encrypt
 
 	if not key or not str then
@@ -619,7 +619,7 @@ end
 --- @param key string
 --- @param cache {}?
 --- @return string
-function Utilities:Decrypt(self, str: string, key: string, cache: {}?): string
+function Utilities.Decrypt(self, str: string, key: string, cache: {}?): string
 	cache = cache or Cache.Decrypt
 
 	if not key or not str then
@@ -653,7 +653,7 @@ end
 --- @param a boolean
 --- @param b boolean
 --- @return boolean
-function Utilities:Xor(self, a, b): boolean
+function Utilities.Xor(self, a, b): boolean
 	return (a and not b) or (b and not a)
 end
 
@@ -666,7 +666,7 @@ end
 --- @param func function
 --- @param errAction function(result string)
 --- @return boolean, any
-function Utilities:Attempt(self, tries: number?, timeBeforeRetry: number?, func: (number)->any, errAction: (string)->any): (boolean, any)
+function Utilities.Attempt(self, tries: number?, timeBeforeRetry: number?, func: (number)->any, errAction: (string)->any): (boolean, any)
 	tries = tries or 3
 	local triesMade = 0
 	local success, result
@@ -689,7 +689,7 @@ end
 --- @param exeDelay number?
 --- @param func function
 --- @param dontStart boolean?
-function Utilities:MakeLoop(self, exeDelay: number?, func: (number)->(), dontStart: boolean?)
+function Utilities.MakeLoop(self, exeDelay: number?, func: (number)->(), dontStart: boolean?)
 	local loop = coroutine.wrap(function()
 		local run = 0
 		while task.wait(exeDelay or 0) do
@@ -708,7 +708,7 @@ end
 --- @param tab {} -- Input table
 --- @param size int -- Batch size
 --- @return {int: {}}
-function Utilities:Batchify(self, tab, size)
+function Utilities.Batchify(self, tab, size)
 	local batches = {}
 	for b = 1, table.getn(tab), size do
 		local batch = {}
@@ -735,7 +735,7 @@ end
 --- @param func (any, number)->any
 --- @param deep boolean?
 --- @return any?
-function Utilities:Iterate(self, tab: {any}|Instance, func: (any, number)->any, deep: boolean?): any?
+function Utilities.Iterate(self, tab: {any}|Instance, func: (any, number)->any, deep: boolean?): any?
 	if deep and type(tab) == "table" then
 		local function iterate(subtable)
 			for ind, val in ipairs(subtable) do
@@ -764,7 +764,7 @@ end
 --- @param obj Instance
 --- @param prop string
 --- @return (boolean, any)
-function Utilities:CheckProperty(self, obj: Instance, prop: string): (boolean, any)
+function Utilities.CheckProperty(self, obj: Instance, prop: string): (boolean, any)
 	return pcall(PropertyCheck, obj, prop)
 end;
 
@@ -775,7 +775,7 @@ end;
 --- @within Utilities
 --- @param object Instance
 --- @return boolean
-function Utilities:IsDestroyed(self, object)
+function Utilities.IsDestroyed(self, object)
 	if type(object) == "userdata" and self:CheckProperty(object, "Parent") then
 		if object.Parent == nil then
 			local ran,err = pcall(function() object.Parent = ParentTester object.Parent = nil end)
@@ -795,7 +795,7 @@ end
 --- @within Utilities
 --- @param meta {}
 --- @return proxy
-function Utilities:NewProxy(self, meta: {})
+function Utilities.NewProxy(self, meta: {})
 	local newProxy = newproxy(true)
 	local metatable = getmetatable(newProxy)
 	metatable.__metatable = false
@@ -809,7 +809,7 @@ end
 --- @within Utilities
 --- @param func function
 --- @return proxy
-function Utilities:FunctionProxy(self, func)
+function Utilities.FunctionProxy(self, func)
 	return self:NewProxy({
 		__call = function(tab, ...)
 			return func(...)
@@ -823,7 +823,7 @@ end
 --- @within Utilities
 --- @param plrData {} -- FakePlayer properties
 --- @return object
-function Utilities:FakePlayer(self, plrData: {})
+function Utilities.FakePlayer(self, plrData: {})
 	local fakePlayer = self.Wrapping:Wrap(self:CreateInstance("Folder", {
 		Name = plrData.Name
 	}))
@@ -862,7 +862,7 @@ end
 --- @param tableAncestry string -- Path string (For example, "Settings.UI_Colors" with Root as the table will navigate to Root.Settings.UI_Colors)
 --- @param splitChara string --- Path split character (Defaults to '.')
 --- @return TablePathReturn
-function Utilities:GetTableValueByPath(self, table: {[any]:any}, tableAncestry: string, splitChar: string): {[string]: any}
+function Utilities.GetTableValueByPath(self, table: {[any]:any}, tableAncestry: string, splitChar: string): {[string]: any}
 	local indexNames = self:SplitString(tableAncestry, splitChar or '.', true)
 	local curTable = table
 
@@ -890,7 +890,7 @@ end
 --- @param tab2 {}
 --- @param noRecursive boolean -- If true, recursively checks all nested tables for equality
 --- @return boolean
-function Utilities:CheckTableEquality(self, tab1: {[any]:any}, tab2: {[any]:any}, noRecursive: boolean): boolean
+function Utilities.CheckTableEquality(self, tab1: {[any]:any}, tab2: {[any]:any}, noRecursive: boolean): boolean
 	if type(tab1) == "table" and type(tab2) == "table" and #tab1 == #tab2 then
 		for index, value in pairs(tab1) do
 			local target = tab2[index]
@@ -920,7 +920,7 @@ end
 --- @within Utilities
 --- @param data any
 --- @return string
-function Utilities:JSONEncode(self, data: any): string
+function Utilities.JSONEncode(self, data: any): string
 	return self.Services.HttpService:JSONEncode(data)
 end
 
@@ -930,7 +930,7 @@ end
 --- @within Utilities
 --- @param data string
 --- @return any
-function Utilities:JSONDecode(self, data: string): any
+function Utilities.JSONDecode(self, data: string): any
 	return self.Services.HttpService:JSONDecode(data)
 end
 
