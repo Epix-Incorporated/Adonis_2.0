@@ -126,7 +126,7 @@ local Admin = {
 --- @within Server.Admin
 --- @param data GetPlayersSettings -- GetPlayers settings
 --- @param text string -- Text to parse
-function Admin:GetPlayers(self, data: {}, text: string)
+function Admin.GetPlayers(self, data: {}, text: string)
 	if not text then
 		return { data and data.Player }
 	else
@@ -151,7 +151,7 @@ end
 --- @method NewSpoofObject
 --- @within Server.Admin
 --- @param data {} -- Data table containing properties/methods to automatically add to the new spoof object
-function Admin:NewSpoofObject(self, data: {})
+function Admin.NewSpoofObject(self, data: {})
 	local spoofObject = Instance.new("Folder", data and data.Properties)
 	local wrapped = Utilities:Wrap(spoofObject)
 

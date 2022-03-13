@@ -13,8 +13,10 @@ local Package = {
 	Package = PackageFolder;
 	Metadata = require(PackageFolder.Metadata);
 
+	Shared = PackageFolder.Shared;
 	Server = PackageFolder.Server;
 	Libraries = PackageFolder.Server.Libraries;
+	SharedLibraries = PackageFolder.Shared.Libraries;
 }
 
 
@@ -80,6 +82,16 @@ return {
 
 		--// Add libraries
 		for i,lib in ipairs(Package.Libraries:GetChildren()) do
+			debug("INDEX LIBRARY", lib.Name)
+			Root.LibraryObjects[lib.Name] = lib
+			if lib:IsA("ModuleScript") then
+				Root.Libraries[lib.Name] = require(lib)
+			else
+				Root.Libraries[lib.Name] = lib
+			end
+		end
+
+		for i,lib in ipairs(Package.SharedLibraries:GetChildren()) do
 			debug("INDEX LIBRARY", lib.Name)
 			Root.LibraryObjects[lib.Name] = lib
 			if lib:IsA("ModuleScript") then

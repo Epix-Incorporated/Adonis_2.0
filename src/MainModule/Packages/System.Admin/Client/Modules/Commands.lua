@@ -75,7 +75,7 @@ end
 --- @method UpdateSettingsProxies
 --- @within Client.Commands
 --- @param data table -- SettingProxy
-function Commands:UpdateSettingProxies(self, data)
+function Commands.UpdateSettingProxies(self, data)
 	DebugWarn("UPDATING COMMAND SETTING PROXIES", data)
 
 	for i,v in pairs(data) do
@@ -99,7 +99,7 @@ end
 --- @within Client.Commands
 --- @param CommandIndex string -- Command index.
 --- @param data {} -- Command data table
-function Commands:DeclareCommand(self, CommandIndex: string, data: {})
+function Commands.DeclareCommand(self, CommandIndex: string, data: {})
 	if self.DeclaredCommands[CommandIndex] then
 		Root.Warn("CommandIndex \"".. CommandIndex .."\" already delcared. Overwriting.")
 	end

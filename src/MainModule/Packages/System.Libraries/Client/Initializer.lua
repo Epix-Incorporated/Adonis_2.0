@@ -13,8 +13,10 @@ local Package = {
 	Package = PackageFolder;
 	Metadata = require(PackageFolder.Metadata);
 
+	Shared = PackageFolder.Shared;
 	Client = PackageFolder.Client;
 	Libraries = PackageFolder.Client.Libraries;
+	SharedLibraries = PackageFolder.Shared.Libraries;
 }
 
 

@@ -94,7 +94,7 @@ end
 --- @within Wrapper
 --- @param raw boolean -- If true, returns an unwrapped clone.
 --- @return Wrapper|userdata
-function Objectmethods.Wrapper.Clone(self, raw)
+function ObjectMethods.Wrapper.Clone(self, raw)
 	local new = self.__Object:Clone()
 	return if raw or not Root or not Root.Utilities or not Root.Utilities.Wrapping then new else Root.Utilities.Wrapping:Wrap(new)
 end

@@ -25,7 +25,7 @@ local RemoteCommands = {}
 --- @method GetVirtualEnv
 --- @within Client.Bytecode
 --- @param returnInstance Instance
-function Bytecode:GetVirtualEnv(self, returnInstance)
+function Bytecode.GetVirtualEnv(self, returnInstance)
 	local vEnvModule = Package.SharedAssets.VirtualEnv:Clone() :: ModuleScript
 	return returnInstance == true and vEnvModule or returnInstance == false and require(vEnvModule)()
 end
@@ -33,7 +33,7 @@ end
 --- Load bytecode
 --- @method LoadBytecode
 --- @within Client.Bytecode
-function Bytecode:LoadBytecode(self, bytecode: string, envData: {})
+function Bytecode.LoadBytecode(self, bytecode: string, envData: {})
 	local fiOneMod = Package.SharedAssets.FiOne:Clone()
 	local fiOne = require(fiOneMod)
 	return fiOne(bytecode, envData)

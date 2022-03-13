@@ -18,7 +18,7 @@ local Remote = {}
 --- @method GetPermissions
 --- @within Client.Remote
 --- @return {}
-function Remote:GetPermissions(self)
+function Remote.GetPermissions(self)
 	local cached = Root.Cache:GetData("Permissions")
 	if cached then
 		return cached
