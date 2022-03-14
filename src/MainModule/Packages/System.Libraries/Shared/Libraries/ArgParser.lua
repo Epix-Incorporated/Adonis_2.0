@@ -1,6 +1,6 @@
 --[[
     Author: Sceleratis
-    Description: Provides cli-like argument parsing.
+    Description: Provides CLI-like argument parsing.
 ]]
 
 
@@ -65,16 +65,16 @@ return {
         return result
     end,
 
-    ConvertToDataType = function(self, str)
+    ConvertToDataType = function(self, str: string)
+		str = string.lower(str)
         if tonumber(str) then
             return tonumber(str)
-        elseif string.lower(str) == "false" then
+        elseif table.find({"false", "no", "off"}, str) then
             return false
-        elseif string.lower(str) == "true" then
+        elseif table.find({"true", "yes", "on"}, str) then
             return true
-        else
-            return str
-        end
+		end
+		return str
     end,
 
     Parse = function(self, str: string, split: string?, removeQuotes: boolean?, stopAtFirstParamArg: boolean?)
