@@ -22,7 +22,7 @@ local Bytecode = {}
 --- @return function
 function Bytecode.GetLoadstring(self)
 	local module = Package.Assets.Loadstring:Clone() :: ModuleScript
-	local vEnvModule = Root.ByteCode:GetVirtualEnv(true) :: ModuleScript
+	local vEnvModule = Root.Bytecode:GetVirtualEnv(true) :: ModuleScript
 	local fiOne = Package.SharedAssets.FiOne:Clone() :: ModuleScript
 
 	fiOne.Parent = module
