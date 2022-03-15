@@ -1,8 +1,8 @@
 --[[
 
 	Description: Theme initializer
-	Author: Sceleratis
-	Date: 12/18/2021
+	Author: Sceleratis/Expertcoderz
+	Date: 03/15/2022
 
 --]]
 
@@ -16,6 +16,7 @@ local Package = {
 	Client = PackageFolder.Client;
 	Modules = PackageFolder:FindFirstChild("Modules");
 	Prefabs = PackageFolder:FindFirstChild("Prefabs");
+	Modifiers = PackageFolder:FindFirstChild("Modifiers");
 }
 
 
@@ -49,33 +50,48 @@ return {
 		RootTable = Root
 		Verbose = if Root.Verbose ~= nil then Root.Verbose else Verbose
 
-		if Package.Metadata.ModuleGroup and not Root.UI.DeclaredModuleGroups[Package.Metadata.ModuleGroup] then
-			Root.UI:DeclareModuleGroup({
-				Name = Package.Metadata.ModuleGroup,
-				Fallback = Package.Metadata.ModuleFallback
-			})
-		end
-
-		if Package.Metadata.PrefabGroup and not Root.UI.DeclaredPrefabGroups[Package.Metadata.PrefabGroup] then
-			Root.UI:DeclarePrefabGroup({
-				Name = Package.Metadata.PrefabGroup,
-				Fallback = Package.Metadata.PrefabFallback
-			})
-		end
+		local ClassInfoTable = {}
 
 		if Package.Modules then
-			for i,child in ipairs(Package.Modules:GetChildren()) do
-				if child:IsA("ModuleScript") then
-					Root.UI:DeclareModule(Package.Metadata.ModuleGroup, child.Name, child)
+			for _, source in ipairs(Package.Modules:GetChildren()) do
+				if source:IsA("ModuleScript") then
+					local classInfo = require(source)
+					if type(classInfo) == "function" then
+						classInfo = classInfo(Root)
+					end
+					if type(classInfo) == "table" then
+						classInfo.ClassName = classInfo.ClassName or source.Name
+						ClassInfoTable[classInfo.ClassName] = classInfo 
+					else
+						Root.Warn("Invalid class information provided by module", source.Name)
+					end
 				end
 			end
 		end
 
 		if Package.Prefabs then
-			for i,obj in ipairs(Package.Prefabs:GetChildren()) do
-				Root.UI:DeclarePrefab(Package.Metadata.PrefabGroup, obj.Name, obj)
+			for _, prefab in ipairs(Package.Prefabs:GetChildren()) do
+				if ClassInfoTable[prefab.Name] then
+					ClassInfoTable[prefab.Name].Prefabricated = prefab
+				else
+					ClassInfoTable[prefab.Name] = {ClassName = prefab.Name, Prefabricated = prefab}
+				end
 			end
 		end
+
+		if Package.Modifiers then
+			for _, module in ipairs(Package.Modifiers:GetChildren()) do
+				if module:IsA("ModuleScript") then
+					if ClassInfoTable[module.Name] then
+						require(module)(ClassInfoTable[module.Name], Root)
+					else
+						Root.Warn("Class does not already exist for modifier", module.Name)
+					end
+				end
+			end
+		end
+
+		Root.UI:RegisterTheme(Package.Metadata.Name, ClassInfoTable)
 
 		debug("INIT " .. Package.Metadata.Name .. " PACKAGE FINISHED")
 	end;
