@@ -1,4 +1,5 @@
 return function(Root)
+	local WINDOW_SIZE_TYPE = "UDim2 | table"
 	return {
 		Members = {
 			Position = {
@@ -6,6 +7,24 @@ return function(Root)
 				Path = function(real)
 					return real.Main, "Position"
 				end,
+			},
+			Size = {
+				Type = WINDOW_SIZE_TYPE,
+				Default = UDim2.fromOffset(300, 200),
+				Read = function(real, window)
+					return real.Main.Size
+				end,
+				Update = function(real, window, val)
+					real.Main.Size = if typeof(val) == "UDim2" then val else UDim2.fromOffset(unpack(val))
+				end,
+			},
+			MinSize = {
+				Type = WINDOW_SIZE_TYPE,
+				Default = UDim2.fromOffset(200, 100)
+			},
+			MaxSize = {
+				Type = WINDOW_SIZE_TYPE,
+				Default = UDim2.fromOffset(1000, 1000)
 			},
 			MainFrame = {
 				Read = function(real, window)
@@ -81,7 +100,7 @@ return function(Root)
 				task.wait(0.3)
 				window.Closed:Fire()
 				window:Destroy()
-				
+
 			end,
 			IsClosed = {
 				Read = function(real, window)
@@ -93,7 +112,7 @@ return function(Root)
 					return window._data.windowHidden
 				end,
 			},
-			Hide = function(window)
+			Minimize = function(window)
 				if not window._data.windowHidden then
 					window.Minimizing:Fire()
 					window._data.windowHidden = true
@@ -112,7 +131,7 @@ return function(Root)
 					)
 				end
 			end,
-			Show = function(window)
+			Maximize = function(window)
 				if window._data.windowHidden then
 					window.Maximizing:Fire()
 					window._data.windowHidden = false
@@ -132,7 +151,7 @@ return function(Root)
 				end
 			end,
 			ToggleHidden = function(window)
-				if window.IsMinimized then window:Show() else window:Hide() end
+				if window.IsMinimized then window:Maximize() else window:Minimize() end
 			end,
 		},
 
@@ -144,28 +163,71 @@ return function(Root)
 			"DragStarted", "DragEnded"
 		},
 
-		Initialize = function(window, real)		
+		Initialize = function(window, real: ScreenGui)		
 			local UserInputService: UserInputService = Root.Utilities.Services.UserInputService
+			local Mouse: Mouse = Root.Utilities.Services.Players.LocalPlayer:GetMouse()
+
+			local MOUSE_ICONS = {
+				Horizontal = "rbxassetid://1243146213",
+				Vertical = "rbxassetid://1243145985",
+				LowerLeft = "rbxassetid://1243145459",
+				LowerRight = "rbxassetid://1243145350",
+				UpperRight = "rbxassetid://1243145459",
+				UpperLeft = "rbxassetid://1243145350"
+			}
+			local originalMouseIcon = nil
 
 			local data = window._data
+			local miscData = {}
+			local dragging = false
+			local resizing = false
+			local originalDisplayOrder = real.DisplayOrder
 
-			local topbar = real.Main.Topbar
+			local mainFrame = real.Main
+			local topbar = mainFrame.Topbar
 
-			local function IsInFrame(window, x, y)
-				local absPos = window.AbsolutePosition
-				local absSize = window.AbsoluteSize
+			local function IsInFrame(frame, x, y)
+				local absPos = frame.AbsolutePosition
+				local absSize = frame.AbsoluteSize
 				return (x >= absPos.X and x <= absPos.X + absSize.X) and (y >= absPos.Y and y <= absPos.Y + absSize.Y)
 			end
 			local function IsInWindow(x, y)
 				if real.Enabled and IsInFrame(real.Main, x, y) then
 					for _, w in ipairs(Root.UI:GetInterfacesByClass("Window", true)) do
-						if w.Enabled and IsInFrame(w.MainFrame, x, y) and w.DisplayOrder > real.DisplayOrder then
+						if w ~= window and w.Enabled and IsInFrame(w.MainFrame, x, y) and w.DisplayOrder > real.DisplayOrder then
 							return false
 						end
 					end
 					return true
 				end
 				return false
+			end
+
+			data.resizeZones = {}
+			for _, obj in pairs(mainFrame:GetChildren()) do
+				data.resizeZones[obj] = obj.Name:match("Resize_(.*)")
+			end
+			local function IsResizeRequest(x, y)
+				for zone, zoneName in pairs(data.resizeZones) do
+					if IsInFrame(zone, x, y) then
+						return zoneName
+					end
+				end
+			end
+
+			local function BringToFront()
+				local maxOrder = originalDisplayOrder
+				for _, v in ipairs(Root.UI:GetInterfacesByClass("Window", true)) do
+					if not v:GetAttribute("WindowFocus_OriginalDisplayOrder") then
+						v:SetAttribute("WindowFocus_OriginalDisplayOrder", v.DisplayOrder)
+					end
+					local origOrder = v:GetAttribute("WindowFocus_OriginalDisplayOrder")
+					v.DisplayOrder = origOrder - 1
+					if v.DisplayOrder > maxOrder then
+						maxOrder = v.DisplayOrder
+					end
+				end
+				real.DisplayOrder = maxOrder + 1
 			end
 
 			data.CloseButton = window:AddTitleButton({
@@ -192,9 +254,106 @@ return function(Root)
 			window:AssociateEvent(UserInputService.InputBegan, function(input, gameHandled)
 				if not gameHandled and real.Enabled and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
 					local x, y = input.Position.X, input.Position.Y
-					if IsInFrame(topbar, x, y) then
-						window.DragStarted:Fire(x, y)
+					if IsInWindow(x, y) then
+						BringToFront()
+						resizing = not data.windowHidden and IsResizeRequest(x, y)
+						if resizing then
+							originalMouseIcon = Mouse.Icon
+
+							miscData.FramePosX = mainFrame.AbsolutePosition.X
+							miscData.FramePosY = mainFrame.AbsolutePosition.Y
+
+							miscData.FrameSizeX = mainFrame.AbsoluteSize.X
+							miscData.FrameSizeY = mainFrame.AbsoluteSize.Y
+
+							miscData.FrameDragStartX = x - mainFrame.AbsolutePosition.X
+							miscData.FrameDragStartY = y - mainFrame.AbsolutePosition.Y
+						elseif IsInFrame(topbar, x, y) then
+							miscData.FrameDragStartX = x - mainFrame.AbsolutePosition.X
+							miscData.FrameDragStartY = y - mainFrame.AbsolutePosition.Y
+							dragging = true
+							window.DragStarted:Fire(x, y)
+						end
 					end
+				end
+			end)
+
+			window:AssociateEvent(UserInputService.InputChanged, function(input, gameHandled)
+				if real.Enabled and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+					local x, y = input.Position.X, input.Position.Y
+					if dragging then
+						mainFrame.Position = UDim2.fromOffset(x - miscData.FrameDragStartX, y - miscData.FrameDragStartY)
+					elseif resizing then
+						Mouse.Icon = MOUSE_ICONS[
+						if resizing == "Left" or resizing == "Right" then "Horizontal"
+							elseif resizing == "Top" or resizing == "Bottom" then "Vertical"
+							else resizing
+						]
+
+						local newPos = UDim2.new(0, mainFrame.AbsolutePosition.X, 0, mainFrame.AbsolutePosition.Y)
+						local sizeX = miscData.FrameSizeX
+						local sizeY = miscData.FrameSizeY
+						local posX = miscData.FramePosX
+						local posY = miscData.FramePosY
+
+						local moveX = false
+						local moveY = false
+
+						if resizing == "UpperRight" then
+							sizeX = x - posX + 3
+							sizeY = posY - y + sizeY - 1
+							moveY = true
+						elseif resizing == "UpperLeft" then
+							sizeX = posX - x + sizeX -1
+							sizeY = posY - y + sizeY -1
+							moveY = true
+							moveX = true
+						elseif resizing == "Right" then
+							sizeX = x - posX + 3
+							sizeY = sizeY
+						elseif resizing == "Left" then
+							sizeX = posX - x + sizeX + 3
+							moveX = true
+						elseif resizing == "LowerRight" then
+							sizeX = x - posX + 3
+							sizeY = y - posY + 3
+						elseif resizing == "LowerLeft" then
+							sizeX = posX - x + sizeX + 3
+							sizeY = y - posY + 3
+							moveX = true
+						elseif resizing == "Top" then
+							sizeY = posY - y + sizeY - 1
+							moveY = true
+						elseif resizing == "Bottom" then
+							sizeX = sizeX
+							sizeY = y - posY + 3
+						end
+
+						local minSize, maxSize = data.__MinSize, data.__MaxSize
+						sizeX = math.clamp(sizeX, minSize.X.Offset, maxSize.X.Offset)
+						sizeY = math.clamp(sizeY, minSize.Y.Offset, maxSize.Y.Offset)
+
+						if moveX then
+							newPos = UDim2.new(0, (posX + miscData.FrameSizeX) - sizeX, 0, newPos.Y.Offset)
+						end
+
+						if moveY then
+							newPos  = UDim2.new(0, newPos.X.Offset, 0, (posY + miscData.FrameSizeY) - sizeY)
+						end
+
+						mainFrame.Position = newPos
+						mainFrame.Size = UDim2.new(0, sizeX, 0, sizeY)
+					end
+				end
+			end)
+
+			window:AssociateEvent(UserInputService.InputEnded, function(input, gameHandled)
+				if (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
+					if resizing and originalMouseIcon then
+						Mouse.Icon = originalMouseIcon
+					end
+					dragging = false
+					resizing = false
 				end
 			end)
 		end,
