@@ -157,7 +157,7 @@ local UI = table.freeze {
 						elseif tweenInfo then TweenInfo.new(tweenInfo)
 						else TweenInfo.new(0.5)
 					
-					for _, v in pairs(if recursive ~= false then Utilities:AddRange(obj._objectRef:GetDescendants(), obj._objectRef) else {obj._objectRef}) do
+					for _, v in pairs(if recursive ~= false then {obj._objectRef, unpack(obj._objectRef:GetDescendants())} else {obj._objectRef}) do
 						if v:IsA("GuiObject") then
 							task.spawn(function()
 								local props = {BackgroundTransparency = targetTransparency}
@@ -403,10 +403,17 @@ local UI = table.freeze {
 				local memberInfo = classInfo.Members[ind]
 				if memberInfo and type(memberInfo) == "table" then
 					assert(memberInfo.Update or memberInfo.Path or not memberInfo.Read, ind.." is a read-only property of "..className)
-					local gotType = typeof(self:UnWrap(val))
-					if memberInfo.Type and memberInfo.Type ~= "any" then
-						local expectedType = memberInfo.Type
-						assert(gotType == expectedType or (gotType == "EnumItem" and val.EnumType == expectedType), string.format("Invalid type for %s (%s expected, got %s)", ind, tostring(expectedType), if gotType == "EnumItem" then "Enum."..tostring(val.EnumType) else gotType))
+					if memberInfo.Type then
+						local gotType = typeof(self:UnWrap(val))
+						local allowedTypes = string.split(string.gsub(memberInfo.Type, " ", ""), "|")
+						local compliant = false
+						for _, t in ipairs(allowedTypes) do
+							if gotType == t or (gotType == "EnumItem" and tostring(val.EnumType) == t) then
+								compliant = true
+								break
+							end
+						end
+						assert(compliant, string.format("Invalid type for %s (%s expected, got %s)", ind, memberInfo.Type, if gotType == "EnumItem" then "Enum."..tostring(val.EnumType) else gotType))
 					end
 					if memberInfo.Path then
 						local target, prop = memberInfo.Path(real, obj)
