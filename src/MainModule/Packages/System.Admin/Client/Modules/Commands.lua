@@ -35,6 +35,7 @@ end
 --- @param cmdIndex string -- Command index
 --- @param ... any -- Command function parameters
 --- @return result
+--- @tag System.Admin
 function RemoteCommands.RunClientSideCommand(cmdIndex: string, ...)
 	DebugWarn("DO CLIENT SIDE COMMAND", cmdIndex, ...)
 	local foundCommand = Root.Commands.DeclaredCommands[cmdIndex]
@@ -49,6 +50,7 @@ end
 --- @function FinishCommandDeclarations
 --- @within Client.Remote.Commands
 --- @param settings table -- Table containing settings sent by the server.
+--- @tag System.Admin
 function RemoteCommands.FinishCommandDeclarations(settings)
 	DebugWarn("FINISH DECLARATION", settings)
 	if settings then

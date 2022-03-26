@@ -341,7 +341,7 @@ end
 --- @within Client.Remote.Commands
 --- @param sessionKey string -- Session key
 --- @param ... any -- Arguments
---- @tag Remote Command
+--- @tag System.Core
 function RemoteCommands.SessionData(sessionKey, ...)
 	if sessionKey then
 		if Sessions[sessionKey] then
@@ -358,7 +358,7 @@ end
 --- @function ErrorMessages
 --- @within Client.Remote.Commands
 --- @param data table -- Error data
---- @tag Remote Command
+--- @tag System.Core
 function RemoteCommands.ErrorMessage(data)
 	Utilities.Events.ServerError:Fire(data)
 end
@@ -368,7 +368,7 @@ end
 --- @function DeclareSettings
 --- @within Client.Remote.Commands
 --- @param settings table -- Table of settings in the format of [setting] = value
---- @tag Remote Command
+--- @tag System.Core
 function RemoteCommands.DeclareSettings(settings)
 	if Root.Settings then
 		for setting,value in pairs(settings) do
@@ -384,12 +384,13 @@ end
 --- @within Client.Remote.Commands
 --- @param setting string -- Setting
 --- @param value any -- Value
---- @tag Remote Command
+--- @tag System.Core
 function RemoteCommands.UpdateSetting(setting, value)
 	rawset(Root.Settings, setting, value)
 end
 
 
+--// Return initializer
 return {
 	Init = function(cRoot, cPackage)
 		Root = cRoot

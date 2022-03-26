@@ -25,7 +25,7 @@ local RemoteCommands = {}
 --- @method GetVirtualEnv
 --- @within Client.Bytecode
 --- @param returnInstance Instance
-function Bytecode.GetVirtualEnv(self, returnInstance)
+function Bytecode.GetVirtualEnv(self, returnInstance: boolean): Instance
 	local vEnvModule = Package.SharedAssets.VirtualEnv:Clone() :: ModuleScript
 	return returnInstance == true and vEnvModule or returnInstance == false and require(vEnvModule)()
 end
@@ -33,7 +33,7 @@ end
 --- Load bytecode
 --- @method LoadBytecode
 --- @within Client.Bytecode
-function Bytecode.LoadBytecode(self, bytecode: string, envData: {})
+function Bytecode.LoadBytecode(self, bytecode: string, envData: {}): ()
 	local fiOneMod = Package.SharedAssets.FiOne:Clone()
 	local fiOne = require(fiOneMod)
 	return fiOne(bytecode, envData)
@@ -44,11 +44,11 @@ end
 --- Run bytecode
 --- @function RunBytecode
 --- @within Client.Remote.Commands
---- @tag Remote Command
+--- @tag System.Core
 --- @param str string -- Bytecode to execute
 --- @param ... any -- Additional arguments
 --- @return any -- Anything returned by executed bytecode
-RemoteCommands.RunBytecode = function(str, ...)
+RemoteCommands.RunBytecode = function(str: string, ...: any): any
 	Utilities.Events.RunningBytecode:Fire(str, ...)
 	return Root.Bytecode:LoadBytecode(str, Utilities:MergeTables(Root.ByteCode:GetVirtualEnv(false), {
 		Root = Root,
@@ -57,6 +57,7 @@ RemoteCommands.RunBytecode = function(str, ...)
 	}))()
 end
 
+--// Return initializer
 return {
 	Init = function(cRoot, cPackage)
 		Root = cRoot

@@ -18,6 +18,7 @@ local Remote = {}
 --- @method GetPermissions
 --- @within Client.Remote
 --- @return {}
+--- @tag System.Admin
 function Remote.GetPermissions(self)
 	local cached = Root.Cache:GetData("Permissions")
 	if cached then

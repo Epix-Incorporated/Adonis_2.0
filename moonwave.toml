@@ -1,4 +1,4 @@
-title = "Adonis"
+title = "Adonis_2.0"
 gitRepoUrl = "https://github.com/Sceleratis/Adonis_2.0"
 gitSourceBranch = "main"
 autoSectionPath = "src/MainModule/Packages"
