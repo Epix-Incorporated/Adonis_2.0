@@ -70,6 +70,7 @@ function Bytecode.LoadBytecode(self, bytecode: string, envData: {})
 end
 
 
+--//// Return initializer
 return {
 	Init = function(cRoot, cPackage)
 		Root = cRoot

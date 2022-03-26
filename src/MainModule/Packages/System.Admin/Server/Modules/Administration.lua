@@ -166,7 +166,7 @@ end
 
 
 
---//// Return initiailizer
+--//// Return initializer
 return {
 	Init = function(cRoot, cPackage)
 		Root = cRoot
