@@ -182,6 +182,8 @@ return {
 		--// Do init
 		Root.Data = Data
 
+		Data:SetupDatastore()
+
 		local persistentData = Utilities:MemoryCache({
 			Timeout = Data.PersistentDataTimeout
 		})
@@ -227,7 +229,5 @@ return {
 		end)
 
 		Utilities.Events.PersistentPlayerDataUpdated:Connect(PersistentPlayerDataUpdated)
-
-		Data:SetupDatastore()
 	end;
 }
