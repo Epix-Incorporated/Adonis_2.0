@@ -16,7 +16,7 @@ local Methods = {}
 --- Remote (client-to-server) commands
 --- @class Server.Remote.Commands
 --- @server
---- @tag Remote Commands
+--- @tag System.Core
 --- @tag Package: System.Core
 local RemoteCommands = setmetatable({},{
 	__newindex = function(self, ind, value)
@@ -51,7 +51,7 @@ local Remote = {
 --- Returns remote communication keys to the client if not already retrieved.
 --- @function GetKeys
 --- @within Server.Remote.Commands
---- @tag Remote Command
+--- @tag System.Core
 --- @param p Player
 function RemoteCommands.GetKeys(p: Player)
 	local data = Root.Core:GetPlayerData(p)
@@ -73,7 +73,7 @@ end
 --- Allows the client to verify integrity of the remote event
 --- @function VerifyRemote
 --- @within Server.Remote.Commands
---- @tag Remote Command
+--- @tag System.Core
 --- @param p Player -- Player
 --- @param t string -- Test value
 function RemoteCommands.VerifyRemote(p: Player, t)

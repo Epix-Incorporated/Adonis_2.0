@@ -9,6 +9,7 @@
 
 local Root, Utilities, Service, Package;
 
+--// Return initializer
 return {
 	Init = function(cRoot, cPackage)
 		Root = cRoot

@@ -17,7 +17,7 @@ local Methods = {}
 --- These should be executed using Root.Remote:Send(COMMAND, DATA) or Root.Remote:Get(COMMAND, DATA)
 --- @class Client.Remote.Commands
 --- @client
---- @tag Remote Commands
+--- @tag System.Core
 --- @tag Package: System.Core
 
 local RemoteCommands = setmetatable({},{
