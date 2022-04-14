@@ -86,6 +86,8 @@ function Utilities.Waiter(self)
 		Release = function(self, ...) self.Event:Fire(...) end;
 		Wait = function(self, ...) return self.Event.Event:Wait(...) end;
 		Destroy = function(self) self.Event:Destroy() end;
+		Connect = function(self, func) self.Event.Event:Connect(func) end;
+		Clear = function(self) self.Event:Destroy(); self.Event = Instance.new("BindableEvent") end;
 	}
 end
 
@@ -116,14 +118,26 @@ function Utilities.Queue(self, key: string, func, noYield)
 		}
 	end
 
+	local returnWaiter = noYield ~= true and self:Waiter();
 	local queue = Queues[key]
 	local tab = {
 		Time = os.time();
 		Running = false;
 		Finished = false;
 		Function = func;
+		ReturnData = {};
 		Waiter = noYield ~= true and self:Waiter();
 	}
+
+	if tab.Waiter then
+		Waiter:Connect(function(...)
+			tab.ReturnData = table.pack(...)
+			returnWaiter:Release()
+			returnWaiter:Destroy()
+			tab.Waiter:Destroy()
+			tab.Finished = true
+		end)
+	end
 
 	table.insert(queue.Active, tab);
 
@@ -131,8 +145,12 @@ function Utilities.Queue(self, key: string, func, noYield)
 		self.Tasks:NewTask("Thread: QueueProcessor_"..tostring(key), self.ProcessQueue, self, queue, key);
 	end
 
-	if not noYield and not tab.Finished then
-		return select(2, tab.Waiter:Wait());
+	if not noYield then
+		if returnWaiter and not tab.Finished then
+			returnWaiter:Wait()
+		end
+
+		return select(2, table.unpack(tab.ReturnData));
 	end
 end
 
