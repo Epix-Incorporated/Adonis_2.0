@@ -124,7 +124,7 @@ return {
 
 		Root.CrossServer = CrossServer
 
-		CrossServer.SubscribedEvent = Service.MessagingService:SubscribeAsync(CrossServer.CrossServerKey, CrossServerReceived)
+		Root.CrossServer.SubscribedEvent = Service.MessagingService:SubscribeAsync(CrossServer.CrossServerKey, CrossServerReceived)
 	end;
 
 	AfterInit = function(Root, Package)

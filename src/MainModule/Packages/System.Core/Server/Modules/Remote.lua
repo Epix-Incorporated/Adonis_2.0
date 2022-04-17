@@ -542,7 +542,7 @@ end
 function Remote.SetupClient(self, p: Player)
 	local handler = Package.Handlers.ClientHandler:Clone()
 	local packageHandler = Root.PackageHandlerModule:Clone()
-	local clientPackages = Root.PackageHandler.GetClientPackages(Root.Packages)
+	local clientPackages = Root.PackageHandler.GetPackages(Root.Packages, "Client")
 	local strippedPackages = Root.PackageHandler.StripPackages(
 		clientPackages,
 		"Server"

@@ -49,14 +49,14 @@ return {
 		RootTable = Root
 		Verbose = if Root.Verbose ~= nil then Root.Verbose else Verbose
 
-		if Package.Metadata.ModuleGroup and not Root.UI.DeclaredModuleGroups[Package.Metadata.ModuleGroup] then
+		if Package.Metadata.ModuleGroup and not Root.UI.DeclaredModules[Package.Metadata.ModuleGroup] then
 			Root.UI:DeclareModuleGroup({
 				Name = Package.Metadata.ModuleGroup,
 				Fallback = Package.Metadata.ModuleFallback
 			})
 		end
 
-		if Package.Metadata.PrefabGroup and not Root.UI.DeclaredPrefabGroups[Package.Metadata.PrefabGroup] then
+		if Package.Metadata.PrefabGroup and not Root.UI.DeclaredPrefabs[Package.Metadata.PrefabGroup] then
 			Root.UI:DeclarePrefabGroup({
 				Name = Package.Metadata.PrefabGroup,
 				Fallback = Package.Metadata.PrefabFallback

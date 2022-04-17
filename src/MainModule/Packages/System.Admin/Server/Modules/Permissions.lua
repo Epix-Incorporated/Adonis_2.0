@@ -566,7 +566,7 @@ return {
 			"ModifySettings",
 			"DebugCommands"
 		}) do
-			Permissions:DeclarePermission(perm)
+			Root.Permissions:DeclarePermission(perm)
 		end
 	end;
 

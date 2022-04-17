@@ -56,7 +56,7 @@ do
 	Root.PackageHandler = PackageHandler
 
 	--// Get client packages
-	local Packages = PackageHandler.GetClientPackages(Root.Packages)
+	local Packages = PackageHandler.GetPackages(Root.Packages)
 
 	--// Load client packages
 	PackageHandler.LoadPackages(Packages, "Client", Root, Packages)

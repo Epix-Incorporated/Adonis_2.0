@@ -83,7 +83,7 @@ local Data = {
 ]=]
 function Data.SaveSetting(self, index: string, value: any)
 	if self.Datastore then
-		PendingSystemSaves[index] = value;
+		self.PendingSystemSaves[index] = value;
 		Root.Core:UpdateSetting(index, value)
 	end
 end
@@ -96,6 +96,7 @@ end
 ]=]
 function Data.ResetSetting(self, index: string)
 	if self.Datastore then
+		--// TODO: Deal with setting resets
 	end
 end
 
@@ -174,6 +175,7 @@ end
 ]=]
 function Data.PerformSystemDataUpdate(self, datastore: DataStore, pendingChanges: {})
 	for path,value in pairs(self.PendingSystemSaves) do
+		--// TODO: Deal with system data updates
 	end
 end
 

@@ -267,7 +267,7 @@ return {
 				if Root.Core.SettingsOverrides[ind] ~= nil then
 					return Root.Core.SettingsOverrides[ind]
 				else
-					return Core:SettingsIndex(self, ind);
+					return Root.Core:SettingsIndex(self, ind);
 				end
 			end,
 
@@ -276,17 +276,17 @@ return {
 			end,
 		});
 
-		Core.PlayerData = Utilities:MemoryCache({
+		Root.Core.PlayerData = Utilities:MemoryCache({
 			Core.PlayerDataCache,
 			Timeout = Root.Timeouts.PlayerDataCacheTimeout,
 			AccessResetsTimer = true
 		})
 
-		Core:DeclareDefaultPlayerData("Leaving", false)
-		Core:DeclareDefaultPlayerData("ClientReady", false)
-		Core:DeclareDefaultPlayerData("ObtainedKeys", false)
+		Root.Core:DeclareDefaultPlayerData("Leaving", false)
+		Root.Core:DeclareDefaultPlayerData("ClientReady", false)
+		Root.Core:DeclareDefaultPlayerData("ObtainedKeys", false)
 
-		Core:DeclareDefaultPlayerData("Cache", function(p, newData)
+		Root.Core:DeclareDefaultPlayerData("Cache", function(p, newData)
 			return Utilities:MemoryCache({
 				Cache = {},
 				Timeout = 0,
@@ -294,18 +294,18 @@ return {
 			})
 		end)
 
-		Core:DeclareDefaultPlayerData("EncryptionKey", function(p, newData)
+		Root.Core:DeclareDefaultPlayerData("EncryptionKey", function(p, newData)
 			return Utilities:RandomString()
 		end)
 
-		Core:DeclareDefaultPlayerData("UserSettings", function(p, newData)
+		Root.Core:DeclareDefaultPlayerData("UserSettings", function(p, newData)
 			return {}
 		end)
 
 		--// Declare settings
 		if Package.Metadata.Settings then
 			for setting,data in pairs(Package.Metadata.Settings) do
-				Core:DeclareSetting(setting, data)
+				Root.Core:DeclareSetting(setting, data)
 			end
 		end
 	end;

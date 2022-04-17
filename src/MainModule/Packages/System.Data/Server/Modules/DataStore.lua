@@ -141,7 +141,7 @@ return {
 			Utilities:MergeTables(Root.Data, Data)
 		end
 
-		Data:SetupDatastore()
+		Root.Data:SetupDatastore()
 	end;
 
 	AfterInit = function(Root, Package)

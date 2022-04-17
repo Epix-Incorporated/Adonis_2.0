@@ -130,7 +130,7 @@ function Utilities.Queue(self, key: string, func, noYield)
 	}
 
 	if tab.Waiter then
-		Waiter:Connect(function(...)
+		tab.Waiter:Connect(function(...)
 			tab.ReturnData = table.pack(...)
 			returnWaiter:Release()
 			returnWaiter:Destroy()
