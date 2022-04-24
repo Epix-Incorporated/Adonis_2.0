@@ -8,6 +8,14 @@
 
 local Root, Package, Utilities, Service
 
+--// Output
+local Verbose = false
+local function DebugWarn(...)
+	if Verbose and Root and Root.Warn then
+		Root.Warn(...)
+	end
+end
+
 --- Responsible for core functionality.
 --- @class Client.Core
 --- @client
@@ -41,16 +49,46 @@ function Core.DeclareSetting(self, setting: string, data: {[string]: any})
 end
 
 
---- If a setting is not found, this is responsible for returning a value for it (or possibly, also setting it)
---- @method SettingsIndex
---- @within Client.Core
---- @param tab table
---- @param ind string -- Setting
---- @return any -- Default setting value
-function Core.SettingsIndex(self, tab: {}, ind: string): any
+--[=[
+	If a setting is not found, this is responsible for returning a value for it (or possibly, also setting it)
+	@method SettingDefault
+	@within Client.Core
+	@param tab table
+	@param ind string -- Setting
+	@return DefaultSettingValue
+]=]
+function Core.SettingDefault(self, ind: string): any
 	local found = self.DeclaredSettings[ind]
+
+	DebugWarn("FOUND SETTING DEFAULT:", ind, found, self.DeclaredSettings)
+	
 	if found then
 		return found.DefaultValue
+	end
+end
+
+
+--[=[ 
+	Responsible for returning the value of a setting if there is no override.
+	@method SettingsIndex
+	@within Client.Core
+	@param tab table
+	@param ind string -- Setting
+	@return any
+]=]
+function Core.SettingsIndex(self, ind: string): any
+	local override = Root.Core.SettingsOverrides[ind]
+	local user = if override == nil then Root.Core.UserSettings[ind] else nil
+	local default = if user == nil and override == nil then self:SettingDefault(ind) else nil
+	local found = if override ~= nil then override elseif user ~= nil then user else default
+
+	DebugWarn("SETTING | OVERRIDE", ind, override)
+	DebugWarn("SETTING | USER", ind, user)
+	DebugWarn("SETTING | DEFAULT", ind, default)
+	DebugWarn("SETTING | FOUND", ind, found)
+	
+	if found then
+		return found
 	else
 		Root.Warn("Unknown setting requested:", ind)
 	end
@@ -93,13 +131,7 @@ return {
 		Root.Core.UserSettings = {}
 		Root.Settings = setmetatable({}, {
 			__index = function(self, ind)
-				if Root.Core.SettingsOverrides[ind] ~= nil then
-					return Root.Core.SettingsOverrides[ind]
-				elseif Root.Core.UserSettings[ind] ~= nil then
-					return Root.Core.UserSettings[ind]
-				else
-					return Core:SettingsIndex(self, ind);
-				end
+				return Core:SettingsIndex(ind);
 			end,
 
 			__newindex = function(self, ind, val)

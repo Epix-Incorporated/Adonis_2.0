@@ -8,6 +8,14 @@
 
 local Root, Package, Utilities, Service
 
+--// Output
+local Verbose = false
+local function DebugWarn(...)
+	if Verbose and Root and Root.Warn then
+		Root.Warn(...)
+	end
+end
+
 local function delayedTimeoutMessage(stillWaiting: boolean, name: string, s: number)
 	if stillWaiting then
 		Root.Warn("Process taking too long to complete: >".. s .."s", name)
@@ -153,6 +161,8 @@ end
 --- @param setting string -- Setting
 --- @param data table -- Setting data table
 function Core.DeclareSetting(self, setting, data)
+	DebugWarn("DECLARE SETTING", setting, data)
+
 	if self.DeclaredSettings[setting] then
 		Root.Warn("Setting \"".. setting .."\" already delcared. Overwriting.")
 	end
@@ -176,15 +186,41 @@ end
 
 
 --- If a setting is not found, this is responsible for returning a value for it (or possibly, also setting it)
---- @method SettingsIndex
+--- @method SettingDefault
 --- @within Server.Core
 --- @param tab table
 --- @param ind string -- Setting
 --- @return DefaultSettingValue
-function Core.SettingsIndex(self, tab, ind)
+function Core.SettingDefault(self, ind: string): any
 	local found = self.DeclaredSettings[ind]
+	
+	DebugWarn("FOUND SETTING DEFAULT:", ind, found, self.DeclaredSettings)
+
 	if found then
 		return found.DefaultValue
+	end
+end
+
+
+--- Responsible for returning the value of a setting if there is no override.
+--- @method SettingsIndex
+--- @within Server.Core 
+--- @param tab table
+--- @param ind string -- Setting 
+--- @return any
+function Core.SettingsIndex(self, ind: string): any
+	local override = Root.Core.SettingsOverrides[ind]
+	local user = if override == nil then Root.Core.UserSettings[ind] else nil
+	local default = if user == nil and override == nil then self:SettingDefault(ind) else nil
+	local found = if override ~= nil then override elseif user ~= nil then user else default
+
+	DebugWarn("SETTING | OVERRIDE", ind, override)
+	DebugWarn("SETTING | USER", ind, user)
+	DebugWarn("SETTING | DEFAULT", ind, default)
+	DebugWarn("SETTING | FOUND", ind, found)
+	
+	if found then
+		return found
 	else
 		Root.Warn("Unknown setting requested:", ind)
 	end
@@ -261,14 +297,11 @@ return {
 			PlayerDataCacheTimeout = 60*10
 		}
 
+		DebugWarn("USER SETTINGS", Root.Settings, Root.Core.UserSettings)
 		Root.Core.UserSettings = Root.Settings
 		Root.Settings = setmetatable({}, {
 			__index = function(self, ind)
-				if Root.Core.SettingsOverrides[ind] ~= nil then
-					return Root.Core.SettingsOverrides[ind]
-				else
-					return Root.Core:SettingsIndex(self, ind);
-				end
+				return Root.Core:SettingsIndex(ind)
 			end,
 
 			__newindex = function(self, ind, val)

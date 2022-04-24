@@ -37,7 +37,7 @@ local Methods = {
 ]=]
 function Methods.Command.SendToClientSide(self, player: Player, ...: any?)
 	DebugWarn("SEND CLIENT SIDE", self)
-	if self.CommandData and self.CommandIndex and self.CommandData.ClientSide then
+	if self.CommandIndex then
 		if typeof(player) == "Instance" and player:IsA("Player") then
 			Root.Remote:Send(player, "RunClientSideCommand", self.CommandIndex, ...)
 		elseif type(player) == "table" then
@@ -57,7 +57,7 @@ end
 ]=]
 function Methods.Command.GetFromClientSide(self, player: Player, ...: any?)
 	DebugWarn("GET CLIENT SIDE", self)
-	if self.CommandData and self.CommandIndex and self.CommandData.ClientSide then
+	if self.CommandIndex then
 		if typeof(player) == "Instance" and player:IsA("Player") then
 			return Root.Remote:Get(player, "RunClientSideCommand", self.CommandIndex, ...)
 		elseif type(player) == "table" then
@@ -81,8 +81,34 @@ local Commands = {
 	DeclaredCommands = {},
 	SharedSettings = {},
 	ArgumentParsers = {
-		["players"] = function(data, cmdArg, argText)
-			return Root.Admin:GetPlayers(data, argText)
+		["players"] = function(data: {[string]: any}, cmdArg: string, argText: string)
+			local players = Root.Admin:GetPlayers(data, argText)
+			if table.getn(players) > 0 then
+				return {
+					Success = true,
+					Result = players
+				}
+			else
+				return {
+					Success = false,
+					Error = string.format("No players matching '%s' were be found", argText);
+				}
+			end
+		end,
+
+		["number"] = function(data: {[string]: any}, cmdArg: string, argText: string)
+			local num = tonumber(argText)
+			if num then
+				return {
+					Success = true,
+					Result = num
+				}
+			else
+				return {
+					Success = false,
+					Error = string.format("Invalid number supplied: '%s'", argText)
+				}
+			end
 		end
 	}
 }
@@ -96,18 +122,47 @@ local Commands = {
 	@param argsText {string} -- Table containing player supplied argument text
 	@return {[int]: any}
 ]=]
-function Commands.ParseArguments(self, data: {[string]: any}, cmdArgs: {string}, argsText: {string}): {[int]: any}
-	local result = {}
+function Commands.ParseArguments(self, 
+		data: {[string]: any}, 
+		parsers: {[string]: (data: {[string]: any}, cmdArg: string, argText: string)->({[string]: any})}, 
+		cmdArgs: {string}, 
+		argsText: {string}
+	): {[int]: any}
+	
+	DebugWarn("Parsing Arguments: ", data, parsers, cmdArgs, argsText)
+	assert(parsers and cmdArgs and argsText, "ParseArguments missing required parameters.")
+
+	local results = {}
 	for i,cmdArg in ipairs(cmdArgs) do
+		DebugWarn("CHECK CMD ARG: ", cmdArg)
 		local argText = argsText[i]
 		if argText then
-			local parser = (if data.CommandData and data.CommandData.Parsers then data.CommandData.Parsers[cmdArg] else nil) or self.ArgumentParsers[cmdArg]
+			DebugWarn("ARG TEXT:", argText)
+			local parser = parsers[cmdArg]
 			if parser then
-				result[i] = parser(data, cmdArg, argText)
+				DebugWarn("GOT PARSER")
+				local result = parser(data, cmdArg, argText)
+				DebugWarn("RESULT:", result)
+				if result ~= nil and type(result) == "table" and result.Success ~= nil then
+					if result.Success then
+						results[i] = result.Result
+					else
+						return {
+							Success = false,
+							Error = result.Error
+						}
+					end
+				else
+					result[i] = result
+				end
 			end
 		end
 	end
-	return result
+	DebugWarn("RETURN SUCCESS; RESULTS:", results)
+	return {
+		Success = true,
+		Results = results
+	}
 end
 
 --[=[
@@ -169,7 +224,7 @@ function Commands.FindCommand(self, str: string): {[string]: any}
 				DebugWarn("CHECKING ALIASES")
 				for i,alias in ipairs(data.Aliases) do
 					DebugWarn("CHECKING ALIAS MATCH")
-					warn("DATA", data)
+					DebugWarn("DATA", data)
 					if (data.Prefix or '') .. string.lower(alias) == string.lower(str) then
 						DebugWarn("RETURNING ALIAS MATCH")
 						local result = { Index = index, Data = data, Alias = alias }
@@ -220,9 +275,9 @@ function Commands.RunCommand(self, command: {[string]: any}, data: {[string]: an
 	DebugWarn("SERVER FUNC?", serverFunc)
 
 	if serverFunc then
-		local newData = Utilities:MergeTables({}, data, Methods.Command)
+		DebugWarn("GOT SERVER FUNC")
 
-		Utilities.Events.CommandRan:Fire(command, data, ...)
+		local newData = Utilities:MergeTables({}, data, Methods.Command)
 
 		Root.Logging:AddLog("Command", {
 			Text = tostring(data.Player or "Unknown").. ": " .. data.Message or "Unknown",
@@ -231,11 +286,43 @@ function Commands.RunCommand(self, command: {[string]: any}, data: {[string]: an
 		})
 
 		if data.Arguments and data.CommandData.Arguments then
-			newData.ParsedArguments = self:ParseArguments(data, data.CommandData.Arguments, data.Arguments)
+			DebugWarn("PARSE ARGUMENTS")
+
+			local result = self:ParseArguments(data, data.Parsers or data.CommandData.Parsers or {}, data.CommandData.Arguments, data.Arguments)
+			
+			DebugWarn("PARSE RESULT:", result)
+
+			if result.Success then
+				newData.ParsedArguments = result.Results
+				newData.ArgumentText = data.Arguments
+				newData.Arguments = {}
+
+				--// Merge arguments and parsed arguments in, using argument name as index
+				for i,arg in ipairs(data.CommandData.Arguments) do
+					newData.Arguments[arg] = if newData.ParsedArguments[i] ~= nil then newData.ParsedArguments[i] else data.Arguments[i]
+				end
+
+				DebugWarn("FINAL NEWDATA:", newData)
+			else
+				DebugWarn("PARSING ERROR", result)
+
+				Utilities.Events.ParsingError:Fire(command, newData, result.Error)
+				Utilities.Events.CommandErrored:Fire(command, newData, ...)
+
+				if data.Player then
+					Root.Remote:SendError(data.Player, result.Error)
+				else
+					Root.Error("Parsing Error:".. tostring(result.Error))
+				end
+
+				DebugWarn("RETURN RUNCOMMAND")
+				--// Argument parsing reported parsing failure; Abort.
+				return
+			end
 		end
 
-		DebugWarn("GOT SERVER FUNC; RUNNING", serverFunc, newData)
-
+		DebugWarn("RUNNING COMMAND", serverFunc, newData)
+		Utilities.Events.CommandRan:Fire(command, data, ...)
 		return xpcall(serverFunc, function(err)
 			if data.Player then
 				Root.Remote:SendError(data.Player, err)
@@ -244,9 +331,11 @@ function Commands.RunCommand(self, command: {[string]: any}, data: {[string]: an
 			Root.Logging:AddLog("Error", {
 				Text = "Error encountered while running command at index ".. (data.CommandIndex or "Unknown"),
 				Description = err,
-				CommandData = data,
+				CommandData = newData,
 				ErrorMessage = err
 			})
+
+			Utilities.Events.CommandErrored:Fire(command, newData, err)
 		end, newData, ...)
 	else
 		Root.Warn("Command missing 'Function'", {

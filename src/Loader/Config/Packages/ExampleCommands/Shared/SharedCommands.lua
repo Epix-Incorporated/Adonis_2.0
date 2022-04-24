@@ -26,12 +26,32 @@ local DeclareCommands = {
 	TestCommand = {
 		Prefix = Settings.Prefix,
 		Aliases = { "testcommand", "example" },
-		Arguments = { "players", "testarg2", "testarg3" },
+		Arguments = { "players", "testarg2", "testarg3", "someNumber"},
 		Parsers = {
-			testarg2 = function(data, cmdArg, text)
+			--// Parsers are command-author-defined argument parsers/validators
+			--// If a parser is not defined for an arg, the raw argument text supplied by the player will be used instead
+			["testarg2"] = function(data, cmdArg, text)
 				Root.Warn("PARSE ARG", data, cmdArg, text)
-				return "PARSE RESULT HERE"
-			end
+				return {
+					Success = true,
+					Result = "PARSING RESULT HERE"
+				}
+				--[[
+					If Errored:
+					return {
+						Success = false,
+						Error = "PARSING ERROR HERE" -- Aborts the entire command before it runs if parsing fails
+					}
+				--]]
+			end,
+
+			["players"] = function(...)
+				return Root.Commands.ArgumentParsers.players(...)
+			end,
+
+			["someNumber"] = function(...)
+				return Root.Commands.ArgumentParsers.number(...)
+			end,
 		},
 		Description = "Test command",
 		Permissions = { "Player" },
@@ -40,16 +60,20 @@ local DeclareCommands = {
 		ServerSide = function(data: {})
 			local plr = data.Player
 			local args = data.Arguments
-			local parsed = data.ParsedArguments
+
+			for i,v in pairs(args) do
+				Root.Warn("Got Argument", i, "of type", type(v), ":", v)
+			end 
 
 			Root.Warn("Success!", {
 				Player = plr,
 				Args = args,
-				Parsed = parsed,
 				Data = data
 			})
 
+			Root.Warn("SEND TO CLIENT SIDE TEST")
 			data:SendToClientSide(plr, args)
+			Root.Warn("GET FROM CLIENT SIDE TEST")
 			Root.Warn("ClientGet Test", data:GetFromClientSide(plr, args))
 		end,
 

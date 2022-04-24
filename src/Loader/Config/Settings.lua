@@ -97,7 +97,7 @@ local Settings = {
 		{ Type = "Default", Roles = { "Player" } },
 
 		--// Studio test user (Player1)
-		{ Type = "User", UserId = -1, Roles = { "Creator", }, Permissions = { "TestPermission" } },
+		{ Type = "User", UserId = -1, Roles = { "Creator" }, Permissions = { "TestPermission" } },
 
 		--// Below gives me (Davey_Bones/Sceleratis) access to the system. This is only used when debugging issues.
 		--// If you do not want this or do not trust me, simply comment out or remove the the line below this comment.

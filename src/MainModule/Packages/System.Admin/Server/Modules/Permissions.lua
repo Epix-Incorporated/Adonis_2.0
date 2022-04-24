@@ -204,9 +204,13 @@ end
 	@return {}
 ]=]
 function Users.GetUserEntries(self, player: Player): {}
+	DebugWarn("Getting user entries for", player)
+	DebugWarn("Root.Settings.Users:", Root.Settings.Users)
+
 	local userEntries = {}
 	for i,user in pairs(Root.Settings.Users) do
 		DebugWarn("Player UserCheck", user, player)
+
 		local userCheck = self.UserChecks[user.Type or "User"]
 		if userCheck then
 			if userCheck(self, player, user) then
@@ -442,9 +446,22 @@ function Permissions.GetPermissions(self, player: Player): {[string]: boolean}
 		DebugWarn("No cached permissions found for player", player)
 
 		local roles = Root.Roles:GetRoles(player)
+		local userEntries = Root.Users:GetUserEntries(player)
+
+		DebugWarn("GOT ROLES FOR PLAYER:", roles)
+		DebugWarn("GOT USER ENTRIES FOR PLAYER:", userEntries)
+
+		for i, data in ipairs(userEntries) do
+			if data.Permissions then
+				for i, perm in ipairs(data.Permissions) do
+					foundPerms[perm] = true
+				end
+			end
+		end
 
 		for role, data in pairs(roles) do
 			for i, perm in ipairs(data.Permissions) do
+				DebugWarn("FOUND ROLE PERM:", perm)
 				foundPerms[perm] = true
 			end
 		end
@@ -454,6 +471,7 @@ function Permissions.GetPermissions(self, player: Player): {[string]: boolean}
 		})
 	end
 
+	DebugWarn("PLAYER PERMISSION OVERRIDES:", data.Overrides.Permissions)
 	for perm,val in pairs(data.Overrides.Permissions) do
 		DebugWarn("Setting permission override", perm, val, player)
 		if val then

@@ -78,7 +78,7 @@ return function(Loader: {}, Settings: {}, Packages: Folder)
 	end
 
 	--// Get server packages
-	local Packages = PackageHandler.GetPackages(Root.Packages);
+	local Packages = PackageHandler.GetPackages(Root.Packages, "Server");
 
 	--// Load server packages
 	PackageHandler.LoadPackages(Packages, "Server", Root, Packages);

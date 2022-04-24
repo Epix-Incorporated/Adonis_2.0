@@ -20,12 +20,30 @@ local DeclareCommands = {
 	SplitDefinitionExample = {
 		Prefix = Settings.Prefix,
 		Aliases = { "splitdefinitionexample" },
-		Arguments = { "players", "testarg2", "testarg3" },
+		Arguments = { "players", "testarg2", "testarg3", "someNumber"},
 		Parsers = {
-			testarg2 = function(data, cmdArg, text)
+			["testarg2"] = function(data, cmdArg, text)
 				Root.Warn("PARSE ARG", data, cmdArg, text)
-				return "PARSE RESULT"
-			end
+				return {
+					Success = true,
+					Result = "PARSING RESULT HERE"
+				}
+				--[[
+					If Errored:
+					return {
+						Success = false,
+						Error = "PARSING ERROR HERE"
+					}
+				--]]
+			end,
+
+			["players"] = function(...)
+				return Root.Commands.ArgumentParsers.players(...)
+			end,
+
+			["someNumber"] = function(...)
+				return Root.Commands.ArgumentParsers.number(...)
+			end,
 		},
 		Description = "Test command",
 		Permissions = { "Player" },
@@ -49,13 +67,30 @@ local DeclareCommands = {
 	ServerOnlyExample = {
 		Prefix = Settings.Prefix,
 		Aliases = { "serveronlyexample" },
-		Arguments = { "players", "testarg2", "testarg3" },
+		Arguments = { "players", "testarg2", "testarg3", "someNumber"},
 		Parsers = {
-			--// Custom argument parser(s)
-			testarg2 = function(data, cmdArg, text)
+			["testarg2"] = function(data, cmdArg, text)
 				Root.Warn("PARSE ARG", data, cmdArg, text)
-				return "PARSE RESULT"
-			end
+				return {
+					Success = true,
+					Result = "PARSING RESULT HERE"
+				}
+				--[[
+					If Errored:
+					return {
+						Success = false,
+						Error = "PARSING ERROR HERE"
+					}
+				--]]
+			end,
+
+			["players"] = function(...)
+				return Root.Commands.ArgumentParsers.players(...)
+			end,
+
+			["someNumber"] = function(...)
+				return Root.Commands.ArgumentParsers.number(...)
+			end,
 		},
 		Description = "Test command",
 		Permissions = { "Player" },
