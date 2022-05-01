@@ -14,11 +14,22 @@ local Commands = { DeclaredCommands = { } }
 
 --// Output
 local Verbose = false
-local function DebugWarn(...)
-	if Verbose and Root and Root.Warn then
+local oWarn = warn;
+
+local function warn(...)
+	if Root and Root.Warn then
 		Root.Warn(...)
+	else
+		oWarn(":: ".. script.Name .." ::", ...)
 	end
 end
+
+local function DebugWarn(...)
+	if Verbose then
+		warn("Debug ::", ...)
+	end
+end
+
 
 
 --- Responsible for client-side command handling.
@@ -87,7 +98,7 @@ function Commands.UpdateSettingProxies(self, data)
 			if setting then
 				data[i] = setting
 			else
-				Root.Warn("Cannot update setting definition: Setting not found :: ", v.Index)
+				warn("Cannot update setting definition: Setting not found :: ", v.Index)
 			end
 		elseif type(v) == "table" then
 			self:UpdateSettingProxies(v)
@@ -103,7 +114,7 @@ end
 --- @param data {} -- Command data table
 function Commands.DeclareCommand(self, CommandIndex: string, data: {})
 	if self.DeclaredCommands[CommandIndex] then
-		Root.Warn("CommandIndex \"".. CommandIndex .."\" already delcared. Overwriting.")
+		warn("CommandIndex \"".. CommandIndex .."\" already delcared. Overwriting.")
 	end
 
 	self.DeclaredCommands[CommandIndex] = data

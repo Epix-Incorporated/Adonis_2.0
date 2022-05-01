@@ -10,11 +10,22 @@ local Root, Package, Utilities, Service
 
 --// Output
 local Verbose = false
-local function DebugWarn(...)
-	if Verbose and Root and Root.Warn then
+local oWarn = warn;
+
+local function warn(...)
+	if Root and Root.Warn then
 		Root.Warn(...)
+	else
+		oWarn(":: ".. script.Name .." ::", ...)
 	end
 end
+
+local function DebugWarn(...)
+	if Verbose then
+		warn("Debug ::", ...)
+	end
+end
+
 
 --- Responsible for core functionality.
 --- @class Client.Core
@@ -34,7 +45,7 @@ local Core = {
 --- @param data table -- Setting information table
 function Core.DeclareSetting(self, setting: string, data: {[string]: any})
 	if self.DeclaredSettings[setting] then
-		Root.Warn("Setting \"".. setting .."\" already delcared. Overwriting.")
+		warn("Setting \"".. setting .."\" already delcared. Overwriting.")
 	end
 
 	if data.Package and type(data.Package) == "table" then
@@ -90,7 +101,7 @@ function Core.SettingsIndex(self, ind: string): any
 	if found then
 		return found
 	else
-		Root.Warn("Unknown setting requested:", ind)
+		warn("Unknown setting requested:", ind)
 	end
 end
 

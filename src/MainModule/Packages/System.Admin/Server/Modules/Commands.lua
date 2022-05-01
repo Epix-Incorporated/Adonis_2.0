@@ -11,12 +11,23 @@ local Root, Utilities, Service, Package;
 
 --// Output
 local Verbose = false
-local function DebugWarn(...)
-	if Verbose and Root and Root.Warn then
+local oWarn = warn;
+
+local function warn(...)
+	if Root and Root.Warn then
 		Root.Warn(...)
+	else
+		oWarn(":: ".. script.Name .." ::", ...)
 	end
 end
 
+local function DebugWarn(...)
+	if Verbose then
+		warn("Debug ::", ...)
+	end
+end
+
+--// Methods
 local Methods = {
 	Command = {};
 }
@@ -181,7 +192,7 @@ function Commands.PlayerCanRunCommand(self, player: Player, command: {[string]: 
 	DebugWarn("GOT PERMS", checkPerms)
 
 	if not checkPerms and not checkRoles then
-		Root.Warn("Command missing roles or permissions definition", command)
+		warn("Command missing roles or permissions definition", command)
 	else
 		DebugWarn("CHECKING PERMISSIONS")
 
@@ -338,7 +349,7 @@ function Commands.RunCommand(self, command: {[string]: any}, data: {[string]: an
 			Utilities.Events.CommandErrored:Fire(command, newData, err)
 		end, newData, ...)
 	else
-		Root.Warn("Command missing 'Function'", {
+		warn("Command missing 'Function'", {
 			Command = command,
 			Data = data
 		})
@@ -407,7 +418,7 @@ function Commands.UpdateSettingProxies(self, data: {[any]: any})
 			if setting ~= nil then
 				data[i] = setting
 			else
-				Root.Warn("Cannot update setting definition: Setting not found :: ", v.Index)
+				warn("Cannot update setting definition: Setting not found :: ", v.Index)
 			end
 		elseif type(v) == "table" then
 			self:UpdateSettingProxies(v)
@@ -424,7 +435,7 @@ end
 ]=]
 function Commands.DeclareCommand(self, CommandIndex: string, data: {[string]: any})
 	if self.DeclaredCommands[CommandIndex] then
-		Root.Warn("CommandIndex \"".. CommandIndex .."\" already delcared. Overwriting.")
+		warn("CommandIndex \"".. CommandIndex .."\" already delcared. Overwriting.")
 	end
 
 	self:UpdateSettingProxies(data)

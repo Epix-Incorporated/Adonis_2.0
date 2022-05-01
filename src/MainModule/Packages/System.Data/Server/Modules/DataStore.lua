@@ -21,6 +21,25 @@ local Data = {
 	UpdateDataRetryInterval = 1
 }
 
+--// Output
+local Verbose = false
+local oWarn = warn;
+
+local function warn(...)
+	if Root and Root.Warn then
+		Root.Warn(...)
+	else
+		oWarn(":: ".. script.Name .." ::", ...)
+	end
+end
+
+local function DebugWarn(...)
+	if Verbose then
+		warn("Debug ::", ...)
+	end
+end
+
+
 --// Datastore handlers
 
 --[=[
@@ -42,7 +61,7 @@ function Data.SetData(self, datastore: DataStore, key: string, data: any)
 			if ran then
 				return true
 			else
-				Root.Warn("SetData Attempt Failed. Retrying...", ret)
+				warn("SetData Attempt Failed. Retrying...", ret)
 				Utilities.Events.DatastoreSetDataFailed:Fire(datastore, key, data, retryCount)
 				task.wait(self.SetDataRetryInterval)
 			end
@@ -72,7 +91,7 @@ function Data.GetData(self, datastore: DataStore, key: string): any
 				Utilities.Events.DatastoreGetData:Fire(datastore, key, ret)
 				return ret
 			else
-				Root.Warn("GetData Attempt Failed. Retrying...", ret)
+				warn("GetData Attempt Failed. Retrying...", ret)
 				Utilities.Events.DatastoreGetDataFailed:Fire(datastore, key, retryCount)
 				task.wait(self.GetDataRetryInterval)
 			end
@@ -101,7 +120,7 @@ function Data.UpdateData(self, datastore: DataStore, key: string, callback: (any
 			if ran then
 				return true
 			else
-				Root.Warn("UpdateData Attempt Failed. Retrying...", ret)
+				warn("UpdateData Attempt Failed. Retrying...", ret)
 				Utilities.Events.DatastoreUpdateDataFailed:Fire(datastore, key, callback, retryCount)
 				task.wait(self.UpdateDataRetryInterval)
 			end

@@ -13,6 +13,26 @@ local PlayerData = {}
 local Sessions = {}
 local Methods = {}
 
+--// Output
+local Verbose = false
+local oWarn = warn;
+
+local function warn(...)
+	if Root and Root.Warn then
+		Root.Warn(...)
+	else
+		oWarn(":: ".. script.Name .." ::", ...)
+	end
+end
+
+local function DebugWarn(...)
+	if Verbose then
+		warn("Debug ::", ...)
+	end
+end
+
+
+
 --- Remote (server-to-client) commands.
 --- These should be executed using Root.Remote:Send(COMMAND, DATA) or Root.Remote:Get(COMMAND, DATA)
 --- @class Client.Remote.Commands
@@ -23,7 +43,7 @@ local Methods = {}
 local RemoteCommands = setmetatable({},{
 	__newindex = function(self, ind, value)
 		if self[ind] ~= nil and Root then
-			Root.Warn("RemoteCommand index already declared. Overwriting...", ind)
+			warn("RemoteCommand index already declared. Overwriting...", ind)
 		end
 
 		rawset(self, ind, value)
@@ -133,7 +153,7 @@ function Remote.Send(self, cmd, ...)
 	if curEvent then
 		local cmd = Utilities:Encrypt(cmd, self.RemoteKey)
 
-		Root.DebugWarn("SENDING", cmd, ...)
+		DebugWarn("SENDING", cmd, ...)
 		curEvent.RemoteEvent:FireServer(cmd, table.pack(...))
 	end
 end
@@ -150,7 +170,7 @@ function Remote.Get(self, cmd, ...)
 	if curEvent then
 		local cmd = Utilities:Encrypt(cmd, self.RemoteKey);
 
-		Root.DebugWarn("GETTING", cmd, ...)
+		DebugWarn("GETTING", cmd, ...)
 		return table.unpack(curEvent.RemoteFunction:InvokeServer(cmd, table.pack(...)))
 	end
 end
@@ -205,7 +225,7 @@ function Remote.ProcessRemoteCommand(self, cmd, args)
 
 	Utilities.Events.ReceivedRemoteCommand:Fire(cmd, if type(args) == "table" then table.unpack(args) else args)
 
-	Root.DebugWarn("GOT", cmd, args)
+	DebugWarn("GOT", cmd, args)
 	if command then
 		return table.pack(command(table.unpack(args)))
 	end
@@ -316,7 +336,7 @@ function Remote.SetupRemote(self)
 			self:EventChangeDetected(...)
 		end)
 
-		Root.DebugWarn("Found Remotes")
+		DebugWarn("Found Remotes")
 
 		GettingEvent = false
 	end

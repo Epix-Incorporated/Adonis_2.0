@@ -17,19 +17,19 @@ local Verbose = false
 
 --// Warn
 local function warn(...)
-	oWarn(":: Adonis : PackageHandler ::", ...)
+	oWarn(":: PackageHandler ::", ...)
 end
 
 --// Warn, but for debugging situations (more verbose/spammy)
-local function debug(...)
+local function DebugWarn(...)
 	if Verbose then
 		warn("Debug ::", ...)
 	end
 end
 
---// Shorthand to debug() that just prints out a line so we can quickly/easily break up output for readability
+--// Shorthand to DebugWarn() that just prints out a line so we can quickly/easily break up output for readability
 local function debugLine()
-	debug("=======================================================")
+	DebugWarn("=======================================================")
 end
 
 --// Formatted warn
@@ -87,19 +87,19 @@ end
 local function GetPackages(Packages: {Folder}, FindName: string?): {[string]: Folder}
 	local found = {}
 
-	debug("GET PACKAGES CONTAINING", FindName)
+	DebugWarn("GET PACKAGES CONTAINING", FindName)
 
 	for i, v in ipairs(Packages) do
-		debug("CHECK PACKAGE", v)
+		DebugWarn("CHECK PACKAGE", v)
 
 		if v:IsA("Folder") and v:FindFirstChild("Metadata") and ((not FindName) or v:FindFirstChild(FindName)) then
-			debug("HAS FINDNAME", v)
+			DebugWarn("HAS FINDNAME", v)
 
 			local metadata = GetMetadata(v)
 			local pkgString = metadata.Name .. "==" .. metadata.Version
 
-			debug("METADATA: ", metadata)
-			debug("PKGSTRING: ", pkgString)
+			DebugWarn("METADATA: ", metadata)
+			DebugWarn("PKGSTRING: ", pkgString)
 
 			if not found[pkgString] then
 				found[pkgString] = v
@@ -149,19 +149,19 @@ end
 --- @param DependencyVersion number -- Searches for this depdendency version (optional.)
 --- @return string, package -- Returns the found package string (name==version) and the package itself.
 local function FindDependency(Packages: {[string]: Folder}, DependencyName: string, DependencyVersion)
-	debug("FIND DEPENDENCY: ", Packages, DependencyName, DependencyVersion)
+	DebugWarn("FIND DEPENDENCY: ", Packages, DependencyName, DependencyVersion)
 
 	for pkgString, pkg in pairs(Packages) do
-		debug("PKGSTRING", pkgString)
-		debug("PKG", pkg)
+		DebugWarn("PKGSTRING", pkgString)
+		DebugWarn("PKG", pkg)
 
 		local name = string.match(pkgString, "(.*)==")
 		local version = string.match(pkgString, "==(.*)")
 
-		debug("NAME, VERSION", name, version)
+		DebugWarn("NAME, VERSION", name, version)
 
 		if name == DependencyName and (not DependencyVersion or DependencyVersion == version) then
-			debug("RETURN; pkgString, pkg", pkgString, pkg)
+			DebugWarn("RETURN; pkgString, pkg", pkgString, pkg)
 			return pkgString, pkg
 		end
 	end
@@ -178,7 +178,7 @@ local function CheckDependencies(Packages: {[string]: Folder}, Package: Folder)
 	local metadata = GetMetadata(Package)
 	local dependencies = metadata.Dependencies
 
-	debug("Checking package depdencies", Package)
+	DebugWarn("Checking package depdencies", Package)
 	if dependencies then
 		for i,depString in pairs(dependencies) do
 			debugLine()
@@ -186,12 +186,12 @@ local function CheckDependencies(Packages: {[string]: Folder}, Package: Folder)
 			local name = string.match(depString, "(.*)==") or depString
 			local version = string.match(depString, "==(.*)")
 			if not FindDependency(Packages, name, version) then
-				debug("Dependency check failed")
+				DebugWarn("Dependency check failed")
 				return false
 			end
 		end
 
-		debug("Dependency check passed")
+		DebugWarn("Dependency check passed")
 		return true
 	else
 		FormatError("Package %s is missing a dependencies list", metadata.Name)
@@ -211,7 +211,7 @@ end
 
 --// Recursively handles dependency resolution
 local Resolve; Resolve = function(Packages: {[string]: Folder}, ResultList: {Folder}, Package: Folder, Chain)
-	debug("RESOLVING: ", Package, Chain)
+	DebugWarn("RESOLVING: ", Package, Chain)
 
 	local metadata = GetMetadata(Package)
 	local pkgString = metadata.Name .. "==" .. metadata.Version
@@ -219,27 +219,27 @@ local Resolve; Resolve = function(Packages: {[string]: Folder}, ResultList: {Fol
 	local chain = Chain or {}
 
 	if chain[pkgString] then
-		debug("PACKAGE ALREADY IN CHAIN")
+		DebugWarn("PACKAGE ALREADY IN CHAIN")
 		FormatError("Circular Dependency Error : One or more dependencies of %s is circular", pkgString)
 		return nil
 	else
-		debug("NO CIRCULAR (CHAIN) CONFLICT")
+		DebugWarn("NO CIRCULAR (CHAIN) CONFLICT")
 
 		chain[pkgString] = true
 
 		for i,depString in pairs(dependencies) do
 			debugLine()
-			debug("DEPENDENCY: ", depString)
+			DebugWarn("DEPENDENCY: ", depString)
 
 			local name = string.match(depString, "(.*)==") or depString
 			local version = string.match(depString, "==(.*)")
 			local depPackageString, dep = FindDependency(Packages, name, version)
 
 			if dep then
-				debug("CHECK RESULTS")
+				DebugWarn("CHECK RESULTS")
 
 				if not CheckResults(ResultList, name, version) then
-					debug("RESOLVE DEP: ", dep, chain)
+					DebugWarn("RESOLVE DEP: ", dep, chain)
 					Resolve(Packages, ResultList, dep, chain)
 				end
 			else
@@ -247,10 +247,10 @@ local Resolve; Resolve = function(Packages: {[string]: Folder}, ResultList: {Fol
 			end
 		end
 
-		debug("CHECK RESULT", ResultList, pkgString)
+		DebugWarn("CHECK RESULT", ResultList, pkgString)
 
 		if not CheckResults(ResultList, metadata.Name, metadata.Version) then
-			debug("ADD TO RESULTLIST", Package, ResultList)
+			DebugWarn("ADD TO RESULTLIST", Package, ResultList)
 			table.insert(ResultList, Package)
 			debugLine()
 		end
@@ -267,10 +267,10 @@ local function GetOrderedPackageList(Packages: {[string]: Folder}): {Folder}
 	local ResultList = {}
 
 	debugLine()
-	debug("GETTING ORDERED PACKAGE LIST", Packages)
+	DebugWarn("GETTING ORDERED PACKAGE LIST", Packages)
 
 	for i,v in pairs(Packages) do
-		debug("RESOLVE PACKAGE: ", v)
+		DebugWarn("RESOLVE PACKAGE: ", v)
 		Resolve(Packages, ResultList, v)
 		debugLine()
 	end
@@ -306,7 +306,7 @@ local function InitPackage(Package: Folder, PackageType: string, ...)
 		end
 	else
 		FormatError("Package %s does not contain PackageType %s", Package.Name, PackageType)
-		--debug("Package", Package.Name, "does not contain PackageType folder", PackageType)
+		--DebugWarn("Package", Package.Name, "does not contain PackageType folder", PackageType)
 	end
 end
 
@@ -323,12 +323,12 @@ local function LoadPackages(Packages: {[string]: Folder}, PackageType: string, .
 	--// Organize packages according to their depdendencies
 	local ordered = GetOrderedPackageList(Packages)
 
-	debug("GOT ORDERED LIST", ordered)
+	DebugWarn("GOT ORDERED LIST", ordered)
 
 	--// Load all packages
 	for i, package in pairs(ordered) do
 		if CheckDependencies(loadedPackages, package) then
-			debug("LOAD PACKAGE", package)
+			DebugWarn("LOAD PACKAGE", package)
 			local ran, res = pcall(InitPackage, package, PackageType, ...)
 			if not ran then
 				warn("Error encountered while running InitPackage; Expand for details:", {
@@ -355,7 +355,7 @@ local function LoadPackages(Packages: {[string]: Folder}, PackageType: string, .
 
 	--// Initialize packages
 	for i,v in ipairs(initFuncs) do
-		debug("INIT", v)
+		DebugWarn("INIT", v)
 		local ran, err = pcall(RunFunction, v.Init, ...)
 		if not ran then
 			warn("Error encountered while running Init function for package; Expand for details:", {
@@ -369,7 +369,7 @@ local function LoadPackages(Packages: {[string]: Folder}, PackageType: string, .
 
 	--// After all packages are initialized
 	for i,v in ipairs(initFuncs) do
-		debug("AFTERINIT", v)
+		DebugWarn("AFTERINIT", v)
 		if v.AfterInit then
 			local ran, err = pcall(RunFunction, v.AfterInit, ...)
 			if not ran then

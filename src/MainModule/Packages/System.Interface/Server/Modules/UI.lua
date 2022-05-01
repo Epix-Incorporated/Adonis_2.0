@@ -42,7 +42,7 @@ end
 	@tag System.UI
 ]=]
 function Remote.MakeUI(self, p: Player, moduleName: string, ...: any)
-	Root.DebugWarn("SENDING: ", p, "GUI", moduleName, ...)
+	DebugWarn("SENDING: ", p, "GUI", moduleName, ...)
 	self:Send(p, "UI_LoadModule", {
 		Name = moduleName
 	}, ...)
@@ -60,7 +60,7 @@ end
 	@tag System.UI
 ]=]
 function Remote.MakeUI_Return(self, p: Player, moduleName: string, ...: any)
-	Root.DebugWarn("SENDING: ", p, "UI_LoadModule", moduleName, ...)
+	DebugWarn("SENDING: ", p, "UI_LoadModule", moduleName, ...)
 	return self:Get(p, "UI_LoadModule", {
 		Name = moduleName
 	}, ...)
@@ -91,8 +91,8 @@ return {
 
 	AfterInit = function(Root, Package)
 		--[[local function test(p)
-			Root.DebugWarn("TESTING UI BYTECODE RUNNING")
-			Root.DebugWarn("TESTING LOADCODE", Root.Remote:LoadCodeWithReturn(p, "return 'THIS WORKED!'.. tostring(Root)..tostring(Data and Data[1])", "TestDataStuff"))
+			DebugWarn("TESTING UI BYTECODE RUNNING")
+			DebugWarn("TESTING LOADCODE", Root.Remote:LoadCodeWithReturn(p, "return 'THIS WORKED!'.. tostring(Root)..tostring(Data and Data[1])", "TestDataStuff"))
 		end
 		Utilities.Events.PlayerReady:Connect(function(p)
 			test(p)

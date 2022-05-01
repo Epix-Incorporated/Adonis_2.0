@@ -14,6 +14,25 @@ local Settings = setmetatable({}, {
 	end
 })
 
+--// Output
+local Verbose = false
+local oWarn = warn;
+
+local function warn(...)
+	if Root and Root.Warn then
+		Root.Warn(...)
+	else
+		oWarn(":: ".. script.Name .." ::", ...)
+	end
+end
+
+local function DebugWarn(...)
+	if Verbose then
+		warn("Debug ::", ...)
+	end
+end
+
+
 local DeclareCommands = {
 	ViewCommands = {
 		Prefix = Settings.Prefix,
@@ -98,7 +117,7 @@ local DeclareCommands = {
 		Arguments = { "players", "testarg2", "testarg3" },
 		Parsers = {
 			testarg2 = function(data, cmdArg, text)
-				Root.Warn("PARSE ARG", data, cmdArg, text)
+				warn("PARSE ARG", data, cmdArg, text)
 				return text
 			end
 		},
@@ -110,7 +129,7 @@ local DeclareCommands = {
 			local args = data.Arguments
 			local parsed = data.ParsedArguments
 
-			Root.Warn("Success!", {
+			warn("Success!", {
 				Player = plr,
 				Args = args,
 				Parsed = parsed,
@@ -118,11 +137,11 @@ local DeclareCommands = {
 			})
 
 			data:SendToClientSide(plr, args)
-			Root.Warn("ClientGet Test", data:GetFromClientSide(plr, args))
+			warn("ClientGet Test", data:GetFromClientSide(plr, args))
 		end,
 
 		ClientSide = function(...)
-			Root.Warn("Client Success!", ...)
+			warn("Client Success!", ...)
 
 			Root.UI:NewElement("Window", {Theme = "Default"}, {
 				Title = "Test";

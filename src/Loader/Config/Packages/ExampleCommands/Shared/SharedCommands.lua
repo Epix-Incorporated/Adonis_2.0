@@ -14,6 +14,25 @@ local Settings = setmetatable({}, {
 	end
 })
 
+--// Output
+local Verbose = false
+local oWarn = warn;
+
+local function warn(...)
+	if Root and Root.Warn then
+		Root.Warn(...)
+	else
+		oWarn(":: ".. script.Name .." ::", ...)
+	end
+end
+
+local function DebugWarn(...)
+	if Verbose then
+		warn("Debug ::", ...)
+	end
+end
+
+
 local DeclareCommands = {
 	--// Since this is in a shared module, everything in this module will be seen to both the server and the client.
 	--// This allows us to define code intended for the client alongside code intended for the server.
@@ -31,7 +50,7 @@ local DeclareCommands = {
 			--// Parsers are command-author-defined argument parsers/validators
 			--// If a parser is not defined for an arg, the raw argument text supplied by the player will be used instead
 			["testarg2"] = function(data, cmdArg, text)
-				Root.Warn("PARSE ARG", data, cmdArg, text)
+				warn("PARSE ARG", data, cmdArg, text)
 				return {
 					Success = true,
 					Result = "PARSING RESULT HERE"
@@ -62,23 +81,23 @@ local DeclareCommands = {
 			local args = data.Arguments
 
 			for i,v in pairs(args) do
-				Root.Warn("Got Argument", i, "of type", type(v), ":", v)
+				warn("Got Argument", i, "of type", type(v), ":", v)
 			end 
 
-			Root.Warn("Success!", {
+			warn("Success!", {
 				Player = plr,
 				Args = args,
 				Data = data
 			})
 
-			Root.Warn("SEND TO CLIENT SIDE TEST")
+			warn("SEND TO CLIENT SIDE TEST")
 			data:SendToClientSide(plr, args)
-			Root.Warn("GET FROM CLIENT SIDE TEST")
-			Root.Warn("ClientGet Test", data:GetFromClientSide(plr, args))
+			warn("GET FROM CLIENT SIDE TEST")
+			warn("ClientGet Test", data:GetFromClientSide(plr, args))
 		end,
 
 		ClientSide = function(...)
-			Root.Warn("Client Success!", ...)
+			warn("Client Success!", ...)
 
 			return "WE GOT THIS FROM THE CLIENT!"
 		end

@@ -4438,7 +4438,8 @@ local SpecialClasses = {
 
 return {
 	Name = "Window",
-	OnLoad = function(Root, gTable, data)
+	OnLoad = function(gRoot, gTable, data)
+		Root = gRoot
 		Root.DebugWarn("LOADING WINDOW!", Root, gTable, data)
 
 		Utilities = Root.Utilities
@@ -4455,7 +4456,7 @@ return {
 				return byteCode
 			end
 		end
-
+		
 		Player = Service.Players.LocalPlayer
 		Mouse = Player:GetMouse()
 		InputService = Service.UserInputService

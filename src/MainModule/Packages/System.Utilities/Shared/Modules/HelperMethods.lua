@@ -13,6 +13,25 @@ local RateLimits = {}
 local ParentTester = Instance.new("Folder")
 local __RANDOM_CHARSET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
+--// Output
+local Verbose = false
+local oWarn = warn;
+
+local function warn(...)
+	if Root and Root.Warn then
+		Root.Warn(...)
+	else
+		oWarn(":: ".. script.Name .." ::", ...)
+	end
+end
+
+local function DebugWarn(...)
+	if Verbose then
+		warn("Debug ::", ...)
+	end
+end
+
+
 local function PropertyCheck(obj, prop): any
 	return obj[prop]
 end
@@ -909,7 +928,7 @@ function Utilities.GetTableValueByPath(self, table: {[any]:any}, tableAncestry: 
 		elseif type(val) == "table" then
 			curTable = val
 		else
-			Root.Warn("Invalid path:", tableAncestry)
+			warn("Invalid path:", tableAncestry)
 		end
 	end
 end

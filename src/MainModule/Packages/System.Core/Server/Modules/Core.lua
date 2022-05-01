@@ -10,15 +10,25 @@ local Root, Package, Utilities, Service
 
 --// Output
 local Verbose = false
-local function DebugWarn(...)
-	if Verbose and Root and Root.Warn then
+local oWarn = warn;
+
+local function warn(...)
+	if Root and Root.Warn then
 		Root.Warn(...)
+	else
+		oWarn(":: ".. script.Name .." ::", ...)
+	end
+end
+
+local function DebugWarn(...)
+	if Verbose then
+		warn("Debug ::", ...)
 	end
 end
 
 local function delayedTimeoutMessage(stillWaiting: boolean, name: string, s: number)
 	if stillWaiting then
-		Root.Warn("Process taking too long to complete: >".. s .."s", name)
+		warn("Process taking too long to complete: >".. s .."s", name)
 	end
 end
 
@@ -46,7 +56,7 @@ local Core = {
 --- @param defaultValue any -- Default player data value (can be function which returns data (use for tables))
 function Core.DeclareDefaultPlayerData(self, ind, defaultValue)
 	if self.DeclaredDefaultPlayerData[ind] then
-		Root.Warn("DefaultPlayerData \"".. ind .."\" already delcared. Overwriting.")
+		warn("DefaultPlayerData \"".. ind .."\" already delcared. Overwriting.")
 	end
 
 	self.DeclaredDefaultPlayerData[ind] = defaultValue
@@ -62,7 +72,7 @@ end
 --- @param func function -- PreLoad function
 function Core.DeclarePlayerPreLoadProcess(self, ind, func)
 	if self.DeclaredPlayerPreLoadingHandlers[ind] then
-		Root.Warn("Player Pre-Loading Process \"".. ind .."\" already declared. Overwriting.")
+		warn("Player Pre-Loading Process \"".. ind .."\" already declared. Overwriting.")
 	end
 
 	self.DeclaredPlayerPreLoadingHandlers[ind] = func
@@ -77,7 +87,7 @@ end
 --- @param func function -- Handler function
 function Core.DeclarePlayerDataHandler(self, ind, func)
 	if self.DeclaredPlayerDataHandlers[ind] then
-		Root.Warn("PlayerDataHandler \"".. ind .."\" already delcared. Overwriting.")
+		warn("PlayerDataHandler \"".. ind .."\" already delcared. Overwriting.")
 	end
 
 	self.DeclaredPlayerDataHandlers[ind] = func
@@ -164,7 +174,7 @@ function Core.DeclareSetting(self, setting, data)
 	DebugWarn("DECLARE SETTING", setting, data)
 
 	if self.DeclaredSettings[setting] then
-		Root.Warn("Setting \"".. setting .."\" already delcared. Overwriting.")
+		warn("Setting \"".. setting .."\" already delcared. Overwriting.")
 	end
 
 	if data.Package and type(data.Package) == "table" then
@@ -222,7 +232,7 @@ function Core.SettingsIndex(self, ind: string): any
 	if found then
 		return found
 	else
-		Root.Warn("Unknown setting requested:", ind)
+		warn("Unknown setting requested:", ind)
 	end
 end
 

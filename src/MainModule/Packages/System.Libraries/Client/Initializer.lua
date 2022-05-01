@@ -22,25 +22,26 @@ local Package = {
 
 --// Misc loading variables
 local RootTable;
-local Verbose = false;
 local InitFunctions = {}
 
 --// Output
+local Verbose = false;
 local oWarn = warn;
 
 local function warn(...)
 	if RootTable and RootTable.Warn then
 		RootTable.Warn(...)
 	else
-		oWarn(":: Adonis Client ::", ...)
+		oWarn(":: ".. script.Name .." ::", ...)
 	end
 end
 
-local function debug(...)
+local function DebugWarn(...)
 	if Verbose then
 		warn("Debug ::", ...)
 	end
 end
+
 
 --// Runs the given function and outputs any errors
 local function RunFunction(Function, ...)
@@ -68,21 +69,21 @@ end
 --// Initializer functions
 return {
 	Init = function(Root, Packages)
-		debug("INIT " .. Package.Metadata.Name .. " PACKAGE")
+		DebugWarn("INIT " .. Package.Metadata.Name .. " PACKAGE")
 
 		--// Init
 		RootTable = Root
 		Verbose = if Root.Verbose ~= nil then Root.Verbose else Verbose
 
 	  	if not Root.Libraries then
-			debug("INIT Root.Libraries")
+			DebugWarn("INIT Root.Libraries")
 			Root.Libraries = {}
 			Root.LibraryObjects = {}
 		end
 
 		--// Add libraries
 		for i,lib in ipairs(Package.Libraries:GetChildren()) do
-			debug("INDEX LIBRARY", lib.Name)
+			DebugWarn("INDEX LIBRARY", lib.Name)
 			Root.LibraryObjects[lib.Name] = lib
 			if lib:IsA("ModuleScript") then
 				Root.Libraries[lib.Name] = require(lib)
@@ -91,12 +92,12 @@ return {
 			end
 		end
 
-		debug("INIT " .. Package.Metadata.Name .. " PACKAGE FINISHED")
+		DebugWarn("INIT " .. Package.Metadata.Name .. " PACKAGE FINISHED")
 	end;
 
 	AfterInit = function(Root, Packages)
-		debug("AFTERINIT " .. Package.Metadata.Name .. " PACKAGE")
+		DebugWarn("AFTERINIT " .. Package.Metadata.Name .. " PACKAGE")
 
-		debug("AFTERINIT " .. Package.Metadata.Name .. " PACKAGE FINISHED")
+		DebugWarn("AFTERINIT " .. Package.Metadata.Name .. " PACKAGE FINISHED")
 	end;
 }

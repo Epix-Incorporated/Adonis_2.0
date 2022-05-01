@@ -14,9 +14,19 @@ local RemoteCommands = {}
 
 --// Output
 local Verbose = false
-local function DebugWarn(...)
-	if Verbose and Root and Root.Warn then
+local oWarn = warn;
+
+local function warn(...)
+	if Root and Root.Warn then
 		Root.Warn(...)
+	else
+		oWarn(":: ".. script.Name .." ::", ...)
+	end
+end
+
+local function DebugWarn(...)
+	if Verbose then
+		warn("Debug ::", ...)
 	end
 end
 
@@ -156,7 +166,7 @@ function Users.UserChecks.Group(self, player: Player, data: {[string]: any}): bo
 			end
 		end
 	else
-		Root.Warn("Missing GroupId or GroupName for group-assigned role. Skipping...")
+		warn("Missing GroupId or GroupName for group-assigned role. Skipping...")
 	end
 
 	return false
@@ -217,7 +227,7 @@ function Users.GetUserEntries(self, player: Player): {}
 				table.insert(userEntries, user)
 			end
 		else
-			Root.Warn("Check for RoleType not found", user.Type)
+			warn("Check for RoleType not found", user.Type)
 		end
 	end
 	return userEntries

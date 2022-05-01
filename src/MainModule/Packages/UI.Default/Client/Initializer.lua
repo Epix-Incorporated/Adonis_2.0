@@ -21,29 +21,30 @@ local Package = {
 
 --// Misc loading variables
 local RootTable;
-local Verbose = false;
 
 --// Output
+local Verbose = false;
 local oWarn = warn;
 
 local function warn(...)
 	if RootTable and RootTable.Warn then
 		RootTable.Warn(...)
 	else
-		oWarn(":: Adonis Client ::", ...)
+		oWarn(":: ".. script.Name .." ::", ...)
 	end
 end
 
-local function debug(...)
+local function DebugWarn(...)
 	if Verbose then
 		warn("Debug ::", ...)
 	end
 end
 
+
 --// Initializer functions
 return {
 	Init = function(Root, Packages)
-		debug("INIT " .. Package.Metadata.Name .. " PACKAGE")
+		DebugWarn("INIT " .. Package.Metadata.Name .. " PACKAGE")
 
 		--// Init
 		RootTable = Root
@@ -77,12 +78,12 @@ return {
 			end
 		end
 
-		debug("INIT " .. Package.Metadata.Name .. " PACKAGE FINISHED")
+		DebugWarn("INIT " .. Package.Metadata.Name .. " PACKAGE FINISHED")
 	end;
 
 	AfterInit = function(Root, Packages)
-		debug("AFTERINIT " .. Package.Metadata.Name .. " PACKAGE")
+		DebugWarn("AFTERINIT " .. Package.Metadata.Name .. " PACKAGE")
 
-		debug("AFTERINIT " .. Package.Metadata.Name .. " PACKAGE FINISHED")
+		DebugWarn("AFTERINIT " .. Package.Metadata.Name .. " PACKAGE FINISHED")
 	end;
 }

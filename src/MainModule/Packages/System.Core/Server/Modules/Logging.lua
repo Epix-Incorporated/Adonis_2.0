@@ -8,6 +8,25 @@
 
 local Root, Package, Utilities, Service
 
+--// Output
+local Verbose = false
+local oWarn = warn;
+
+local function warn(...)
+	if Root and Root.Warn then
+		Root.Warn(...)
+	else
+		oWarn(":: ".. script.Name .." ::", ...)
+	end
+end
+
+local function DebugWarn(...)
+	if Verbose then
+		warn("Debug ::", ...)
+	end
+end
+
+
 --- Responsible for logging functionality.
 --- @class Server.Logging
 --- @server
@@ -58,7 +77,7 @@ function Logging.AddLog(self, logType: string, logEntry: {Text: string?, Descrip
 
 		Utilities.Events.LogAdded:Fire(logType, logEntry)
 	else
-		Root.Warn("Invalid LogType Supplied:", logType)
+		warn("Invalid LogType Supplied:", logType)
 	end
 end
 

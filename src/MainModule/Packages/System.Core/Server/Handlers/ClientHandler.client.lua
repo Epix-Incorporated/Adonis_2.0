@@ -8,10 +8,27 @@
 
 --// Precursory variables/functions
 local AppName = "Adonis Client"
+local Verbose = false
 local oWarn = warn
+local oError = error
+local oPrint = print
 
 local function warn(...)
 	oWarn(":: ".. AppName .." ::", ...)
+end
+
+local function error(...)
+	oError(":: ".. AppName .." ::", ...)
+end
+
+local function print(...)
+	oPrint(":: ".. AppName .." ::", ...)
+end
+
+local function DebugWarn(...)
+	if Verbose then
+		warn("Debug ::", ...)
+	end
 end
 
 local function addRange(tab, ...)
@@ -25,8 +42,12 @@ end
 
 --// Table shared with all packages which acts as the root table for all others
 local Root = {
+	Warn = warn;
+	Error = error;
+	Print = print;
+	DebugWarn = DebugWarn;
 	AppName = AppName;
-	Verbose = false;
+	Verbose = Verbose;
 	Globals = {};
 	Packages = {};
 	Libraries = {};
@@ -44,7 +65,7 @@ do
 	repeat task.wait(0.01); script.Parent = nil; until script.Parent == nil
 
 	--// Begin loading
-	if Root.Verbose then warn("Loading packages...") end
+	DebugWarn("Loading packages...")
 
 	--// Get all packages
 	addRange(Root.Packages, Root.PackagesFolder:GetChildren())

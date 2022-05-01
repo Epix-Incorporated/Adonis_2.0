@@ -14,11 +14,30 @@ local Settings = setmetatable({}, {
 	end
 })
 
+--// Output
+local Verbose = false
+local oWarn = warn;
+
+local function warn(...)
+	if Root and Root.Warn then
+		Root.Warn(...)
+	else
+		oWarn(":: ".. script.Name .." ::", ...)
+	end
+end
+
+local function DebugWarn(...)
+	if Verbose then
+		warn("Debug ::", ...)
+	end
+end
+
+
 local DeclareCommands = {
 	--// ClientSide for SplitDefinitionExample
 	SplitDefinitionExample = {
 		ClientSide = function(...)
-			Root.Warn("Split Definition!", ...)
+			warn("Split Definition!", ...)
 
 			return "WE GOT THIS FROM THE CLIENT!"
 		end

@@ -12,6 +12,25 @@ local Root, Utilities, Service, Package;
 local RemoteCommands = {}
 local Methods = {}
 
+--// Output
+local Verbose = false
+local oWarn = warn;
+
+local function warn(...)
+	if Root and Root.Warn then
+		Root.Warn(...)
+	else
+		oWarn(":: ".. script.Name .." ::", ...)
+	end
+end
+
+local function DebugWarn(...)
+	if Verbose then
+		warn("Debug ::", ...)
+	end
+end
+
+
 --[=[
 	Responsible for client-side UI management.
 	@class Client.UI
@@ -32,7 +51,7 @@ local UI = {
 	@tag System.UI
 ]=]
 function RemoteCommands.UI_LoadModule(data: {[string]: any}, ...: any)
-	Root.DebugWarn("LOAD UI MODULE", data, ...)
+	DebugWarn("LOAD UI MODULE", data, ...)
 	return Root.UI:LoadModule(data, ...);
 end
 
@@ -46,7 +65,7 @@ end
 ]=]
 function UI.DeclareLauncher(self, name: string, data: {[string]: any})
 	if self.DeclaredLaunchers[name] then
-		Root.Warn("Prefab group already declared. Overwriting launcher:", name);
+		warn("Prefab group already declared. Overwriting launcher:", name);
 		Utilities.Events.UIWarning:Fire("Overwriting existing launcher", name);
 	end
 
@@ -64,7 +83,7 @@ function UI.DeclarePrefabGroup(self, groupData: {[string]: any})
 	local groupName = groupData.Name;
 
 	if self.DeclaredPrefabs[groupName] then
-		Root.Warn("Prefab group already declared. Overwriting group:", groupName);
+		warn("Prefab group already declared. Overwriting group:", groupName);
 		Utilities.Events.UIWarning:Fire("Overwriting existing prefab group", groupName);
 	end
 
@@ -87,7 +106,7 @@ function UI.DeclareModuleGroup(self, groupData: {[string]: any})
 	local groupName = groupData.Name;
 
 	if self.DeclaredModules[groupName] then
-		Root.Warn("Prefab group already declared. Overwriting group:", groupName);
+		warn("Prefab group already declared. Overwriting group:", groupName);
 		Utilities.Events.UIWarning:Fire("Overwriting existing prefab group", groupName);
 	end
 
@@ -115,7 +134,7 @@ function UI.DeclarePrefab(self, groupName: string, name: string, prefab: Instanc
 	end
 
 	if self.DeclaredPrefabs[groupName].Prefabs[name] then
-		Root.Warn("Prefab for group already declared. Overwriting. Prefab Name:", name, "| Group Name:", groupName);
+		warn("Prefab for group already declared. Overwriting. Prefab Name:", name, "| Group Name:", groupName);
 		Utilities.Events.UIWarning:Fire("Overwriting existing prefab", name, groupName);
 	end
 
@@ -138,7 +157,7 @@ function UI.DeclareModule(self, groupName: string, name: string, module: ModuleS
 	end
 
 	if self.DeclaredModules[groupName].Modules[name] then
-		Root.Warn("UI module for group already declared. Overwriting. Module Name:", name, "| Group Name:", groupName);
+		warn("UI module for group already declared. Overwriting. Module Name:", name, "| Group Name:", groupName);
 		Utilities.Events.UIWarning:Fire("Overwriting existing UI module", name, groupName);
 	end
 
@@ -159,7 +178,7 @@ function UI.GetPrefab(self, prefabName: string, groupName: string): Instance
 	local fallbackGroupName = prefabGroup.Fallback
 	local fallbackGroup = if fallbackGroupName then self.DeclaredPrefabs[fallbackGroupName] else nil
 
-	Root.DebugWarn("GETTING PREFAB", prefabName, groupName)
+	DebugWarn("GETTING PREFAB", prefabName, groupName)
 
 	if prefabGroup then
 		local found = prefabGroup.Prefabs[prefabName] or (fallbackGroup and fallbackGroup.Prefabs[prefabName]) or (defaultGroup and defaultGroup.Prefabs[prefabName])
@@ -178,11 +197,11 @@ function UI.GetPrefab(self, prefabName: string, groupName: string): Instance
 				Controller = controller
 			}
 		else
-			Root.Warn("UI prefab not found! prefab:", prefabName, " | Group:", groupName);
+			warn("UI prefab not found! prefab:", prefabName, " | Group:", groupName);
 			Utilities.Events.UIWarning:Fire("Prefab not found", prefabName, groupName);
 		end
 	else
-		Root.Warn("No UI prefab group found! Prefab:", prefabName, " | Group:", groupName);
+		warn("No UI prefab group found! Prefab:", prefabName, " | Group:", groupName);
 		Utilities.Events.UIWarning:Fire("Prefab group not found", prefabName, groupName);
 	end
 end
@@ -202,7 +221,7 @@ function UI.GetModule(self, moduleName: string, groupName: string): ModuleScript
 	local fallbackGroupName = moduleGroup.Fallback
 	local fallbackGroup = if fallbackGroupName then self.DeclaredModules[fallbackGroupName] else nil
 
-	Root.DebugWarn("GETTING UI MODULE", moduleName, groupName)
+	DebugWarn("GETTING UI MODULE", moduleName, groupName)
 
 	if moduleGroup then
 		local found = moduleGroup.Modules[moduleName] or (fallbackGroup and fallbackGroup.Modules[moduleName]) or (defaultGroup and defaultGroup.Modules[moduleName])
@@ -210,11 +229,11 @@ function UI.GetModule(self, moduleName: string, groupName: string): ModuleScript
 		if found then
 			return found
 		else
-			Root.Warn("UI module not found! Module:", moduleName, " | Group:", groupName);
+			warn("UI module not found! Module:", moduleName, " | Group:", groupName);
 			Utilities.Events.UIWarning:Fire("Module not found", moduleName, groupName);
 		end
 	else
-		Root.Warn("No UI module group found! Module:", moduleName, " | Group:", groupName);
+		warn("No UI module group found! Module:", moduleName, " | Group:", groupName);
 		Utilities.Events.UIWarning:Fire("Module group not found", moduleName, groupName);
 	end
 end
@@ -230,10 +249,10 @@ end
 function UI.LoadModule(self, moduleData: {[any]: any}, ...: any): any
 	local module = self:GetModule(moduleData.Name, moduleData.Group)
 	if module then
-		Root.DebugWarn("REQUIRING UI MODULE", moduleData)
+		DebugWarn("REQUIRING UI MODULE", moduleData)
 		local handler = require(module)
 		if handler and type(handler) == "table" and handler.LoadModule then
-			Root.DebugWarn("LOADING UI MODULE", moduleData)
+			DebugWarn("LOADING UI MODULE", moduleData)
 			Utilities.Events.UI_LoadingModule:Fire(moduleData, module, ...)
 			return handler:LoadModule(Root, moduleData, ...)
 		end
@@ -363,7 +382,7 @@ function UI.GetParent(self, obj: Instance): Instance
 			end
 		end
 	else
-		Root.Warn("PlayerGui not found")
+		warn("PlayerGui not found")
 	end
 end
 

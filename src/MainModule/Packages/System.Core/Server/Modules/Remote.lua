@@ -11,6 +11,24 @@ local Package, Utilities, Root, Service
 local MakingEvent = false
 local Methods = {}
 
+--// Output
+local Verbose = false
+local oWarn = warn;
+
+local function warn(...)
+	if Root and Root.Warn then
+		Root.Warn(...)
+	else
+		oWarn(":: ".. script.Name .." ::", ...)
+	end
+end
+
+local function DebugWarn(...)
+	if Verbose then
+		warn("Debug ::", ...)
+	end
+end
+
 
 --// Class definitions
 --- Remote (client-to-server) commands
@@ -21,7 +39,7 @@ local Methods = {}
 local RemoteCommands = setmetatable({},{
 	__newindex = function(self, ind, value)
 		if self[ind] ~= nil and Root then
-			Root.Warn("RemoteCommand index already declared. Overwriting...", ind)
+			warn("RemoteCommand index already declared. Overwriting...", ind)
 		end
 
 		rawset(self, ind, value)
@@ -59,7 +77,7 @@ function RemoteCommands.GetKeys(p: Player)
 		if not data.ObtainedKeys then
 			data.ObtainedKeys = true
 			data.RemoteKey = Utilities:RandomString()
-			Root.DebugWarn("Player Obtained Keys", p)
+			DebugWarn("Player Obtained Keys", p)
 			return data.RemoteKey
 		else
 			Utilities.Events.PlayerError:Fire(p, "Player attempted to re-obtain keys")
@@ -94,7 +112,7 @@ function RemoteCommands.ClientReady(p: Player)
 		if not data.ClientReady then
 			data.ClientReady = true;
 			Utilities.Events.PlayerReady:Fire(p, data);
-			Root.DebugWarn("Player Finished Loading", p);
+			DebugWarn("Player Finished Loading", p);
 
 			return true;
 		end
@@ -364,7 +382,7 @@ function Remote.Send(self, p: Player, cmd: string, ...)
 			local data = Root.Core:GetPlayerData(p)
 			local cmd = Utilities:Encrypt(cmd, data.RemoteKey or self.SharedKey);
 
-			Root.DebugWarn("SENDING", p, cmd, ...)
+			DebugWarn("SENDING", p, cmd, ...)
 			curEvent.RemoteEvent:FireClient(p, cmd, table.pack(...));
 		end
 	end
@@ -385,7 +403,7 @@ function Remote.Get(self, p: Player, cmd: string, ...)
 			local data = Root.Core:GetPlayerData(p)
 			local cmd = Utilities:Encrypt(cmd, data.RemoteKey or self.SharedKey);
 
-			Root.DebugWarn("GETTING", p, cmd, ...)
+			DebugWarn("GETTING", p, cmd, ...)
 			return table.unpack(curEvent.RemoteFunction:InvokeClient(p, cmd, table.pack(...)));
 		end
 	end
@@ -512,7 +530,7 @@ function Remote.ProcessRemoteCommand(self, p: Player, cmd: string, args)
 		args = {args}
 	end
 
-	Root.DebugWarn("Remote command received", p, cmd, args)
+	DebugWarn("Remote command received", p, cmd, args)
 
 	Utilities.Events.ReceivedRemoteCommand:Fire(p, cmd, if type(args) == "table" then table.unpack(args) else args)
 
@@ -556,8 +574,8 @@ function Remote.SetupClient(self, p: Player)
 		Children  = strippedPackages
 	})
 
-	Root.DebugWarn("CLIENT PACKAGES:", clientPackages, cliPackageFolder)
-	Root.DebugWarn("STRIPPED:", strippedPackages)
+	DebugWarn("CLIENT PACKAGES:", clientPackages, cliPackageFolder)
+	DebugWarn("STRIPPED:", strippedPackages)
 
 	packageHandler.Parent = handler;
 

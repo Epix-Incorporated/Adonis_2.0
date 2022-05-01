@@ -19,10 +19,27 @@
 
 --// Precursory variables/functions
 local AppName = "Adonis Server"
+local Verbose = false
 local oWarn = warn
+local oError = error
+local oPrint = print
 
 local function warn(...)
 	oWarn(":: ".. AppName .." ::", ...)
+end
+
+local function error(...)
+	oError(":: ".. AppName .." ::", ...)
+end
+
+local function print(...)
+	oPrint(":: ".. AppName .." ::", ...)
+end
+
+local function DebugWarn(...)
+	if Verbose then
+		warn("Debug ::", ...)
+	end
 end
 
 local function addRange(tab, ...)
@@ -36,8 +53,12 @@ end
 
 --// Table shared with all packages which acts as the root table for all others
 local Root = {
+	Warn = warn;
+	Error = error;
+	Print = print;
+	DebugWarn = DebugWarn;
 	AppName = AppName;
-	Verbose = false;
+	Verbose = Verbose;
 	Globals = {};
 	Packages = {};
 	Libraries = {};
@@ -48,7 +69,7 @@ local Root = {
 --// Returns to the loader
 return function(Loader: {}, Settings: {}, Packages: Folder)
 	--// Begin loading
-	if Root.Verbose then warn("Loading packages...") end
+	DebugWarn("Loading packages...")
 
 	--// Set variables
 	local start = os.clock();
