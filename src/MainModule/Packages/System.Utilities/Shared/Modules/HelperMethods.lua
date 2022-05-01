@@ -364,33 +364,47 @@ function Utilities.GetFormattedTime(self, optTime: number?, withDate: boolean?):
 end
 
 
---- Returns a formatted string of the provided number; Ex: 1000000.124 -> "1,000,000.124"
+--- Returns a formatted string of the provided number; Ex: 1000000.124 -> "1,000,000.124" or "1M"
 --- @method FormatNumber
 --- @within Utilities
 --- @param num number
+--- @param boolean doAbbreviate -- Will attempt to abbreviate large numbers if true
 --- @param string separator -- Optional; defaults to ","
 --- @return string
-function Utilities.FormatNumber(self, num: number?, separator: string?): string
+function Utilities.FormatNumber(self, num: number?, doAbbreviate: boolean?, separator: string?): string
 	num = tonumber(num)
-	if not num then return "NaN" end
-	if num >= 1e150 then return "Inf" end
+	separator = separator or ","
 
-	local int, dec = unpack(tostring(num):split("."))
+	if not num then return "NaN" end
+	if math.abs(num) >= 1e150 then return "Inf" end
+
+	local int, dec = unpack(tostring(math.abs(num)):split("."))
+
+	if doAbbreviate and math.abs(num) >= 1000 then
+		local ABBREVIATIONS = {
+			"K", "M", "B", "T", "Qd", "Qi"
+		}
+		local thousands = math.floor((#int - 1) / 3)
+		local suffix = ABBREVIATIONS[thousands]
+		if suffix then
+			return tonumber(string.format("%.2f", num / (10 ^ (3 * thousands)))) .. suffix
+		end
+		return self:FormatNumber(num / (10 ^ (3 * #ABBREVIATIONS)), false, separator) .. ABBREVIATIONS[#ABBREVIATIONS]
+	end
 
 	int = int:reverse()
-	local new = ""
+	local newInt = ""
 	local counter = 1
-	separator = separator or ","
 	for i = 1, #int do
 		if counter > 3 then
-			new ..= separator
+			newInt ..= separator
 			counter = 1
 		end
-		new ..= int:sub(i, i)
+		newInt ..= int:sub(i, i)
 		counter += 1
 	end
 
-	return new:reverse() .. if dec then "."..dec else ""
+	return (if num < 0 then "-" else "") .. newInt:reverse() .. if dec then "."..dec else ""
 end
 
 
@@ -861,7 +875,7 @@ function Utilities.FakePlayer(self, plrData: {})
 		PlayerScripts = Instance.new("Folder");
 		Kick = function() fakePlayer:Destroy() fakePlayer:SetSpecial("Parent", nil) end;
 		IsA = function(ignore, arg) if arg == "Player" then return true end end;
-	}) do fakePlayer:SetSpecial(prop, val) end
+		}) do fakePlayer:SetSpecial(prop, val) end
 
 	return fakePlayer
 end
@@ -950,6 +964,111 @@ end
 --- @return any
 function Utilities.JSONDecode(self, data: string): any
 	return self.Services.HttpService:JSONDecode(data)
+end
+
+
+--- Escapes any control characters in the provided string.
+--- @method EscapeControlCharacters
+--- @within Utilities
+--- @param string
+--- @return string
+function Utilities.EscapeControlCharacters(self, str: string): string
+	return str:gsub("%c", {
+		["\a"] = "\\a",
+		["\b"] = "\\b",
+		["\f"] = "\\f",
+		["\n"] = "\\n",
+		["\r"] = "\\r",
+		["\t"] = "\\t",
+		["\v"] = "\\v"
+	})
+end
+
+
+--- Converts provided data into a displayable string (not intended for data storage).
+--- @method Serialize
+--- @within Utilities
+--- @param ... any
+--- @return string
+function Utilities.Serialize(self, ...: any?): string
+	local result = ""
+	local packed = {...}
+
+	local tupleSize = #packed
+	if tupleSize == 0 then
+		return "nil"
+	end
+
+	local BUILTIN_TABLES = {
+		[Axes] = "Axes",
+		[BrickColor] = "BrickColor",
+		[CatalogSearchParams] = "CatalogSearchParams",
+		[CFrame] = "CFrame",
+		[Color3] = "Color3",
+		[ColorSequence] = "ColorSequence",
+		[ColorSequenceKeypoint] = "ColorSequenceKeypoint",
+		[DateTime] = "DateTime",
+		[DockWidgetPluginGuiInfo] = "DockWidgetPluginGuiInfo",
+		[Faces] = "Faces",
+		[FloatCurveKey] = "FloatCurveKey",
+		[Instance] = "Instance",
+		[NumberRange] = "NumberRange",
+		[NumberSequence] = "NumberSequence",
+		[NumberSequenceKeypoint] = "NumberSequenceKeypoint",
+		[OverlapParams] = "OverlapParams",
+		[PathWaypoint] = "PathWaypoint",
+		[PhysicalProperties] = "PhysicalProperties",
+		[Random] = "Random",
+		[Ray] = "Ray",
+		[RaycastParams] = "RaycastParams",
+		[Rect] = "Rect",
+		[Region3] = "Region3",
+		[Region3int16] = "Region3int16",
+		[TweenInfo] = "TweenInfo",
+		[UDim] = "UDim",
+		[UDim2] = "UDim2",
+		[Vector2] = "Vector2",
+		[Vector2int16] = "Vector2int16",
+		[Vector3] = "Vector3",
+		[Vector3int16] = "Vector3int16",
+
+		[debug] = "debug",
+		[os] = "os",
+		[task] = "task",
+		[_G] = "_G",
+	}
+	while #packed > 0 do
+		local data = table.remove(packed, 1)
+		local dataType = typeof(data)
+
+		if dataType == "table" then
+			if BUILTIN_TABLES[data] then
+				result ..= BUILTIN_TABLES[data]
+			else
+				local res = {}
+				for ind, val in pairs(data) do
+					table.insert(res, "["..self:Serialize(ind).."] = " .. self:Serialize(val))
+				end
+				result ..= "{"..table.concat(res, ", ").."}"
+			end
+		else
+			local isPrimitive = table.find({"function", "string", "number", "boolean", "EnumItem", "Enum", "Enums"}, dataType)
+			if not isPrimitive then
+				result ..= (if dataType == "Instance" then data.ClassName else dataType)..": "
+			end
+			result ..= (isPrimitive and "" or "(") .. (if dataType == "Instance" then data:GetFullName()
+				elseif dataType == "string" then '"'..self:EscapeControlCharacters(data:gsub(".", {["\\"] = "\\\\", ['"'] = '\\"'}))..'"'
+				elseif dataType == "Enum" then "Enum."..tostring(data)
+				elseif dataType == "Enums" then "Enum"
+				else tostring(data)) .. (isPrimitive and "" or ")")
+		end
+
+		if #packed > 0 then
+			result ..= ", "
+		end
+	end
+
+	return if tupleSize > 1 then "("..result..")" else result
 end
 
 
