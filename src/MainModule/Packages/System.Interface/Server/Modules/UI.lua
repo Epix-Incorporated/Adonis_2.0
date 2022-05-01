@@ -9,6 +9,23 @@
 
 local Root, Utilities, Service, Package;
 
+--// Output
+local Verbose = false
+local oWarn = warn;
+
+local function warn(...)
+	if Root and Root.Warn then
+		Root.Warn(...)
+	else
+		oWarn(":: ".. script.Name .." ::", ...)
+	end
+end
+
+local function DebugWarn(...)
+	if Verbose then
+		warn("Debug ::", ...)
+	end
+end
 
 --[=[
 	Responsible for server-side UI handling.
