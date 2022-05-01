@@ -1,12 +1,12 @@
 {
-    "name": "Adonis2.0_Rojo",
+    "name": "Hermes1.0",
     "tree": {
         "$className": "Folder",
-        "MainModule": {
+        "Hermes": {
             "$path": "../src/MainModule"
         },
-        "Adonis2.0_Loader": {
-            "$className": "Model",
+        "Loader": {
+            "$className": "Folder",
             "$path": "../src/Loader"
         }
     }

@@ -1,6 +1,6 @@
 --[[
 
-	Description: Responsible for loading Adonis's MainModule
+	Description: Responsible for loading Hermes's MainModule
 	Author: Sceleratis
 	Date: 12/05/2021
 
@@ -23,8 +23,8 @@ local LocalMode = true;
 --// Loader
 local Loader = {
 
-	--// Adonis's MainModule
-	MainModule = if LocalMode then script.Parent.Parent.MainModule else 0;
+	--// MainModule
+	MainModule = if LocalMode then script.Parent.Parent.Hermes else 0;
 
 	--// Get settings
 	Settings = require(script.Parent.Config.Settings);
@@ -40,10 +40,10 @@ local Loader = {
 		local response = moduleFunc(self, self.Settings, self.Packages);
 
 		if not response then
-			warn(":: Adonis Loader :: Something went wrong while loading.");
+			warn(":: Hermes Loader :: Something went wrong while loading.");
 		end
 	end;
 }
 
---// Load Adonis
+--// Load Server
 Loader:LoadMainModule();

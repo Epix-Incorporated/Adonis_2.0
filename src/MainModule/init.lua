@@ -18,7 +18,7 @@
 
 
 --// Precursory variables/functions
-local AppName = "Adonis Server"
+local AppName = "Hermes Server"
 local Verbose = false
 local oWarn = warn
 local oError = error

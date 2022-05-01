@@ -1,19 +1,19 @@
 {
-	"name": "Adonis_2.0",
+	"name": "Hermes_1.0",
 	"tree": {
 		"$className": "DataModel",
 
 		"ServerScriptService": {
 			"$className": "ServerScriptService",
 
-			"Adonis2.0_Rojo": {
+			"Hermes1.0": {
 				"$className": "Folder",
-				"MainModule": {
+				"Hermes": {
 					"$path": "src/MainModule"
 				},
 
-				"Adonis2.0_Loader": {
-					"$className": "Model",
+				"Loader": {
+					"$className": "Folder",
 					"$path": "src/Loader"
 				}
 			}
