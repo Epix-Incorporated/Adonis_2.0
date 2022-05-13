@@ -211,6 +211,16 @@ function Core.SettingDefault(self, ind: string): any
 	end
 end
 
+--[=[
+	Resets a setting override back to its original value.
+	@method ResetSettingOverride
+	@within Server.Core
+	@param setting string
+]=]
+function Core.ResetSettingOverride(self, setting: string)
+	self.SettingsOverrides[setting] = self.UserSettings[setting]
+end
+
 
 --- Responsible for returning the value of a setting if there is no override.
 --- @method SettingsIndex
@@ -308,7 +318,8 @@ return {
 		}
 
 		DebugWarn("USER SETTINGS", Root.Settings, Root.Core.UserSettings)
-		Root.Core.UserSettings = Root.Settings
+		Root.Core.UserSettings = Utilities:FullTableClone(Root.Settings)
+		Root.Core.SettingsOverrides = Utilities:FullTableClone(Root.Settings)
 		Root.Settings = setmetatable({}, {
 			__index = function(self, ind)
 				return Root.Core:SettingsIndex(ind)

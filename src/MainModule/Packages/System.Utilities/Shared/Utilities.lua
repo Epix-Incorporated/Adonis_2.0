@@ -94,13 +94,33 @@ end
 --- @return any
 function ObjectMethods.MemoryCache.GetData(self, key: any)
 	local found = self.__Cache[key]
-	if found and os.time() - found.CacheTime <= found.Timeout then
+	if found ~= nil and os.time() - found.CacheTime <= found.Timeout then
 		if found.AccessResetsTimer then
 			found.CacheTime = os.time()
 		end
 		return found.Value
-	elseif found then
+	elseif found ~= nil then
 		self.__Cache[key] = nil
+	end
+end
+
+
+--[=[
+	Gets an item associated with the specified key from the cache, or sets it if expired or not found.
+	@method GetOrSet
+	@within MemoryCache
+	@param key any -- Cache key used to update and retrieve stored values
+	@param value any -- Value to store
+	@param data CacheEntryData -- Optional table describing how to handle stored data
+]=]
+function ObjectMethods.MemoryCache.GetOrSet(self, key: any, value: any?, data: {[string]: any}?)
+	local found = self:GetData(key)
+	if found ~= nil then
+		return found
+	else
+		local newVal = if type(value) == "function" then value() else value
+		self:SetData(key, newVal, data)
+		return newVal
 	end
 end
 

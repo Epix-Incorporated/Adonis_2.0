@@ -13,25 +13,6 @@ local RateLimits = {}
 local ParentTester = Instance.new("Folder")
 local __RANDOM_CHARSET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
---// Output
-local Verbose = false
-local oWarn = warn;
-
-local function warn(...)
-	if Root and Root.Warn then
-		Root.Warn(...)
-	else
-		oWarn(":: ".. script.Name .." ::", ...)
-	end
-end
-
-local function DebugWarn(...)
-	if Verbose then
-		warn("Debug ::", ...)
-	end
-end
-
-
 local function PropertyCheck(obj, prop): any
 	return obj[prop]
 end
@@ -451,35 +432,6 @@ function Utilities.FormatStringForRichText(self, str: string): string
 end
 
 
---- Inserts elements from supplied ordered tables into the first table.
---- @method AddRange
---- @within Utilities
---- @param tab {} -- Table to insert subsequent table contents into
---- @param ... {} -- Ordered tables whos contents will be inserted into the first table
---- @return tab
-function Utilities.AddRange(self, tab, ...)
-	for i,t in ipairs(table.pack(...)) do
-		for k,v in ipairs(t) do
-			table.insert(tab, v)
-		end
-	end
-
-	return tab
-end
-
-
---- Given an ordered table, returns a subset of that table.
---- @method TableSub
---- @within Utilities
---- @param tab {}
---- @param startPos number
---- @param endPos number -- Optional
---- @return subset
-function Utilities.TableSub(self, tab: {}, startPos: number, endPos: number?)
-	return table.pack(table.unpack(tab, startPos, endPos))
-end
-
-
 --- Removes excess whitespace from strings.
 --- @method Trim
 --- @within Utilities
@@ -555,75 +507,6 @@ function Utilities.JoinStrings(self, joiner: string?, ...)
 		end
 	end
 	return result or ""
-end
-
-
---- Merges tables into the first table.
---- Each subsequent table will overwrite keys in/from the tables that came before it.
---- @method MergeTables
---- @within Utilities
---- @param tab {} -- Table to merge subsequent tables into
---- @param ... {} -- Tables to merge into the first table; Each subsequent table overwrites keys set by previous tables
---- @return tab
-function Utilities.MergeTables(self, tab, ...)
-	for i,t in ipairs(table.pack(...)) do
-		for k,v in pairs(t) do
-			tab[k] = v
-		end
-	end
-	return tab
-end
-
-
---- Same as MergeTables, but also calls itself when overriting one table with another.
---- @method MergeTablesRecursive
---- @within Utilities
---- @param tab {} -- Table to merge into
---- @param ... {} -- Tables to merge from
---- @return tab
-function Utilities.MergeTablesRecursive(self, tab, ...)
-	for _, t in ipairs(table.pack(...)) do
-		for k,v in pairs(t) do
-			if tab[k] ~= nil and type(v) == "table" and type(tab[k]) == "table" then
-				tab[k] = self:MergeTablesRecursive(tab[k], v)
-			else
-				tab[k] = v
-			end
-		end
-	end
-	return tab
-end
-
-
---- Returns the number of elements in a given table.
---- @method CountTable
---- @within Utilities
---- @param tab {[any]:any}
---- @param excludeNumIndices boolean -- Exclude non-string indeces
---- @return number
-function Utilities.CountTable(tab: {[any]:any}, excludeNumIndices: boolean?): number
-	local n = 0
-	for i, v in pairs(tab) do
-		if not excludeNumIndices or type(i) ~= "number" then
-			n += 1
-		end
-	end
-	return n
-end
-
-
---- Reverses the supplied ordered table.
---- @method ReverseTable
---- @within Utilities
---- @param array {[number]:any})
---- @return {[number]:any}
-function Utilities.ReverseTable(array: {[number]:any}): {[number]:any}
-	local len: number = #array
-	local reversed = {}
-	for i = 1, len do
-		reversed[len-i] = array[i]
-	end
-	return reversed
 end
 
 
@@ -709,28 +592,62 @@ function Utilities.Xor(self, a, b): boolean
 end
 
 
+--[=[
+	Execution strategy configuration used by Utilities:Attempt(...)
+	@interface ExecutionStrategy
+	@within Utilities
+	@field MaxAttempts number?
+	@field MaxDelay number? -- The maximum amount of time Attempt should take (does not include function execution time). If ExponentialBackoff is true, each delay will instead increase based on attempt number up to this value. 
+	@field Delay number? -- If provided, overrides MaxDelay and ExponentialBackoff
+	@field ErrorAction (string)->any?
+	@field ExponentialBackoff boolean
+]=]
+
 --- Advanced alternative to xpcall with multiple retry logic.
 --- @method Attempt
 --- @within Utilities
---- @param tries number
---- @param timeBeforeRetry number
 --- @param func function
---- @param errAction function(result string)
---- @return boolean, any
-function Utilities.Attempt(self, tries: number?, timeBeforeRetry: number?, func: (number)->any, errAction: (string)->any): (boolean, any)
-	tries = tries or 3
-	local triesMade = 0
-	local success, result
-	repeat
-		triesMade += 1
-		success, result = pcall(func, triesMade)
-		if not success then task.wait(timeBeforeRetry or 0) end
-	until success or triesMade >= tries
-	if not success and errAction then
-		result = errAction(result)
+--- @param strategy ExecutionStrategy
+--- @return boolean, any, ...
+function Utilities.Attempt(self, func: (number)->any, strategy: {[string]: any}, ...): (boolean, any)
+	local result
+	local maxAttempts = strategy.MaxAttempts or 6
+	local maxDelay = strategy.MaxDelay or 60
+	local delay = strategy.Delay
+	local exponential = strategy.ExponentialBackoff
+	local errAction = strategy.ErrorAction
+
+	for attempt = 1, maxAttempts do
+		result = table.pack(pcall(func, ...))
+
+		if result[1] then 
+			break
+		else
+			task.wait(if delay then delay elseif exponential then maxDelay * (attempt/maxAttempts) else maxDelay/maxAttempts) 
+		end
 	end
-	return success, result
+
+	if not result[1] and errAction then
+		errAction(result[2])
+	end
+
+	return table.unpack(result)
 end
+
+
+--[=[
+	Nullifies the specified indexes in the provided table.
+	@method NullifyIndexList
+	@within Utilities
+	@param tab {[any]: any}
+	@param indexList {[int]: any}
+]=]
+function Utilities.NullifyIndexList(self, tab: {[any]: any}, indexList: {[int]: any})
+	for i,index in ipairs(indexList) do
+		tab[index] = nil
+	end
+end
+
 
 
 --- Creates a new loop with a specified delay between executions.
@@ -899,40 +816,6 @@ function Utilities.FakePlayer(self, plrData: {})
 	return fakePlayer
 end
 
---- Returned by Utilities:GetTableValueByPath(...)
---- @interface TablePathReturn
---- @within Utilities
---- @field Table {} -- Destination value nested parent table (Settings in Root.Settings.UI_Colors)
---- @field Index string -- Destination index in nested parent table
---- @field Value any -- Destination value
-
---- Given a table, a path string, and an optional ancestry split character, nagivates through the table to the location specified by the provided path string.
---- @method GetTableValueByPath
---- @within Utilities
---- @param table {}
---- @param tableAncestry string -- Path string (For example, "Settings.UI_Colors" with Root as the table will navigate to Root.Settings.UI_Colors)
---- @param splitChara string --- Path split character (Defaults to '.')
---- @return TablePathReturn
-function Utilities.GetTableValueByPath(self, table: {[any]:any}, tableAncestry: string, splitChar: string): {[string]: any}
-	local indexNames = self:SplitString(tableAncestry, splitChar or '.', true)
-	local curTable = table
-
-	for i,index in ipairs(indexNames) do
-		local val = curTable[index]
-		if i == #indexNames then
-			return {
-				Table = curTable,
-				Index = index,
-				Value = val,
-			}
-		elseif type(val) == "table" then
-			curTable = val
-		else
-			warn("Invalid path:", tableAncestry)
-		end
-	end
-end
-
 
 --- Compares two tables for equality.
 --- @method CheckTableEquality
@@ -966,6 +849,476 @@ function Utilities.CheckTableEquality(self, tab1: {[any]:any}, tab2: {[any]:any}
 end
 
 
+--- Inserts elements from supplied ordered tables into the first table.
+--- @method AddRange
+--- @within Utilities
+--- @param tab {} -- Table to insert subsequent table contents into
+--- @param ... {} -- Ordered tables whos contents will be inserted into the first table
+--- @return tab
+function Utilities.AddRange(self, tab, ...)
+	for i,t in ipairs(table.pack(...)) do
+		for k,v in ipairs(t) do
+			table.insert(tab, v)
+		end
+	end
+
+	return tab
+end
+
+
+--- Given an ordered table, returns a subset of that table.
+--- @method TableSub
+--- @within Utilities
+--- @param tab {}
+--- @param startPos number
+--- @param endPos number -- Optional
+--- @return subset
+function Utilities.TableSub(self, tab: {}, startPos: number, endPos: number?)
+	return table.pack(table.unpack(tab, startPos, endPos))
+end
+
+
+--- Merges tables into the first table.
+--- Each subsequent table will overwrite keys in/from the tables that came before it.
+--- @method MergeTables
+--- @within Utilities
+--- @param tab {} -- Table to merge subsequent tables into
+--- @param ... {} -- Tables to merge into the first table; Each subsequent table overwrites keys set by previous tables
+--- @return tab
+function Utilities.MergeTables(self, tab, ...)
+	for i,t in ipairs(table.pack(...)) do
+		for k,v in pairs(t) do
+			tab[k] = v
+		end
+	end
+	return tab
+end
+
+
+--[=[
+	Performs a recursive table clone.
+	@method FullTableClone
+	@within Utilities
+	@param tab {[any]: any}
+	@return {[any]: any}
+]=]
+function Utilities.FullTableClone(self, tab: {[any]: any}): {[any]: any}
+	local clone = table.clone(tab)
+
+	for i,v in pairs(clone) do
+		if type(v) == "table" then
+			clone[i] = self:FullTableClone(v)
+		end
+	end
+
+	return clone
+end
+
+
+--- Same as MergeTables, but also calls itself when overriting one table with another.
+--- @method MergeTablesRecursive
+--- @within Utilities
+--- @param tab {} -- Table to merge into
+--- @param ... {} -- Tables to merge from
+--- @return tab
+function Utilities.MergeTablesRecursive(self, tab, ...)
+	for _, t in ipairs(table.pack(...)) do
+		for k,v in pairs(t) do
+			if tab[k] ~= nil and type(v) == "table" and type(tab[k]) == "table" then
+				tab[k] = self:MergeTablesRecursive(tab[k], v)
+			else
+				tab[k] = v
+			end
+		end
+	end
+	return tab
+end
+
+
+--- Returns the number of elements in a given table.
+--- @method CountTable
+--- @within Utilities
+--- @param tab {[any]:any}
+--- @param excludeNumIndices boolean -- Exclude non-string indeces
+--- @return number
+function Utilities.CountTable(tab: {[any]:any}, excludeNumIndices: boolean?): number
+	local n = 0
+	for i, v in pairs(tab) do
+		if not excludeNumIndices or type(i) ~= "number" then
+			n += 1
+		end
+	end
+	return n
+end
+
+
+--- Reverses the supplied ordered table.
+--- @method ReverseTable
+--- @within Utilities
+--- @param array {[number]:any})
+--- @return {[number]:any}
+function Utilities.ReverseTable(array: {[number]:any}): {[number]:any}
+	local len: number = #array
+	local reversed = {}
+	for i = 1, len do
+		reversed[len-i] = array[i]
+	end
+	return reversed
+end
+
+
+--- Returned by Utilities:GetTableValueByPath(...)
+--- @interface TablePathReturn
+--- @within Utilities
+--- @field Table {} -- Destination value nested parent table (Settings in Root.Settings.UI_Colors)
+--- @field Index string -- Destination index in nested parent table
+--- @field Value any -- Destination value
+
+--- Given a table, a path string, and an optional ancestry split character, nagivates through the table to the location specified by the provided path string.
+--- @method GetTableValueByPath
+--- @within Utilities
+--- @param table {}
+--- @param tableAncestry string -- Path string (For example, "Settings.UI_Colors" with Root as the table will navigate to Root.Settings.UI_Colors)
+--- @param splitChara string --- Path split character (Defaults to '.')
+--- @return TablePathReturn
+function Utilities.GetTableValueByPath(self, table: {[any]:any}, tableAncestry: string|{any}, splitChar: string): {[string]: any}
+	local indexNames = if type(tableAncestry) == "table" then tableAncestry else self:SplitString(tableAncestry, splitChar or '.', true)
+	local curTable = table
+
+	for i,index in ipairs(indexNames) do
+		local val = curTable[index]
+		if i == #indexNames then
+			return {
+				Table = curTable,
+				Index = index,
+				Value = val,
+			}
+		elseif type(val) == "table" then
+			curTable = val
+		else
+			return nil
+		end
+	end
+end
+
+
+--[=[
+	Returns true if the table contains any elements, false if not. 
+	@method Any
+	@within Utilities
+	@param tab {[any]: any}
+	@return bool
+]=]
+function Utilities.Any(self, tab: {[any]: any}): boolean
+	for i,v in pairs(tab) do
+		return true
+	end
+	return false
+end
+
+
+--[=[
+	Determines if a tabled is ordered or not.
+	@method IsOrderedTable
+	@within Utilities
+	@param tab {[any]: any}
+	@return boolean
+]=]
+function Utilities.IsOrderedTable(self, tab: {[any]: any}): boolean
+	for i,v in pairs(tab) do
+		if type(i) ~= "number" then
+			return false
+		end
+	end
+	return true
+end
+
+
+--[=[
+	Returned by Utilities:GetTablePaths(...)
+	@interface TablePath
+	@within Utilities
+	@field Path {[int]: string} -- Path table
+	@field Value any -- Path destination value
+	@field IsOrderedTable boolean
+]=]
+
+--[=[
+	Returns all paths within a table and their values.
+	@method GetTablePaths
+	@within Utilities
+	@param tab {[any]: any}
+	@param foundPaths {[int]: TablePath}
+	@param curPath {[int]: string}
+	@return {[int]: TablePath}
+]=]
+function Utilities.GetTablePaths(self, tab: {[any]: any}, foundPaths: {[int]: TablePath}, curPath): {[int]: TablePath}
+	local curPath = curPath or {}
+	local foundPaths = foundPaths or {}
+
+	for index,value in pairs(tab) do
+		local tPath = table.clone(curPath)
+		table.insert(tPath, index)
+		if type(value) == "table" and self:Any(value) then
+			self:GetTablePaths(value, foundPaths, tPath)
+		else
+			table.insert(foundPaths, {Path = tPath, Value = value, IsOrderedTable = self:IsOrderedTable(tab)})
+		end
+	end
+
+	return foundPaths
+end
+
+
+--[=[
+	Given a list of table paths, returns a table of flattened path keypairs with values.
+	@method FlattenPaths
+	@within Utilities
+	@param paths {[int]: TablePath}
+	@param split string
+	@return {[string]: any}
+]=]
+function Utilities.FlattenPaths(self, paths: {[int]: TablePath}, split: string): {[string]: any}
+	local results = {}
+	for i,path in ipairs(paths) do
+		local pathStr = self:FlattenPath(path.Path, split)
+		results[pathStr] = path.Value
+	end
+	return results;
+end
+
+
+--[=[
+	Given an ordered table of index strings, produces a path string.
+	@method FlattenPath
+	@within Utilities
+	@param path {[int]: string}
+	@param split string -- Joiner string
+	@return string
+]=]
+function Utilities.FlattenPath(self, path: {[int]: string}, split: string): string
+	local pathStr = ""
+	for k,index in ipairs(path) do
+		pathStr = pathStr .. split .. tostring(index)
+	end
+	return pathStr
+end
+
+--[=[
+	Utilities:Checkpath(...) result.
+	@interface CheckPathResult
+	@within Utilities
+	@field HasFullPath boolean
+	@field PartialPath {[int]: string}
+	@field Value any
+]=]
+
+--[=[
+	Checks if the provided table contains the provided path. 
+	If the full path cannot be traversed, a partial path will be returned.
+	@method CheckPath
+	@within Utilities
+	@param tab {[any]: any}
+	@param path {[int]: string}
+	@return CheckPathResult
+]=]
+function Utilities.CheckPath(self, tab: {[any]: any}, path: {[int]: string})
+	local partialPath = {}
+	local lastValue = nil;
+	local cur = tab
+	for i,index in ipairs(path) do
+		local value = cur[index]
+
+		if value ~= nil then
+			lastValue = value
+			table.insert(partialPath, index)
+
+			if i == table.getn(path) then
+				return {
+					HasFullPath = true,
+					PartialPath = partialPath,
+					Value = value
+				}
+			elseif type(value) == "table" then
+				cur = value
+			else
+				return {
+					HasFullPath = false,
+					PartialPath = partialPath,
+					Value = value
+				}
+			end
+		else 
+			return {
+				HasFullPath = false,
+				PartialPath = partialPath,
+				Value = lastValue
+			}
+		end
+	end
+end
+
+
+--[=[
+	Returns the last subtable using the path provided, creating any missing subtables along the way.
+	@method EnsurePath
+	@within Utilities
+	@param tab {[any]: any}
+	@param path {[int]: string}
+	@param noCreate boolean
+	@return {[any]: any}|nil
+]=]
+function Utilities.EnsurePath(self, tab: {[any]: any}, path: {[int]: string}, noCreate: boolean): {[any]: any}|nil
+	local cur = tab
+	for i,index in ipairs(path) do
+		local val = cur[index]
+		if i == #path then
+			return cur
+		else
+			if type(val) == "table" then
+				cur = val
+			elseif not noCreate then
+				local new = {}
+				cur[index] = new
+				cur = new
+			else
+				return nil
+			end
+		end
+	end
+end
+
+
+--[=[
+	Checks equality between two objects or tables.
+	@method CheckEquality
+	@within Utilities
+	@param a any
+	@param b any
+	@return boolean
+]=]
+function Utilities.CheckEquality(self, a: any, b: any): boolean
+	if a == b or rawequal(a, b) then
+		return true
+	elseif type(a) == "table" and type(b) == "table" then
+		return self:CheckTableEquality(a, b)
+	end
+	return false
+end
+
+
+--[=[
+	Utilities:TableDiff(...) result.
+	@interface TableDiffResult
+	@within Utilities
+	@field Mode string -- ADD, SET, REMOVE
+	@field Flat string -- Flat path
+	@field Path {[int]: string}
+	@field Value any
+]=]
+--[=[
+	Compares the source table to the destination table and retrieves a list of differences.
+	@method TableDiff
+	@within Utilities
+	@param dest {[any]: any}
+	@param source {[any]: any}
+	@return {[int]: TableDiffResult}
+]=]
+function Utilities.TableDiff(self, dest: {[any]: any}, source: {[any]: any}): {[int]: TableDiffResult}
+	local sourcePaths = self:GetTablePaths(source)
+	local destPaths = self:GetTablePaths(dest)
+	local flatSourcePaths = self:FlattenPaths(sourcePaths, "\\")
+	local flatDestPaths = self:FlattenPaths(destPaths, "\\")
+	local results = {}
+	
+	--// Find things the Source has that Destination does not
+	for i,path in pairs(sourcePaths) do
+		local flat = self:FlattenPath(path.Path, "\\")
+		local isOrdered = type(path.Path[#path.Path]) == "number"
+		if not self:CheckEquality(flatDestPaths[flat], path.Value) then
+			table.insert(results, {
+				Mode = if isOrdered then "ADD" else "SET",
+				Flat = flat,
+				Path = path.Path,
+				Value = path.Value
+			})
+		end
+	end
+
+	--// Find things that Destination has that Source does not
+	for i,path in pairs(destPaths) do
+		local flat = self:FlattenPath(path.Path, "\\")
+		local isOrdered = type(path.Path[#path.Path]) == "number"
+		if not self:CheckEquality(flatSourcePaths[flat], path.Value) then
+			local found = false
+			
+			if not isOrdered then
+				for i,v in ipairs(results) do
+					if v.Flat == flat then
+						found = true
+						break
+					end
+				end
+			end
+			
+			if not found then
+				table.insert(results, {
+					Mode = if isOrdered then "REMOVE" else "SET",
+					Flat = flat,
+					Path = path.Path,
+					Value = if isOrdered then path.Value else nil
+				})
+			end
+		end
+	end
+	
+	return results
+end
+
+
+--[=[
+	Updates the target table using the provided differences list.
+	@method MergeDiff
+	@within Utilities
+	@param tab {[any]: any}
+	@param diff {[int]: TableDiffResult}
+]=]
+function Utilities.MergeDiff(self, tab: {[any]: any}, diff: {[int]: TableDiffResult})
+	for i,change in ipairs(diff) do
+		if change.Mode == "SET" then
+			local dest = self:EnsurePath(tab, change.Path)
+			if type(dest) == "table" then
+				dest[change.Path[#change.Path]] = change.Value
+			end
+		elseif change.Mode == "ADD" then
+			warn(change.Path)
+			local dest = self:EnsurePath(tab, change.Path)
+			if type(dest) == "table" then
+				local found = false
+				for k,v in pairs(dest) do
+					if self:CheckEquality(v, change.Value) then
+						found = true
+						break
+					end
+				end
+				if not found then
+					table.insert(dest, change.Value)
+				end
+			end
+		elseif change.Mode == "REMOVE" then
+			local dest = self:EnsurePath(tab, change.Path, true)
+			if dest then
+				for k,v in pairs(dest) do
+					if self:CheckEquality(v, change.Value) then
+						table.remove(dest, k)
+					end
+				end
+			end
+		end
+	end
+end
+
+
 --- JSON encodes provided data.
 --- @method JSONEncode
 --- @within Utilities
@@ -989,7 +1342,7 @@ end
 --- Escapes any control characters in the provided string.
 --- @method EscapeControlCharacters
 --- @within Utilities
---- @param string
+--- @param str string
 --- @return string
 function Utilities.EscapeControlCharacters(self, str: string): string
 	return str:gsub("%c", {

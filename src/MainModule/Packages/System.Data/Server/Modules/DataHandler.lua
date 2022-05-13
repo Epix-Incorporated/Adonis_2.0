@@ -69,36 +69,12 @@ local Data = {
 
 	SystemSaves = {},
 	PlayerSaves = {},
-
-	--// Settings handlers
-	SavedSettings = {}
+	
+	Persistent = {},
+	DefaultPersistent = {},
+	DefaultPersistentHandlers = {}
 }
 
---[=[
-	Responsible for setting saving functionality.
-	@method SaveSetting
-	@within Server.Data
-	@param index string
-	@param value any
-]=]
-function Data.SaveSetting(self, index: string, value: any)
-	if self.Datastore then
-		self.PendingSystemSaves[index] = value;
-		Root.Core:UpdateSetting(index, value)
-	end
-end
-
---[=[
-	Responsible for setting data reset functionality.
-	@method ResetSetting
-	@within Server.Data
-	@param index string
-]=]
-function Data.ResetSetting(self, index: string)
-	if self.Datastore then
-		--// TODO: Deal with setting resets
-	end
-end
 
 --[=[
 	Returns saved data for the provided player.
@@ -166,17 +142,82 @@ function Data.UpdateSavedSystemData(self, key: string, callback: (any))
 	return Root.Data:UpdateData(self.SystemDataStore, key, callback)
 end
 
+function Data.DataEncode(self, data: any): string
+	return Utilities:JSONEncode(data)
+end
+
+function Data.DataDecode(self, data: string): any
+	return Utilities:JSONDecode(data)
+end
+
+
 --[=[
-	(WIP) Performs system data update operation.
+	Responsible for datastore keys.
+	@method GetKey
+	@within Server.Data
+	@param key string
+	@return string
+]=]
+function Data.GetKey(self, key: string): string
+	return key
+end
+
+
+--[=[
+	Performs system data update operation.
 	@method PerformSystemDataUpdate
 	@within Server.Data
 	@param datastore DataStore
 	@param pendingChanges {}
 ]=]
 function Data.PerformSystemDataUpdate(self, datastore: DataStore, pendingChanges: {})
-	for path,value in pairs(self.PendingSystemSaves) do
-		--// TODO: Deal with system data updates
+	local persistent = self.Persistent
+	local defaultPersistent = self.DefaultPersistent
+
+	if self:UpdateSavedSystemData("PersistentData", function(savedEncoded)
+		local newDiff
+		if savedEncoded then
+			local saved = self:DataDecode(savedEncoded)
+			local savedPersistent = Utilities:FullTableClone(persistent)
+
+			Utilities:MergeDiff(savedPersistent, saved)
+			Root.Data.Persistent = savedPersistent
+			newDiff = Utilities:TableDiff(defaultPersistent, savedPersistent)
+		else
+			newDiff = Utilities:TableDiff(defaultPersistent, persistent)
+		end
+		return self:DataEncode(newDiff)
+	end)  then
+		warn("Updated saved system data.")
 	end
+end
+
+function Data.DeclarePersistentDefaultHandler(self, func: ({[any]: any}) -> nil)
+
+end
+
+function Data.GetDefaultPersistentData(self)
+	local newPersistent = {}
+	for i,func in ipairs(self.DefaultPersistentHandlers) do
+		pcall(func, newPersistent)
+	end
+	return newPersistent
+end
+
+function Data.LoadPersistentData(self)
+	local gotDiffData = self:GetSavedSystemData("PersistentData")
+	local default = self:GetDefaultPersistentData()
+
+	if gotDiffData then
+		Utilities:MergeDiff(default, gotDiffData)
+	end
+
+	self.DefaultPersistent = default -- Update default persistence data
+	return default
+end
+
+function Data.LoadSettings(self)
+	self.SavedSeting = table.clone(Root.Core.UserSettings)
 end
 
 --[=[
@@ -245,7 +286,9 @@ return {
 		Root.PersistentData = setmetatable({}, {
 			__index = function(self, ind)
 				local gotData = persistentData:GetData(ind)
+				if not gotData then
 
+				end
 			end,
 
 			__newindex = function(self, ind, value)

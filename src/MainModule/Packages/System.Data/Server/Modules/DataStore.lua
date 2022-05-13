@@ -16,9 +16,9 @@ local Data = {
 	UpdateDataRetryCount = 5,
 
 	--// Retry interval
-	GetDataRetryInterval = 1,
-	SetDataRetryInterval = 1,
-	UpdateDataRetryInterval = 1
+	GetDataRetryMaxDelay = 30,
+	SetDataRetryMaxDelay= 30,
+	UpdateDataRetryMaxDelay = 30
 }
 
 --// Output
@@ -54,20 +54,21 @@ function Data.SetData(self, datastore: DataStore, key: string, data: any)
 	Utilities.Events.DatastoreSetData:Fire(datastore, key, data)
 
 	return Utilities:Queue("DS_SetData", function()
-		local retryCount = 0
-		repeat
-			local ran,ret = pcall(datastore.SetAsync, datastore, key, data)
-
-			if ran then
-				return true
-			else
-				warn("SetData Attempt Failed. Retrying...", ret)
-				Utilities.Events.DatastoreSetDataFailed:Fire(datastore, key, data, retryCount)
-				task.wait(self.SetDataRetryInterval)
+		local ran, result = Utilities:Attempt(datastore.SetAsync, {
+			MaxAttempts = Root.Data.SetDataRetryCount,
+			MaxDelay = Root.Data.SetDataRetryMaxDelay,
+			ExponentialBackoff = true,
+			ErrorAction = function(err)
+				warn("SetData Attempt Failed. Retrying...", err)
+				Utilities.Events.DatastoreSetDataFailed:Fire(datastore, key, data, err)
 			end
+		}, datastore, key, data)
 
-			retryCount += 1
-		until retryCount == self.SetDataRetryCount
+		if ran then
+			Utilities.Events.DatastoreGetData:Fire(datastore, key, data)
+		end
+
+		return ran
 	end)
 end
 
@@ -83,21 +84,21 @@ function Data.GetData(self, datastore: DataStore, key: string): any
 	Utilities.Events.DatastoreGetDataAttempt:Fire(datastore, key)
 
 	return Utilities:Queue("DS_GetData", function()
-		local retryCount = 0
-		repeat
-			local ran,ret = pcall(datastore.GetAsync, datastore, key)
-
-			if ran then
-				Utilities.Events.DatastoreGetData:Fire(datastore, key, ret)
-				return ret
-			else
-				warn("GetData Attempt Failed. Retrying...", ret)
-				Utilities.Events.DatastoreGetDataFailed:Fire(datastore, key, retryCount)
-				task.wait(self.GetDataRetryInterval)
+		local ran, result = Utilities:Attempt(datastore.GetAsync, {
+			MaxAttempts = Root.Data.GetDataRetryCount,
+			MaxDelay = Root.Data.GetDataRetryMaxDelay,
+			ExponentialBackoff = true,
+			ErrorAction = function(err)
+				warn("GetData Attempt Failed. Retrying...", err)
+				Utilities.Events.DatastoreGetDataFailed:Fire(datastore, key, err)
 			end
+		}, datastore, key)
 
-			retryCount += 1
-		until retryCount == self.GetDataRetryCount
+		if ran then
+			Utilities.Events.DatastoreGetData:Fire(datastore, key, result)
+		end
+
+		return result
 	end)
 end
 
@@ -113,20 +114,21 @@ function Data.UpdateData(self, datastore: DataStore, key: string, callback: (any
 	Utilities.Events.DatastoreUpdateData:Fire(datastore, key, callback)
 
 	return Utilities:Queue("DS_UpdateData", function()
-		local retryCount = 0
-		repeat
-			local ran,ret = pcall(datastore.UpdateAsync, datastore, key, callback)
-
-			if ran then
-				return true
-			else
-				warn("UpdateData Attempt Failed. Retrying...", ret)
-				Utilities.Events.DatastoreUpdateDataFailed:Fire(datastore, key, callback, retryCount)
-				task.wait(self.UpdateDataRetryInterval)
+		local ran, result = Utilities:Attempt(datastore.UpdateAsync, {
+			MaxAttempts = Root.Data.UpdateDataRetryCount,
+			MaxDelay = Root.Data.UpdateDataRetryMaxDelay,
+			ExponentialBackoff = true,
+			ErrorAction = function(err)
+				warn("UpdateData Attempt Failed. Retrying...", err)
+				Utilities.Events.DatastoreUpdateDataFailed:Fire(datastore, key, callback, err)
 			end
+		}, datastore, key, callback)
 
-			retryCount += 1
-		until retryCount == self.UpdateDataRetryCount
+		if ran then
+			Utilities.Events.DatastoreUpdateData:Fire(datastore, key, callback)
+		end
+
+		return ran
 	end)
 end
 

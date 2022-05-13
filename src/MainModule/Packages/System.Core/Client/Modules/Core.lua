@@ -79,6 +79,17 @@ function Core.SettingDefault(self, ind: string): any
 end
 
 
+--[=[
+	Resets a setting override back to its original value.
+	@method ResetSettingOverride
+	@within Server.Core
+	@param setting string
+]=]
+function Core.ResetSettingOverride(self, setting: string)
+	self.SettingsOverrides[setting] = self.UserSettings[setting]
+end
+
+
 --[=[ 
 	Responsible for returning the value of a setting if there is no override.
 	@method SettingsIndex
