@@ -1230,7 +1230,7 @@ function Utilities.TableDiff(self, dest: {[any]: any}, source: {[any]: any}): {[
 	local flatSourcePaths = self:FlattenPaths(sourcePaths, "\\")
 	local flatDestPaths = self:FlattenPaths(destPaths, "\\")
 	local results = {}
-	
+
 	--// Find things the Source has that Destination does not
 	for i,path in pairs(sourcePaths) do
 		local flat = self:FlattenPath(path.Path, "\\")
@@ -1251,7 +1251,7 @@ function Utilities.TableDiff(self, dest: {[any]: any}, source: {[any]: any}): {[
 		local isOrdered = type(path.Path[#path.Path]) == "number"
 		if not self:CheckEquality(flatSourcePaths[flat], path.Value) then
 			local found = false
-			
+
 			if not isOrdered then
 				for i,v in ipairs(results) do
 					if v.Flat == flat then
@@ -1260,7 +1260,7 @@ function Utilities.TableDiff(self, dest: {[any]: any}, source: {[any]: any}): {[
 					end
 				end
 			end
-			
+
 			if not found then
 				table.insert(results, {
 					Mode = if isOrdered then "REMOVE" else "SET",
@@ -1271,7 +1271,7 @@ function Utilities.TableDiff(self, dest: {[any]: any}, source: {[any]: any}): {[
 			end
 		end
 	end
-	
+
 	return results
 end
 
@@ -1363,13 +1363,13 @@ end
 --- @param ... any
 --- @return string
 function Utilities.Serialize(self, ...: any?): string
+	local tupleSize = select("#", ...)
+	if tupleSize == 0 then
+		return "void"
+	end
+
 	local result = ""
 	local packed = {...}
-
-	local tupleSize = #packed
-	if tupleSize == 0 then
-		return "nil"
-	end
 
 	local BUILTIN_TABLES = {
 		[Axes] = "Axes",
@@ -1407,10 +1407,11 @@ function Utilities.Serialize(self, ...: any?): string
 		[debug] = "debug",
 		[os] = "os",
 		[task] = "task",
+		[shared] = "shared",
 		[_G] = "_G",
 	}
-	while #packed > 0 do
-		local data = table.remove(packed, 1)
+	for i = 1, tupleSize do
+		local data = table.remove(packed, i)
 		local dataType = typeof(data)
 
 		if dataType == "table" then
@@ -1421,10 +1422,16 @@ function Utilities.Serialize(self, ...: any?): string
 				for ind, val in pairs(data) do
 					table.insert(res, "["..self:Serialize(ind).."] = " .. self:Serialize(val))
 				end
+				local str = tostring(data)
+				if not str:match("^table: 0x") then
+					result ..= str
+				end
 				result ..= "{"..table.concat(res, ", ").."}"
 			end
+		elseif dataType == "function" then
+			result ..= "function"
 		else
-			local isPrimitive = table.find({"function", "string", "number", "boolean", "EnumItem", "Enum", "Enums"}, dataType)
+			local isPrimitive = table.find({"string", "number", "boolean", "nil", "EnumItem", "Enum", "Enums"}, dataType)
 			if not isPrimitive then
 				result ..= (if dataType == "Instance" then data.ClassName else dataType)..": "
 			end
@@ -1435,7 +1442,7 @@ function Utilities.Serialize(self, ...: any?): string
 				else tostring(data)) .. (isPrimitive and "" or ")")
 		end
 
-		if #packed > 0 then
+		if i < tupleSize then
 			result ..= ", "
 		end
 	end
