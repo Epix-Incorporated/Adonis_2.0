@@ -1411,7 +1411,7 @@ function Utilities.Serialize(self, ...: any?): string
 		[_G] = "_G",
 	}
 	for i = 1, tupleSize do
-		local data = table.remove(packed, i)
+		local data = packed[i]
 		local dataType = typeof(data)
 
 		if dataType == "table" then
