@@ -2,7 +2,7 @@
 name: Bug report
 about: Create a report to help us understand and fix broken features or functionality
   within Adonis.
-title: Bug report
+title: ''
 labels: bug
 assignees: ''
 
