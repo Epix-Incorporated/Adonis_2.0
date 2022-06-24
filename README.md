@@ -15,21 +15,21 @@
     </a>
 </div>
 <hr/>
-Adonis is a server moderation and management system created for use on the Roblox platform.
+Adonis is a community-maintained server moderation and management system created for use on the Roblox platform.
 
 ## ⚠️ NOTICE
-This version of Adonis is a **WORK IN PROGRESS** and is missing many features. For the current version, see the [Adonis 1.0 repository](https://github.com/Sceleratis/Adonis).
+This version of Adonis is a **WORK IN PROGRESS** and is missing many features. For the current and supported version, see the [Adonis 1.0 repository](https://github.com/Sceleratis/Adonis).
+
+⚠️ **DO NOT USE ADONIS 2.0 IN A PRODUCTION ENVIRONMENT! IT WILL NOT WORK.** ⚠️
 
 **The following information on this page may not be accurate.**
-
-The text below is based on Adonis 1.0, and may not be up-to-date for Adonis 2.0.
 
 ## ✨ Installation
 (WIP)
 
 If you get stuck, feel free to ask for assistance in our [Discord server](https://discord.gg/H5RvTP3).
 
-### Method 1: Official Roblox Model
+### Method 1 (recommended): Official Roblox Model
 * [Take a copy](https://www.roblox.com/library/7510622625/) of the Adonis loader model from the Roblox library
 * Insert the model into Studio using the Toolbox into `ServerScriptService`
 
