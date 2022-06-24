@@ -1,2 +1,5 @@
+github:
+- .github/**/*
+
 loader:
 - scr/Loader/**/*
