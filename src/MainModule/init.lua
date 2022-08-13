@@ -43,8 +43,8 @@ local function DebugWarn(...)
 end
 
 local function addRange(tab, ...)
-	for i,t in ipairs(table.pack(...)) do
-		for k,v in ipairs(t) do
+	for _, t in ipairs({...}) do
+		for _, v in ipairs(t) do
 			table.insert(tab, v)
 		end
 	end
@@ -75,21 +75,21 @@ return function(Loader: {}, Settings: {}, Packages: Folder)
 	local start = os.clock();
 
 	--// Get PackageHandler
-	local PackageHandler = require(Root.PackageHandlerModule);
+	local PackageHandler = require(Root.PackageHandlerModule)
 
 	--// Set Root table variables
-	Root.PackageHandler = PackageHandler;
-	Root.Settings = Settings;
+	Root.PackageHandler = PackageHandler
+	Root.Settings = Settings
 	Root.Verbose = if Settings and Settings.Verbose ~= nil then Settings.Verbose else Root.Verbose
 
 	--// Get all packages
-	addRange(Root.Packages, script.Packages:GetChildren(), Packages:GetChildren());
+	addRange(Root.Packages, script.Packages:GetChildren(), Packages:GetChildren())
 
 	--// Remove disabled packages
 	if Settings.DisabledPackages and table.getn(Settings.DisabledPackages) > 0 then
-		for i,package in ipairs(Root.Packages) do
+		for i, package in ipairs(Root.Packages) do
 			local metadata = PackageHandler.GetMetadata(package)
-			for k,disabled in ipairs(Settings.DisabledPackages) do
+			for _, disabled in ipairs(Settings.DisabledPackages) do
 				if metadata.Name == disabled or metadata.Name .. "==" .. metadata.Version == disabled then
 					table.remove(Root.Packages, i)
 					break
@@ -99,13 +99,13 @@ return function(Loader: {}, Settings: {}, Packages: Folder)
 	end
 
 	--// Get server packages
-	local Packages = PackageHandler.GetPackages(Root.Packages, "Server");
+	local Packages = PackageHandler.GetPackages(Root.Packages, "Server")
 
 	--// Load server packages
-	PackageHandler.LoadPackages(Packages, "Server", Root, Packages);
+	PackageHandler.LoadPackages(Packages, "Server", Root, Packages)
 
 	--// Loading complete
-	warn("Loading complete :: Elapsed:", os.clock() - start);
+	warn("Loading complete :: Elapsed:", os.clock() - start)
 
-	return true;
+	return true
 end
