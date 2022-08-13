@@ -67,46 +67,43 @@ end
 
 --// Initializer functions
 return {
-	Init = function(Root, Packages)
-		DebugWarn("INIT " .. Package.Metadata.Name .. " PACKAGE")
+	{
+		RunOrder = 1;
+		Function = function(Root, Packages)
+			DebugWarn("INIT " .. Package.Metadata.Name .. " PACKAGE")
 
-		--// Init
-		RootTable = Root
-		Verbose = if Root.Verbose ~= nil then Root.Verbose else Verbose
+			--// Init
+			RootTable = Root
+			Verbose = if Root.Verbose ~= nil then Root.Verbose else Verbose
 
-		if not Root.Libraries then
-			DebugWarn("INIT Root.Libraries")
-			Root.Libraries = {}
-			Root.LibraryObjects = {}
-		end
-
-		--// Add libraries
-		for i,lib in ipairs(Package.Libraries:GetChildren()) do
-			DebugWarn("INDEX LIBRARY", lib.Name)
-			Root.LibraryObjects[lib.Name] = lib
-			if lib:IsA("ModuleScript") then
-				Root.Libraries[lib.Name] = require(lib)
-			else
-				Root.Libraries[lib.Name] = lib
+			if not Root.Libraries then
+				DebugWarn("INIT Root.Libraries")
+				Root.Libraries = {}
+				Root.LibraryObjects = {}
 			end
-		end
 
-		for i,lib in ipairs(Package.SharedLibraries:GetChildren()) do
-			DebugWarn("INDEX LIBRARY", lib.Name)
-			Root.LibraryObjects[lib.Name] = lib
-			if lib:IsA("ModuleScript") then
-				Root.Libraries[lib.Name] = require(lib)
-			else
-				Root.Libraries[lib.Name] = lib
+			--// Add libraries
+			for i,lib in ipairs(Package.Libraries:GetChildren()) do
+				DebugWarn("INDEX LIBRARY", lib.Name)
+				Root.LibraryObjects[lib.Name] = lib
+				if lib:IsA("ModuleScript") then
+					Root.Libraries[lib.Name] = require(lib)
+				else
+					Root.Libraries[lib.Name] = lib
+				end
 			end
-		end
 
-		DebugWarn("INIT " .. Package.Metadata.Name .. " PACKAGE FINISHED")
-	end;
+			for i,lib in ipairs(Package.SharedLibraries:GetChildren()) do
+				DebugWarn("INDEX LIBRARY", lib.Name)
+				Root.LibraryObjects[lib.Name] = lib
+				if lib:IsA("ModuleScript") then
+					Root.Libraries[lib.Name] = require(lib)
+				else
+					Root.Libraries[lib.Name] = lib
+				end
+			end
 
-	AfterInit = function(Root, Packages)
-		DebugWarn("AFTERINIT " .. Package.Metadata.Name .. " PACKAGE")
-
-		DebugWarn("AFTERINIT " .. Package.Metadata.Name .. " PACKAGE FINISHED")
-	end;
+			DebugWarn("INIT " .. Package.Metadata.Name .. " PACKAGE FINISHED")
+		end;
+	};
 }

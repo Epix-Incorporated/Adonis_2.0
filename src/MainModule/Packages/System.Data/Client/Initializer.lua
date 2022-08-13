@@ -8,7 +8,6 @@
 
 --// Initializer functions
 return {
-	Init = function(Root, Packages)
-	end;
+	
 }
   

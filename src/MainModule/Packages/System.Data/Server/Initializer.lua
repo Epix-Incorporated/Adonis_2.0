@@ -65,47 +65,52 @@ end
 
 --// Initializer functions
 return {
-	Init = function(Root, Packages)
-		DebugWarn("INIT " .. Package.Metadata.Name .. " PACKAGE")
+	{
+		RunOrder = 1;
+		Function = function(Root, Packages)
+			DebugWarn("INIT " .. Package.Metadata.Name .. " PACKAGE")
 
-		--// Init
-		RootTable = Root
-		Verbose = if Root.Verbose ~= nil then Root.Verbose else Verbose
+			--// Init
+			RootTable = Root
+			Verbose = if Root.Verbose ~= nil then Root.Verbose else Verbose
 
-		--// Declare settings
-		if Package.Metadata.Settings then
-			for setting,data in pairs(Package.Metadata.Settings) do
-				Root.Core:DeclareSetting(setting, data)
+			--// Declare settings
+			if Package.Metadata.Settings then
+				for setting,data in pairs(Package.Metadata.Settings) do
+					Root.Core:DeclareSetting(setting, data)
+				end
 			end
-		end
 
-		--// Load modules
-		for i,module in ipairs(Package.Modules:GetChildren()) do
-			if module:IsA("ModuleScript") then
-				LoadModule(module, Root, Package)
+			--// Load modules
+			for i,module in ipairs(Package.Modules:GetChildren()) do
+				if module:IsA("ModuleScript") then
+					LoadModule(module, Root, Package)
+				end
 			end
-		end
 
-		--// Run init methods
-		for i,t in ipairs(InitFunctions) do
-			if t.Init then
-				RunFunction(t.Init, Root, Package)
+			--// Run init methods
+			for i,t in ipairs(InitFunctions) do
+				if t.Init then
+					RunFunction(t.Init, Root, Package)
+				end
 			end
-		end
 
-		DebugWarn("INIT " .. Package.Metadata.Name .. " PACKAGE FINISHED")
-	end;
+			DebugWarn("INIT " .. Package.Metadata.Name .. " PACKAGE FINISHED")
+		end;
+	};
+	{
+		RunOrder = 2;
+		Function = function(Root, Packages)
+			DebugWarn("AFTERINIT " .. Package.Metadata.Name .. " PACKAGE")
 
-	AfterInit = function(Root, Packages)
-		DebugWarn("AFTERINIT " .. Package.Metadata.Name .. " PACKAGE")
-
-		--// Run AfterInit methods
-		for i,t in ipairs(InitFunctions) do
-			if t.AfterInit then
-				RunFunction(t.AfterInit, Root, Package)
+			--// Run AfterInit methods
+			for i,t in ipairs(InitFunctions) do
+				if t.AfterInit then
+					RunFunction(t.AfterInit, Root, Package)
+				end
 			end
-		end
 
-		DebugWarn("AFTERINIT " .. Package.Metadata.Name .. " PACKAGE FINISHED")
-	end;
+			DebugWarn("AFTERINIT " .. Package.Metadata.Name .. " PACKAGE FINISHED")
+		end;
+	}
 }

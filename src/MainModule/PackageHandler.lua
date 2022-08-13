@@ -293,8 +293,10 @@ local function InitPackage(Package: Folder, PackageType: string, ...)
 			local res = require(initMod)
 			if res and type(res) == "function" then
 				return {
-					Init = res;
-					AfterInit = nil;
+					{
+						RunOrder = 1;
+						Function = res;
+					};
 				}
 			elseif res and type(res) == "table" then
 				return res
@@ -308,6 +310,25 @@ local function InitPackage(Package: Folder, PackageType: string, ...)
 		FormatError("Package %s does not contain PackageType %s", Package.Name, PackageType)
 		--DebugWarn("Package", Package.Name, "does not contain PackageType folder", PackageType)
 	end
+end
+
+--[=[
+	Given a table, a value, and an index, inserts the value into an ordered list at the supplied index 
+	@function INsertAtIndexGroup
+	@within PackageHandler
+	@param Tab {[any]: {[number]: any}} -- Table holding index groups.
+	@param Value any -- Value being inserted.
+	@param Index any -- Key of index group.
+	@return Tab
+]=]
+local function InsertAtIndexGroup(Tab: {[any]: {[number]: any}}, Value: any, Index: any): {[any]: {[number]: any}}
+	if (Tab[Index] == nil or type(Tab[Index]) ~= "table") then
+		Tab[Index] = {}
+	end
+
+	table.insert(Tab[Index], Value)
+
+	return Tab;
 end
 
 --- Given a table of packages, performs dependency resolution and loads all packages provided matching PackageType in order.
@@ -342,11 +363,19 @@ local function LoadPackages(Packages: {[string]: Folder}, PackageType: string, .
 
 				loadedPackages[pkgString] = package
 
-				table.insert(initFuncs, {
-					Package = package;
-					Init = res.Init;
-					AfterInit = res.AfterInit;
-				})
+				for groupPos, funcGroup in pairs(res) do
+					if (type(funcGroup) == "table" and funcGroup.Function and funcGroup.RunOrder) then
+						InsertAtIndexGroup(initFuncs, {
+							Package = package,
+							Function = funcGroup.Function
+						}, funcGroup.RunOrder)
+					elseif type(funcGroup) == "function" then
+						InsertAtIndexGroup(initFuncs, {
+							Package = package,
+							Function = funcGroup.Function
+						}, groupPos)
+					end
+				end
 			end
 		else
 			warn("Package dependency check failed", package)
@@ -354,29 +383,15 @@ local function LoadPackages(Packages: {[string]: Folder}, PackageType: string, .
 	end
 
 	--// Initialize packages
-	for i,v in ipairs(initFuncs) do
-		DebugWarn("INIT", v)
-		local ran, err = pcall(RunFunction, v.Init, ...)
-		if not ran then
-			warn("Error encountered while running Init function for package; Expand for details:", {
-				Package = v.Package;
-				PackageType = PackageType;
-				Index = i;
-				Error = tostring(err);
-			})
-		end
-	end
-
-	--// After all packages are initialized
-	for i,v in ipairs(initFuncs) do
-		DebugWarn("AFTERINIT", v)
-		if v.AfterInit then
-			local ran, err = pcall(RunFunction, v.AfterInit, ...)
+	for i,group in pairs(initFuncs) do
+		for k,v in ipairs(group) do
+			DebugWarn("RUNNING FUNC IN RUNGROUP", i, "FOR PACKAGE", v.Package)
+			local ran, err = pcall(RunFunction, v.Function, ...)
 			if not ran then
-				warn("Error encountered while running AfterInit function for package; Expand for details:", {
+				warn("Error encountered while running Init function for package; Expand for details:", {
 					Package = v.Package;
 					PackageType = PackageType;
-					Index = i;
+					RunOrder = i;
 					Error = tostring(err);
 				})
 			end
