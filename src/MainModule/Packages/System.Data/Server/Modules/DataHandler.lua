@@ -71,6 +71,7 @@ local Data = {
 	PlayerSaves = {},
 	
 	Persistent = {},
+	PersistentHandlers = {}, 
 	DefaultPersistent = {},
 	DefaultPersistentHandlers = {}
 }
@@ -142,10 +143,22 @@ function Data.UpdateSavedSystemData(self, key: string, callback: (any))
 	return Root.Data:UpdateData(self.SystemDataStore, key, callback)
 end
 
+--[=[
+	Encodes data. Currently performs a JSON encode.
+	@method DataEncode
+	@within Server.Data
+	@param data {[string]: any}
+]=]
 function Data.DataEncode(self, data: any): string
 	return Utilities:JSONEncode(data)
 end
 
+--[=[
+	Decodes data. Currently performs a JSON decode.
+	@method DataDecode
+	@within Server.Data
+	@param data string
+]=]
 function Data.DataDecode(self, data: string): any
 	return Utilities:JSONDecode(data)
 end
@@ -192,10 +205,21 @@ function Data.PerformSystemDataUpdate(self, datastore: DataStore, pendingChanges
 	end
 end
 
+--[=[
+	Declares a handler for default persistent data. Persistent default handlers will be ran when getting default persistent data. 
+	@method DeclarePerdsistentDefaultHandler
+	@within Server.Data
+	@param func ({[any]: any})
+]=]
 function Data.DeclarePersistentDefaultHandler(self, func: ({[any]: any}) -> nil)
-
+	table.insert(self.DefaultPersistentHandlers, func)
 end
 
+--[=[
+	Performs player data update operation.
+	@method GetDefaultPersistentData
+	@within Server.Data
+]=]
 function Data.GetDefaultPersistentData(self)
 	local newPersistent = {}
 	for i,func in ipairs(self.DefaultPersistentHandlers) do
@@ -204,6 +228,11 @@ function Data.GetDefaultPersistentData(self)
 	return newPersistent
 end
 
+--[=[
+	Loads persistent system data.
+	@method LoadPersistentData
+	@within Server.Data
+]=]
 function Data.LoadPersistentData(self)
 	local gotDiffData = self:GetSavedSystemData("PersistentData")
 	local default = self:GetDefaultPersistentData()
@@ -216,6 +245,13 @@ function Data.LoadPersistentData(self)
 	return default
 end
 
+--[=[
+	Performs player data update operation.
+	@method PerformPlayerDataUpdate
+	@within Server.Data
+	@param datastore DataStore
+	@param pendingChanges {}
+]=]
 function Data.LoadSettings(self)
 	self.SavedSeting = table.clone(Root.Core.UserSettings)
 end
@@ -255,6 +291,7 @@ function Data.PersistentPlayerDataUpdated(self, p: Player, playerData: {[string]
 		PlayerData = playerData,
 		PersistentData = playerData.PersistentData
 	}
+	
 end
 
 
@@ -315,13 +352,13 @@ return {
 		--// Do after-init
 		Data.SystemDataSaveUpdateLoop = Utilities.Tasks:NewTask("Thread: DatastoreUpdate_System", function()
 			while task.wait(Data.SystemDataUpdateInterval) do
-				Root.Data:PerformDataUpdate()
+				Root.Data:PerformSystemDataUpdate(Root.Data.SystemDataStore)
 			end
 		end)
 
 		Data.PlayerDataSaveUpdateLoop = Utilities.Tasks:NewTask("Thread: DatastoreUpdate_Players", function()
 			while task.wait(Data.SystemDataUpdateInterval) do
-				Root.Data:PerformDataUpdate()
+				Root.Data:PerformPlayerDataUpdate(Root.Data.PlayerDataStore)
 			end
 		end)
 
