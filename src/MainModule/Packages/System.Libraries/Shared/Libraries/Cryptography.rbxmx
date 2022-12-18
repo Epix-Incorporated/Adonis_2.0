@@ -1,0 +1,5138 @@
+<roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.roblox.com/roblox.xsd" version="4">
+	<Meta name="ExplicitAutoJoints">true</Meta>
+	<External>null</External>
+	<External>nil</External>
+	<Item class="ModuleScript" referent="RBX7FF75A324E6F4B7AA58420B842202219">
+		<Properties>
+			<BinaryString name="AttributesSerialize"></BinaryString>
+			<Content name="LinkedSource"><null></null></Content>
+			<string name="Name">Cryptography</string>
+			<string name="ScriptGuid">{69DC804B-9C7E-4D9A-879F-49695A350117}</string>
+			<ProtectedString name="Source"><![CDATA[--[[::--
+
+WARNING!!!.. THIS PLUGIN IS USED INTERALLY BY THE FRAMEWORK FOR SECURITY PURPOSES.
+IT IS ADVISED YOU DO NOT MAKE ANY CHANGES TO THIS MODULE, AND ANY OF IT'S DESCENDANTS.
+
+--::]]--
+
+--[[::--
+
+Copyright (C) 2022, Luc Rodriguez (Aliases : Shambi, StyledDev).
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+--::]]--
+
+--// Type Definitions //--
+
+type Array<Type> = {[number] : Type};
+type Dictionary<Type> = {[string] : Type};
+
+--// Structures //--
+
+type RSA_Key_Pair_Structure = {
+	Public : {
+		Shared : string,
+		Public : string
+	},
+	Secret : {
+		Shared : string,
+		Secret : string
+	}
+};
+
+type RSA_Configuration_Structure = {
+	Bits : number,
+	ByteSize : number
+}?;
+
+type Curve25519_Key_Pair_Structure = {
+	Secret : string,
+	Public : string
+};
+
+type Deflate_Configuration_Structure = {
+	level : number,
+	strategy : string
+};
+
+type RSA_Structure = {
+	GenerateKeyPair : () -> RSA_Key_Pair_Structure,
+	ValidateSignature : (string, string, string) -> boolean,
+	Encrypt : (string, string, RSA_Configuration_Structure) -> string,
+	Decrypt : (string, string, RSA_Configuration_Structure) -> string,
+	RawUncompress : (string) -> string,
+	Sign : (string, string) -> string,
+	RawCompress : (string) -> string
+};
+
+type Curve25519_Structure = {
+	GenerateKeyPair : () -> Curve25519_Key_Pair_Structure,
+	GenerateSessionKey : (string, string) -> string
+};
+
+type AES_Structure = {
+	Encrypt : (string, string) -> string,
+	Decrypt : (string, string) -> string,
+	GenerateKey : () -> string
+};
+
+type Sha256_Structure = (string, string?) -> string;
+
+type Deflate_Structure = {
+	Deflate : {
+		Compress : (string, Deflate_Configuration_Structure) -> string,
+		Decompress : (string) -> string
+	},
+	Zlib : {
+		Compress : (string, Deflate_Configuration_Structure) -> string,
+		Decompress : (string) -> string
+	},
+	Library : any?
+};
+
+type Base64_Structure = {
+	Encode : (string) -> string,
+	Decode : (string) -> string
+};
+
+--// Libraries //--
+
+local RSA : RSA_Structure? = require(script:WaitForChild("RSA"));
+local AES : AES_Structure? = require(script:WaitForChild("AES"));
+local Sha256 : Sha256_Structure? = require(script:WaitForChild("Sha256"));
+local Base64 : Base64_Structure? = require(script:WaitForChild("Base64"));
+local Deflate : Deflate_Structure? = require(script:WaitForChild("Deflate"));
+local Curve25519 : Curve25519_Structure? = require(script:WaitForChild("Curve25519"));
+
+--// Package //--
+
+local Package : Dictionary<any?> = {
+	["RSA"] = RSA,
+	["AES"] = AES,
+	["Sha256"] = Sha256,
+	["Base64"] = Base64,
+	["Deflate"] = Deflate,
+	["Curve25519"] = Curve25519
+};
+
+--// Export Structures //--
+
+export type RSA = RSA_Structure;
+export type AES = AES_Structure;
+export type Sha256 = Sha256_Structure;
+export type Base64 = Base64_Structure;
+export type Deflate = Deflate_Structure;
+export type Curve25519 = Curve25519_Structure;
+
+export type RSA_KEY_PAIR = RSA_Key_Pair_Structure;
+export type Curve25519_KEY_PAIR = Curve25519_Key_Pair_Structure;
+
+--// Return Package //--
+
+return (Package);]]></ProtectedString>
+			<int64 name="SourceAssetId">-1</int64>
+			<BinaryString name="Tags"></BinaryString>
+		</Properties>
+		<Item class="ModuleScript" referent="RBX1459D4DBFA044CD1A74DB272D21AD476">
+			<Properties>
+				<BinaryString name="AttributesSerialize"></BinaryString>
+				<Content name="LinkedSource"><null></null></Content>
+				<string name="Name">RSA</string>
+				<string name="ScriptGuid">{1981C6C0-F411-4B92-B1FC-C46F7DC3B101}</string>
+				<ProtectedString name="Source"><![CDATA[--[[::
+
+Copyright (C) 2022, Luc Rodriguez (Aliases : Shambi, StyledDev).
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+- This copy has been modified to suit YUCON FRAMEWORK.
+
+--::]]
+
+--// Type Definitions //--
+
+type Array<Type> = {[number] : Type};
+type Dictionary<Type> = {[string] : Type};
+
+type PublicKey = { Shared : string, Public : string };
+type SecretKey = { Shared : string, Secret : string };
+type KeyPair = { Public : PublicKey, Secret : SecretKey};
+
+--// Predefined Functions //--
+
+local function CFloor(Input : number) : number
+	return (if (Input < 0) then (math.ceil(Input) + 0) else math.floor(Input));
+end;
+
+local function CModulus(Input : number, Offset : number) : number
+	local Modulus : number = Input % Offset;
+	
+	return (if (Input < 0) and (Modulus > 0) then (Modulus - Offset) else Modulus);
+end;
+
+--// Services //--
+
+local RunService : RunService = game:GetService("RunService");
+
+--// Libraries //--
+
+local Sha256 : (string, string?) -> string = require(script.Parent:WaitForChild("Sha256"));
+local Deflate : any? = require(script.Parent:WaitForChild("Deflate"));
+
+--// Variables //--
+
+local DeflateBits : number = 256;
+local DeflateByteSize  : number = 8;
+
+local Radix : number = 2 ^ 24;
+local RadixSquareRoot : number = CFloor(math.sqrt(Radix));
+
+local BigIntegarMetatable : any? = {};
+local KThreshold : number = 12;
+
+local PrintScale : number = 10000000
+local PrintScaleFormat : string = string.format("%%.%dd", math.log10(PrintScale));
+
+local Cache : any?, NumberCache : number = {}, 0;
+
+local BigRandomSwap : Dictionary<string> = {["0"] = "1", ["2"] = "3", ["4"] = "5", ["6"] = "7", ["8"] = "9"};
+
+local RSA : Dictionary<any?> = {
+	["PrecalculatedKeyPair"] = { -- This is for Studio/Testing Purposes only, 𝗗𝗢 𝗡𝗢𝗧 attempt to use this for real-world implimentations.
+		Public = { Shared = "193660003426827760555665049731361116152109682873418816638226771757571844935973"; Public = "265384107208835401784628792467594394109"; },
+		Secret = { Shared = "193660003426827760555665049731361116152109682873418816638226771757571844935973"; Secret = "32965100842216541551199950489883253605648465942442501354141100794088790251021"; }
+	}
+};
+
+--// Big Integar Functions //--
+
+local function Allocate() : ... any?
+	local BigInteger : any? = setmetatable({}, BigIntegarMetatable);
+	
+	BigInteger.Components = {};
+	BigInteger.Sign = 1;
+	
+	return (BigInteger);
+end;
+
+local function Clone(Input : any?) : ... any?
+	local BigInteger = Allocate();
+	
+	BigInteger.Sign = Input.Sign;
+	
+	local ActualComponents : any? = Input.Components;
+	
+	for Index : number = 1, #ActualComponents do
+		BigInteger.Components[Index] = ActualComponents[Index];
+	end;
+	
+	return (BigInteger);
+end;
+
+local function Normalize(BigInteger : any?, NoTruncation : boolean?) : ... any?
+	local Components : any?, Value : any? = BigInteger.Components, nil;
+	
+	for Index : number = 1, #Components - 1 do
+		Value = Components[Index];
+		
+		if (Value < 0) then
+			Components[Index + 1] += CFloor(Value / Radix) - 1;
+			Value = CModulus(Value, Radix);
+			
+			if (Value ~= 0) then
+				Components[Index] = Value + Radix;
+			else
+				Components[Index] = Value;
+				Components[Index + 1] += 1;
+			end;
+		end;
+	end;
+	
+	if not Components[#Components] then
+		print(Components)
+		print(BigInteger)
+	end
+	
+	if (Components[#Components] < 0) then
+		BigInteger.Sign = -BigInteger.Sign;
+		
+		for Index : number = 1, #Components - 1 do
+			Value = Components[Index];
+			Components[Index] = Radix - Value;
+			Components[Index + 1] += 1;
+		end;
+		
+		Components[#Components] = -Components[#Components];
+	end;
+	
+	for Index : number = 1, #Components do
+		Value = Components[Index];
+		
+		if (Value > Radix) then
+			Components[Index + 1] = (Components[Index + 1] or 0) + CFloor(Value / Radix);
+			Components[Index] = CModulus(Value, Radix);
+		end;
+	end;
+	
+	if not (NoTruncation) then
+		for Index : number = #Components, 2, -1 do
+			if (Components[Index] == 0) then
+				Components[Index] = nil;
+			else
+				break;
+			end;
+		end;
+	end;
+	
+	if (#Components == 1) and (Components[1] == 0) and (BigInteger.Sign == -1) then
+		BigInteger.Sign = 1;
+	end;
+end;
+
+local function Negate(Input : any?) : ... any?
+	local BigInteger : any? = Clone(Input);
+	
+	BigInteger.Sign = -BigInteger.Sign;
+	
+	return (BigInteger);
+end;
+
+local function Compare(Input : any?, To : any?) : number
+	local InputComponents : any?, OtherComponents : any? = Input.Components, To.Components;
+	local InputSign : number, OtherSign : number = Input.Sign, To.Sign;
+	
+	local InputComponentSize : number = #InputComponents;
+	local OtherComponentSize : number = #OtherComponents;
+	
+	if (InputComponents == OtherComponents) then
+		return (0);
+		
+	elseif (InputSign > OtherSign) then
+		return (1);
+		
+	elseif (InputSign < OtherSign) then
+		return (-1);
+		
+	elseif (InputComponentSize > OtherComponentSize) then
+		return (InputSign);
+		
+	elseif (InputComponentSize < OtherComponentSize) then
+		return (-InputSign);
+	end;
+	
+	for Index : number = InputComponentSize, 1, -1 do
+		if (InputComponents[Index] > OtherComponents[Index]) then
+			return (InputSign);
+			
+		elseif (InputComponents[Index] < OtherComponents[Index]) then
+			return (-InputSign);
+		end;
+	end;
+	
+	return (0);
+end;
+
+local function LessThan(Input : any?, To : any?) : boolean
+	return (Compare(Input, To) < 0);
+end;
+
+local function EqualTo(Input : any?, To : any?) : boolean
+	return (Compare(Input, To) == 0);
+end;
+
+local function LessThanOrEqualTo(Input : any?, To : any?) : boolean
+	return (Compare(Input, To) <= 0);
+end;
+
+local function AddInteger(Input : any?, Amount : number) : ... any?
+	local BigInteger : any? = Clone(Input);
+	
+	if (BigInteger.Sign == 1) then
+		BigInteger.Components[1] += Amount;
+	else
+		BigInteger.Components[1] -= Amount;
+	end;
+	
+	Normalize(BigInteger);
+	return (BigInteger);
+end;
+
+local function Add(Input : any?, Amount : any?) : ... any?
+	if (type(Input) == "number") then
+		return (AddInteger(Amount, Input));
+		
+	elseif (type(Amount) == "number") then
+		return (AddInteger(Input, Amount));
+	end;
+	
+	local BigInteger : any? = Clone(Input);
+	local Sign : boolean = BigInteger.Sign == Amount.Sign;
+	local Components = BigInteger.Components;
+	
+	for Index : number = #Components + 1, #Amount.Components do
+		Components[Index] = 0;
+	end;
+	
+	local BigComponents : any? = Amount.Components;
+	
+	for Index : number = 1, #BigComponents do
+		local Value : number = BigComponents[Index];
+		
+		if (Sign) then
+			Components[Index] += Value;
+		else
+			Components[Index] -= Value;
+		end;
+	end;
+	
+	Normalize(BigInteger);
+	return (BigInteger);
+end;
+
+local function Subtract(Input : any?, Amount : any?) : ... any?
+	if (type(Amount) == "number") then
+		return (AddInteger(Input, -Amount));
+		
+	elseif (type(Input) == "number") then
+		Input = CreateBigInteger(Input);
+	end;
+	
+	return (Add(Input, Negate(Amount)));
+end;
+
+local function MultiplyInteger(Input : any?, Amount : any?) : ... any?
+	local BigInteger : any? = Clone(Input);
+	
+	if (Amount < 0) then
+		Amount = -Amount;
+		BigInteger.Sign = -BigInteger.Sign;
+	end;
+	
+	local BigComponents : any? = BigInteger.Components;
+	
+	for Index : number = 1, #BigComponents do
+		BigComponents[Index] *= Amount;
+	end;
+	
+	Normalize(BigInteger);
+	return (BigInteger);
+end;
+
+local function BigMultiply(Input : any?, Amount : any?) : ... any?
+	local BigInteger : any? = Allocate();
+	local Components : any? = BigInteger.Components;
+	local ActualComponents : any?, OtherComponents : any? = Input.Components, Amount.Components;
+	
+	for Index : number = 1, #ActualComponents + #OtherComponents do
+		Components[Index] = 0;
+	end;
+	
+	for Index : number = 1, #ActualComponents do
+		for SecondaryIndex : number = 1, #OtherComponents do
+			local SolvedIndex : number = Index + SecondaryIndex - 1;
+			
+			Components[SolvedIndex] += ActualComponents[Index] * OtherComponents[SecondaryIndex];
+		end;
+		
+		Normalize(BigInteger, true);
+	end;
+	
+	Normalize(BigInteger);
+	
+	if (BigInteger ~= CreateBigInteger(0)) then
+		BigInteger.Sign = Input.Sign * Amount.Sign;
+	end;
+	
+	return (BigInteger);
+end;
+
+local function KMultiply(Input : any?, Amount : any?) : ... any?
+	local InputComponents : any?, OtherComponents : any? = Input.Components, Amount.Components;
+	local InputSize : number, AmountSize : number = #Input.Components, #Amount.Components;
+	local bi, bj, bk, bl = Allocate(), Allocate(), Allocate(), Allocate();
+	local iComponents, jComponents = bi.Components, bj.Components;
+	local kComponents, lComponents = bk.Components, bl.Components;
+	
+	local Number : number = CFloor((math.max(InputSize, AmountSize) + 1) / 2);
+	local DoubleNumber : number = Number * 2;
+	
+	for Index : number = 1, Number do
+		local Solved : number = Index + Number;
+		
+		iComponents[Index] = if (Solved <= InputSize) then InputComponents[Solved] else 0;
+		jComponents[Index] = if (Index <= InputSize) then InputComponents[Index] else 0;
+		kComponents[Index] = if (Solved <= AmountSize) then OtherComponents[Solved] else 0;
+		lComponents[Index] = if (Index <= AmountSize) then OtherComponents[Index] else 0;
+	end;
+	
+	Normalize(bi);
+	Normalize(bj);
+	Normalize(bk);
+	Normalize(bl);
+	
+	local ik : any?, jl : any? = bi * bk, bj * bl;
+	local Middle : any? = (bi + bj) * (bk + bl) - ik - jl;
+	local MiddleComponents : any? = Middle.Components;
+	local ikComponents : any? = ik.Components;
+	local jlComponents : any? = jl.Components;
+	
+	for Index : number = 1, #ikComponents + DoubleNumber do
+		jlComponents[Index] = jlComponents[Index] or 0;
+	end;
+	
+	for Index : number = 1, #MiddleComponents do
+		jlComponents[Index + Number] += MiddleComponents[Index];
+	end;
+	
+	for Index : number = 1, #ikComponents do
+		jlComponents[Index + DoubleNumber] += ikComponents[Index];
+	end;
+	
+	jl.Sign = Input.Sign * Amount.Sign;
+	Normalize(jl);
+	return (jl);
+end;
+
+local function Multiply(Input : any?, Amount : any?) : ... any?
+	if (type(Input) == "number") then
+		return (MultiplyInteger(Amount, Input));
+		
+	elseif (type(Amount) == "number") then
+		return (MultiplyInteger(Input, Amount));
+	end;
+	
+	if (#Input.Components < KThreshold) or (#Amount.Components < KThreshold) then
+		return (BigMultiply(Input, Amount));
+	end;
+	
+	return (KMultiply(Input, Amount));
+end;
+
+local function DivideInteger(Numerator : any?, Denominator : any?) : ... any?
+	local BigInteger : any? = Clone(Numerator);
+	
+	if Denominator < 0 then
+		Denominator = -Denominator;
+		BigInteger.Sign = -BigInteger.Sign;
+	end;
+	
+	local Result : number, Components : any? = 0, BigInteger.Components;
+	
+	for Index : number = #Components, 1, -1 do
+		Result = Result * Radix + Components[Index];
+		
+		Components[Index] = CFloor(Result / Denominator);
+		Result = CModulus(Result, Denominator);
+	end;
+	
+	Normalize(BigInteger);
+	return (BigInteger);
+end;
+
+local function MultiplicationDivision(Numerator : any?, Denominator : any?) : ... any?
+	local Number : number = #Denominator.Components;
+	local Approximation : any? = DivideInteger(Numerator, Denominator.Components[Number]);
+	
+	for Index : number = Number, #Approximation.Components do
+		Approximation.Components[Index - Number + 1] = Approximation.Components[Index];
+	end;
+	
+	for Index : number = #Approximation.Components, #Approximation.Components - Number + 2, -1 do
+		Approximation.Components[Index] = nil;
+	end;
+	
+	local Remainder : any? = Approximation * Denominator - Numerator;
+	
+	return (if (Remainder < Denominator) then Approximation else (Approximation - MultiplicationDivision(Remainder, Denominator)));
+end;
+
+local function MultiplicationDivisionWrapper(Numerator : any?, Denominator : any?) : ... any?
+	if (Denominator.Components[#Denominator.Components] < RadixSquareRoot) then
+		Numerator = MultiplyInteger(Numerator, RadixSquareRoot);
+		Denominator = MultiplyInteger(Denominator, RadixSquareRoot);
+	end;
+	
+	return (MultiplicationDivision(Numerator, Denominator));
+end;
+
+local function Division(Numerator : any?, Denominator : any?) : ... any?
+	if (type(Denominator) == "number") then
+		assert(Denominator ~= 0, "Unable to divide by 0.");
+		
+		return DivideInteger(Numerator, Denominator);
+		
+	elseif type(Numerator) == "number" then
+		Numerator = CreateBigInteger(Numerator);
+	end;
+	
+	local Sign : number, Compared : number = 1, Compare(Denominator, CreateBigInteger(0));
+	
+	if (Compared == 0) then
+		error("Unable to divide by 0.", 2);
+		
+	elseif (Compared == -1) then
+		Sign = -Sign;
+		Denominator = Negate(Denominator);
+	end;
+	
+	Compared = Compare(Numerator, CreateBigInteger(0));
+	
+	if (Compared == 0) then
+		return (CreateBigInteger(0));
+		
+	elseif (Compared == -1) then
+		Sign = -Sign;
+		Numerator = Negate(Numerator);
+	end;
+	
+	Compared = Compare(Numerator, Denominator);
+	
+	if (Compared == -1) then
+		return (CreateBigInteger(0));
+		
+	elseif (Compared == 0) then
+		return (CreateBigInteger(Sign));
+	end;
+	
+	local BigInteger;
+	
+	if (#Denominator.Components == 1) then
+		BigInteger = DivideInteger(Numerator, Denominator.Components[1]);
+	else
+		BigInteger = MultiplicationDivisionWrapper(Numerator, Denominator);
+	end;
+	
+	if (Sign == -1) then
+		BigInteger = Negate(BigInteger);
+	end;
+	
+	return (BigInteger);
+end;
+
+local function IntegerRemainder(BigInteger : any?, Magnitude : any?) : number
+	local RadiusResult : number, Result : number = 1, 0;
+	local BigComponents : any? = BigInteger.Components;
+	
+	if (Magnitude < 0) then
+		Magnitude = -Magnitude;
+	end;
+	
+	for Index : number = 1, #BigComponents do
+		local Value : any? = BigComponents[Index];
+		
+		Result = CModulus(Result + Value * RadiusResult, Magnitude);
+		RadiusResult = CModulus(RadiusResult * Radix, Magnitude);
+	end;
+	
+	if (BigInteger.Sign < 1) then
+		Result = -Result;
+	end;
+	
+	return (Result);
+end;
+
+local function IntegerModulus(BigInteger : any?, Magnitude : any?) : ... any?
+	local Result : any? = IntegerRemainder(BigInteger, Magnitude);
+	
+	if (Result < 0) then
+		Result += Magnitude;
+	end;
+	
+	return (Result);
+end;
+
+local function Remainder(BigInteger : any?, Magnitude : any?) : ... any?
+	if (type(Magnitude) == "number") then
+		return (CreateBigInteger(IntegerRemainder(BigInteger, Magnitude)));
+		
+	elseif (type(BigInteger) == "number") then
+		BigInteger = CreateBigInteger(BigInteger);
+	end;
+
+	return (BigInteger - ((BigInteger / Magnitude) * Magnitude));
+end;
+
+local function Modulus(Input : any?, Magnitude : any?) : ... any?
+	local BigInteger : any? = Remainder(Input, Magnitude);
+	
+	if (BigInteger.Sign == -1) then
+		BigInteger += Magnitude;
+	end;
+	
+	return (BigInteger);
+end;
+
+local function MakeString(BigInteger : any?, String : any?) : nil?
+	if (BigInteger >= CreateBigInteger(PrintScale)) then
+		MakeString(DivideInteger(BigInteger, PrintScale), String);
+	end;
+	
+	table.insert(String, string.format(PrintScaleFormat, IntegerModulus(BigInteger, PrintScale)));
+end;
+
+local function BigIntegerToString(BigInteger : any?) : string
+	local String : Array<string> = {};
+	
+	if (BigInteger < CreateBigInteger(0)) then
+		BigInteger = Negate(BigInteger);
+		table.insert(String, "-");
+	end;
+	
+	MakeString(BigInteger, String);
+	String = string.gsub(table.concat(String), "^0*", "");
+	if (String == "") then 
+		String = "0";
+	end;
+	
+	return (String);
+end;
+
+local function BigIntegerToNumber(BigInteger : any?) : number
+	return (tonumber(BigIntegerToString(BigInteger)));
+end;
+
+BigIntegarMetatable = {
+	__add = Add;
+	__sub = Subtract;
+	__mul = Multiply;
+	__div = Division;
+	__mod = Modulus;
+	__unm = Negate;
+	__eq = EqualTo;
+	__lt = LessThan;
+	__le = LessThanOrEqualTo;
+	__tostring = BigIntegerToString;
+};
+
+function CreateBigInteger(Number : any?) : ... any?
+	if (Cache[Number]) then
+		return (Cache[Number]);
+	end;
+	
+	if Number == nil then
+		warn(debug.traceback())
+	end
+	
+	local BigInteger;
+	
+	if (type(Number) == "string") then
+		local Digits : Array<number> = { string.byte(Number, 1, -1) };
+		
+		for Index : number = 1, #Digits do
+			Digits[Index] = string.char(Digits[Index]);
+		end;
+		
+		local Start : number, Sign : number = 1, 1;
+		
+		if (Digits[1] == '-') then
+			Start, Sign = 2, -1;
+		end;
+		
+		BigInteger = CreateBigInteger(0);
+		
+		for Index : number = Start, #Digits do
+			BigInteger = AddInteger(MultiplyInteger(BigInteger, 10), tonumber(Digits[Index]));
+		end;
+		
+		BigInteger = MultiplyInteger(BigInteger, Sign);
+	else
+		BigInteger = Allocate();
+		BigInteger.Components[1] = Number or 0;
+		
+		if (Number == nil) then
+			print(BigInteger)
+		end;
+		
+		Normalize(BigInteger);
+	end;
+	
+	if (NumberCache > 100) then
+		Cache, NumberCache = {}, 0;
+	end;
+	
+	Cache[Number] = BigInteger;
+	NumberCache += 1;
+	
+	return (BigInteger);
+end;
+
+local Package : string, Coords : {[number] : number}, Counter : number, Unpacked : {[number] : any?} = string.gsub(require(script.Precompiled)[1], ".", function(Character : string) : string? 
+	if not (tonumber(Character)) then 
+		return (""); 
+	end; 
+end), require(script.Bytes), 0, {};
+
+for Index : number, Key : number in ipairs(Coords) do
+	local Decoded : number = tonumber(string.format("%x", Key));
+
+	Unpacked[Index] = CreateBigInteger(string.sub(Package, Counter + 1, Counter + Decoded));
+	Counter += Decoded;
+end;
+
+Coords, Counter, Package = nil;
+
+Unpacked[0] = CreateBigInteger("1");
+
+local BigZero : any? = CreateBigInteger(0);
+local BigOne : any? = CreateBigInteger(1);
+
+function NumberToBytes(Number : any?, Bits : number, ByteSize : number) : Array<number>
+	assert(not (Bits > #Unpacked), "Too many bits. Must be <= " .. #Unpacked .. ".");
+
+	Number = CreateBigInteger(Number);
+
+	local ResultBits : Array<any?>, Results : any? = {}, {};
+	ResultBits[1] = {};
+	
+	for Index : number = Bits - 1, 0, -1 do
+		local ExponentValue : any? = Unpacked[Index];
+		local Resultant : any? = Number - ExponentValue;
+		
+		if (ExponentValue <= Resultant) then
+			warn("Invalid Data!", ExponentValue, Resultant);
+			return nil;
+		end;
+
+		if (Resultant < BigZero) then
+			if (#(ResultBits[#ResultBits]) >= ByteSize) then
+				table.insert(ResultBits, {0});
+			else
+				table.insert(ResultBits[#ResultBits], 0);
+			end;
+		else
+			Number = Resultant;
+			
+			if (#(ResultBits[#ResultBits]) >= ByteSize) then
+				table.insert(ResultBits, {1});
+			else
+				table.insert(ResultBits[#ResultBits], 1);
+			end
+		end
+
+		if (Number == CreateBigInteger(0)) then
+			break;
+		end;
+	end;
+	
+	for _, BinarySequence : Array<number> in ipairs(ResultBits) do
+		local ThisResult : number = 0;
+		
+		for Index : number, Bit : number in ipairs(BinarySequence) do
+			if (Bit == 1) then
+				ThisResult += math.pow(2, ByteSize - Index);
+			end;
+		end;
+		
+		table.insert(Results, ThisResult);
+	end;
+
+	return (Results);
+end;
+
+function BytesToNumber(Bytes : Array<number?>, Bits : number, ByteSize : number) : string
+	assert(not (Bits > #Unpacked), "Too many bits. Must be <= " .. #Unpacked .. ".");
+	assert(not (#Bytes > Bits / ByteSize), "Too many bytes to store into the number of bits available. Must be <= " .. Bits / ByteSize .. ".")
+
+	local Binary : Array<number> = {};
+	
+	for _, Byte : number in ipairs(Bytes) do
+		for Index : number = ByteSize - 1, 0, -1 do
+			local Powered = math.pow(2, Index);
+			if (Byte - Powered < 0) then
+				table.insert(Binary, 0);
+			else
+				table.insert(Binary, 1);
+				Byte -= Powered;
+			end;
+		end;
+	end;
+
+	local Number : any? = CreateBigInteger(0);
+	
+	for Index : number = 1, #Binary do
+		if (Binary[Index] == 1) then
+			Number += Unpacked[Bits - Index];
+		end;
+	end;
+
+	return (tostring(Number));
+end;
+
+function EncodeBigNumbers(Numbers : Array<number>) : Array<string>
+	for Index : number, Value : number in ipairs(Numbers) do
+		Numbers[Index] = tostring(Value);
+	end;
+	
+	return (Numbers);
+end;
+
+function StringToBytes(String : string) : Array<number>
+	local Result : Array<number> = {};
+	
+	for Index : number = 1, #String do
+		table.insert(Result, string.byte(String, Index));
+	end;
+	
+	return (Result);
+end;
+
+function BytesToString(Bytes : Array<number>) : string
+	local String : string = "";
+	
+	for _, Value : number in ipairs(Bytes) do
+		String ..= string.char(Value);
+	end;
+	
+	return (String);
+end;
+
+function NumberToString(Input : number, Bits : number?, ByteSize : number) : string
+	return (BytesToString(NumberToBytes(Input, Bits or DeflateBits, ByteSize or DeflateByteSize)));
+end;
+
+function StringToNumber(Input : {[any] : any?} | string, Bits : number?, ByteSize : number?) : number
+	if (type(Input) == "table") then 
+		Input = table.concat(Input);
+	end;
+	
+	return (BytesToNumber(StringToBytes(Input), Bits or DeflateBits, ByteSize or DeflateByteSize));
+end;
+
+function ModulusExponent(Base : number, Exponent : number, Modulus : number) : number
+	local Result : number = 1;
+
+	while (true) do
+		warn("[FRAMEWORK] Partially Modulated Exponent.")
+		
+		if (Exponent % 2 == BigOne) then
+			wait();
+			Result *= Base % Modulus;
+		end;
+		
+		Exponent /= 2;
+
+		if (tostring(Exponent) == tostring(BigZero)) then
+			break;
+		end;
+		
+		Base *= Base % Modulus;
+	end;
+
+	return (Result);
+end;
+
+function GreatestCommonDivisor(Input : number?, SecondaryInput : number?) : number?
+	if (SecondaryInput ~= BigZero) then
+		return (GreatestCommonDivisor(SecondaryInput, Input % SecondaryInput));
+	else
+		return (Input);
+	end;
+end;
+
+function BigRandomWithLength(Length : number, Cap : number?) : ... any?
+	if not (Cap) then
+		Cap = 999_999_999;
+	end;
+
+	local RandomString : string = tostring(math.random(100_000_000, Cap));
+
+	while (true) do
+		RandomString ..= tostring(math.random(100_000_000, Cap));
+		
+		if (#RandomString >= Length) then
+			local FinalRandom : string = string.sub(RandomString, 1, Length);
+			local Cropped : string = string.sub(FinalRandom, -1, -1);
+			local InnerCropped : string = string.sub(FinalRandom, 1, -2);
+			
+			local Digit : string = BigRandomSwap[Cropped];
+			
+			if (Digit == nil) then
+				return (CreateBigInteger(FinalRandom));
+			else
+				return (CreateBigInteger(InnerCropped .. Digit));
+			end;
+		end;
+	end;
+end;
+
+function BigRandom(MinimumNumber : any?, MaximumNumber : any?) : ... any?
+	if (MaximumNumber < CreateBigInteger(1_000_000_000)) then
+		return (CreateBigInteger(math.random(BigIntegerToNumber(MinimumNumber), BigIntegerToNumber(MaximumNumber))));
+	end;
+
+	local MaximumString : string = tostring(MaximumNumber);
+	local Cap : number? = tonumber(string.sub(tostring(MaximumNumber), 1, 9));
+	local Range : number = #MaximumString - #tostring(MinimumNumber);
+
+	if (Range == 0) then
+		return (BigRandomWithLength(#MaximumString, Cap));
+	end;
+
+	if (#MaximumString > 30) then
+		return (BigRandomWithLength(#MaximumString - 1));
+	end;
+
+	local RandomLength : number = math.random(1, math.pow(2, (#MaximumString - 1)));
+	
+	for Index : number = 1, #MaximumString - 1 do
+		if (RandomLength <= math.pow(2, Index)) then
+			return (BigRandomWithLength(Index));
+		end;
+	end;
+end;
+
+function IsPrime(Number : number?) : boolean
+	warn("[FRAMEWORK] Checking \"IsPrime\".");
+	
+	if (type(Number) == "number") then
+		Number = CreateBigInteger(Number);
+	end;
+
+	if (Number % 2 == BigZero) then
+		wait()
+		return (false);
+	end;
+
+	local Solved : number, Divisor : any? = 0, Number - BigOne;
+	
+	while (Divisor % 2 == BigZero) do
+		Solved += 1;
+		Divisor /= 2;
+	end;
+
+	for Index : number = 1, 3 do
+		--RunService.Heartbeat:Wait();
+		wait()
+		
+		local Randomized : any? = BigRandom(CreateBigInteger(2), Number - 2);
+		local Exponent : any? = ModulusExponent(Randomized, Divisor, Number);
+		
+		if (Exponent ~= BigOne) and (Exponent + 1 ~= Number) then
+			for j = 1, Solved do
+				Exponent = ModulusExponent(Exponent, CreateBigInteger(2), Number);
+				
+				if (Exponent == BigOne) then
+					return (false);
+					
+				elseif (Exponent == Number - 1) then
+					Randomized = BigZero;
+					break;
+				end;
+			end;
+			
+			if (Randomized ~= BigZero) then
+				return (false);
+			end;
+		end;
+	end;
+	
+	return (true);
+end;
+
+function GenerateLargePrimeNumber() : number | any?
+	while (true) do
+		local RandomNumber : any? = BigRandomWithLength(39);
+
+		if (IsPrime(RandomNumber)) then
+			warn("[FRAMEWORK] Generated Large Prime Number.")
+			return (RandomNumber);
+		end;
+
+		--RunService.Heartbeat:Wait();
+	end;
+end;
+
+function GeneratePrimeQuotient(Exponent : number?) : number | any?
+	local RandomPrimeNumber;
+	
+	while (true) do
+		RandomPrimeNumber = GenerateLargePrimeNumber();
+		
+		if (GreatestCommonDivisor(Exponent, RandomPrimeNumber - 1) == BigOne) then
+			return (RandomPrimeNumber);
+		end;
+		
+		--RunService.Heartbeat:Wait();
+	end;
+end;
+
+function Euclidean(a : number, b : number) : (number?, number?, number?)
+	local x : number, y : number = BigZero, BigOne;
+	local u : number, v : number = BigOne, BigZero;
+	
+	while (a ~= BigZero) do
+		local q : number, r : number = b / a, b % a;
+		local m : number, n : number = x - u * q, y - v * q;
+		
+		b, a, x, y, u, v = a, r, u, v, m, n;
+	end;
+	
+	return b, x, y;
+end;
+
+function ModulusInverse(Active : number, Modulus : number) : number?
+	local GreatestCommonDivisibleNumber : number, X : number, Y : number = Euclidean(Active, Modulus);
+	
+	if (GreatestCommonDivisibleNumber ~= BigOne) then
+		return (nil);
+	else
+		return (X % Modulus);
+	end;
+end;
+
+function GenerateKeyPair()
+	while (true) do
+		local Exponent : number? = GenerateLargePrimeNumber(); -- e
+		
+		local PublicExponent : number? = GeneratePrimeQuotient(Exponent); -- p
+		local Quotient : number? = GeneratePrimeQuotient(Exponent); -- q
+		local Shared : number? = PublicExponent * Quotient; -- n
+		local PublicHighInteger : number? = (PublicExponent - 1) * (Quotient - 1) -- phi
+		local SecretExponent : number? = ModulusInverse(Exponent, PublicHighInteger) -- d
+		
+		warn("[FRAMEWORK] Generated Key Pair.");
+		
+		-- 104328 is just a magic number (can be any semi-unique number)
+		local Encrypted = ModulusExponent(CreateBigInteger(104328), Exponent, Shared);
+		local Decrypted = ModulusExponent(Encrypted, SecretExponent, Shared);
+		
+		warn("[FRAMEWORK] Testing Key Pair.");
+		
+		if (Decrypted == CreateBigInteger(104328)) then
+			warn("[FRAMEWORK] Key Pair Valid.");
+			
+			return ({
+				["Shared"] = tostring(Shared);
+				["Public"] = tostring(Exponent);
+			}), ({
+				["Shared"] = tostring(Shared);
+				["Secret"] = tostring(SecretExponent);
+			});
+		else
+			warn("[FRAMEWORK] Key Pair Invalid.");
+			--wait();
+		end;
+	end;
+end;
+
+function Crypt(Key : PublicKey | SecretKey, Number : number) : string
+	local Exponent : number? = CreateBigInteger(Key.Public or Key.Secret);
+	
+	return (tostring(ModulusExponent(CreateBigInteger(Number), Exponent, CreateBigInteger(Key.Shared))));
+end;
+
+function Compress(Dataset : Array<string>) : string
+	local Built : string = "";
+	
+	for _, Data : string in ipairs(Dataset) do
+		Built = string.format("%s%s&", Built, Data);
+	end;
+	
+	return (string.sub(Built, 1, -2));
+end;
+
+function Uncompress(Compressed : string) : Array<string>
+	local Built : Array<string> = {};
+	
+	for Data : string in string.gmatch(Compressed, "%w+") do
+		table.insert(Built, Data);
+	end;
+	
+	return (Built);
+end;
+
+function SplitIntoChunks(Data, Size)
+	local Chunks : Array<string> = {};
+	
+	string.gsub(Data, string.rep(".", Size or DeflateByteSize), function(CharacterSet : string) : string?
+		table.insert(Chunks, CharacterSet);
+	end);
+	
+	return (Chunks);
+end
+
+function EncryptChunk(Chunk : string, Key : PublicKey | SecretKey, Configuration : Dictionary<number>?) : string
+	local Results : any? = BytesToNumber(StringToBytes(Chunk), Configuration.Bits or DeflateBits, Configuration.ByteSize or DeflateByteSize);
+	
+	return (Crypt(Key, Results));
+end;
+
+function Encrypt(Data : string, Key : PublicKey | SecretKey, Configuration : Dictionary<number>?) : string
+	Configuration = Configuration or { ["Bits"] = DeflateBits; ["ByteSize"] = DeflateByteSize; };
+	Data ..= string.rep("\0", (math.ceil(#Data / Configuration.ByteSize) * Configuration.ByteSize) - #Data);
+	
+	local Chunks : Array<string> = SplitIntoChunks(Data, Configuration.ByteSize);
+	local Encrypted : Array<string> = {};
+	
+	for _, Chunk : string in ipairs(Chunks) do
+		local EncryptedChunk : string = EncryptChunk(Chunk, Key, Configuration);
+		
+		table.insert(Encrypted, EncryptedChunk);
+	end;
+	
+	return (Compress(Encrypted));
+end;
+
+function Decrypt(Data : string, Key : PublicKey | SecretKey, Configuration : Dictionary<number>?) : string
+	Configuration = Configuration or { ["Bits"] = DeflateBits; ["ByteSize"] = DeflateByteSize; };
+	
+	local Decrypted : string = "";
+	
+	for _, Chunk : string in ipairs(Uncompress(Data)) do
+		Decrypted ..= NumberToString(Crypt(Key, Chunk));
+	end;
+	
+	return (Decrypted);
+end;
+
+function RSA:RawCompress(Data : string) : string
+	return (Deflate.Deflate.Compress(Data, {
+		["level"] = 9, ["strategy"] = "dynamic"
+	}));
+end;
+
+function RSA:RawUncompress(Data : string) : string
+	return (Deflate.Deflate.Decompress(Data));
+end;
+
+function RSA:GenerateKeyPair() : KeyPair
+	--if (RunService:IsStudio()) then
+		--return (self.PrecalculatedKeyPair);	
+	--else
+		local PublicKey : PublicKey?, SecretKey : SecretKey? = GenerateKeyPair();
+	
+		return ({
+			["Public"] = PublicKey,
+			["Secret"] = SecretKey
+		});
+	--end;
+end;
+
+function RSA:Encrypt(Data : string, Key : PublicKey | SecretKey, Configuration : { Bits : number, ByteSize : number }?) : string
+	return (self:RawCompress(Encrypt(Data, Key, Configuration)));
+	--return (Encrypt(Data, Key, Configuration));
+end;
+
+function RSA:Decrypt(Data : string, Key : PublicKey | SecretKey, Configuration : { Bits : number, ByteSize : number }?) : ... any?
+	return (Decrypt(self:RawUncompress(Data) .. '', Key, Configuration));
+	--return (Decrypt(Data, Key, Configuration));
+end;
+
+function RSA:Sign(Message : string, Key : string) : string
+	local Hash : string = Sha256(Message);
+	
+	return Encrypt(Message .. Hash, Key);
+end;
+
+function RSA:ValidateSignature(Message : string, Signature : string, Key : string) : boolean
+	local Decrypted : string = Decrypt(Signature, Key);
+	local Integrity : string = Sha256(Message);
+	
+	local IntegrityHash : string = string.sub(Decrypted, -64, -1);
+	local DecryptedData : string = string.sub(Decrypted, 1, -65);
+	
+	return ((Message == Decrypted) and (Integrity == IntegrityHash));
+end;
+
+return (RSA);]]></ProtectedString>
+				<int64 name="SourceAssetId">-1</int64>
+				<BinaryString name="Tags"></BinaryString>
+			</Properties>
+			<Item class="ModuleScript" referent="RBXD3D051354F6B4F33A2B6992B3D2FF072">
+				<Properties>
+					<BinaryString name="AttributesSerialize"></BinaryString>
+					<Content name="LinkedSource"><null></null></Content>
+					<string name="Name">Precompiled</string>
+					<string name="ScriptGuid">{288D9A90-AA3D-4ED2-93A0-C094A8535E41}</string>
+					<ProtectedString name="Source"><![CDATA[--[[::
+
+Copyright (C) 2022, Luc Rodriguez (Aliases : Shambi, StyledDev).
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+--::]]
+
+return ({[[
+248163264128256512102420484096819216384327686553613107226214452428810485762097152419430483886081677721633554432671088641342177282684
+354565368709121073741824214748364842949672968589934592171798691843435973836868719476736137438953472274877906944549755813888109951162
+777621990232555524398046511104879609302220817592186044416351843720888327036874417766414073748835532828147497671065656294995342131211
+258999068426242251799813685248450359962737049690071992547409921801439850948198436028797018963968720575940379279361441151880758558722
+882303761517117445764607523034234881152921504606846976230584300921369395246116860184273879049223372036854775808184467440737095516163
+689348814741910323273786976294838206464147573952589676412928295147905179352825856590295810358705651712118059162071741130342423611832
+414348226068484722366482869645213696944473296573929042739218889465931478580854784377789318629571617095687555786372591432341913615111
+572745182864683827230223145490365729367654460446290980731458735308812089258196146291747061762417851639229258349412352483570327845851
+669882470496714065569170333976494081934281311383406679529881638685626227668133590597632773712524553362671811952641547425049106725343
+623905283094850098213450687247810566189700196426901374495621121237940039285380274899124224247588007857076054979824844849517601571415
+210995964968969903520314283042199192993792198070406285660843983859875843961408125713216879677197516879228162514264337593543950336158
+456325028528675187087900672316912650057057350374175801344633825300114114700748351602688126765060022822940149670320537625353012004564
+588029934064107525070602400912917605986812821504101412048018258352119736256430082028240960365167042394725128601640564819207303340847
+894502572032811296384146066816957890051440641622592768292133633915780102881283245185536584267267831560205762566490371073168534535663
+120411525121298074214633706907132624082305024259614842926741381426524816461004851922968585348276285304963292200961038459371706965525
+706099265844019220769187434139310514121985316880384415383748682786210282439706337607688307674973655724205648794126752153616615349947
+311448411297588253504307233230699894622896822595176507008614466461399789245793645190353014017228813292279957849158729038070602803445
+762658455991569831745807614120560689152531691198313966349161522824112137830410633823966279326983230456482242756608212676479325586539
+664609129644855132164253529586511730793292182592897102643285070591730234615865843651857942052864170141183460469231731687303715884105
+728340282366920938463463374607431768211456680564733841876926926749214863536422912136112946768375385385349842972707284582427222589353
+675077077069968594541456916485444517870735015415413993718908291383296108890357414700308308279874378165827665922177807148294006166165
+597487563316553318443556142965880123323311949751266331066368871122859317602466466238995025326621327361742245718635204932932477990050
+653242654723484491437270409865864955980101306485309446968982874540819731729911960202612970618881393796574908163946345982392040522594
+123776278759314981632789269196478408104518824755255751862996326557853839295681620903764951041115037259926531157076785913632418075299
+020822300745198530623141535718272648361505980416446014903970612462830714365452967230119608328920298079412249256614287309059344602392
+166417840596158824498513228574618118689204784332835681192317648997026457149236237378409568665671362384635297994052914298472474756819
+137331214272476927059598810582859694494951363827466242854495385411919762116571938898990272765493248570899077082383952423314387779798
+054553098649611417981541647679048466287755595961091061972992228359630832953580969325755111919221821239459844567192616659071619386515
+102238384436424789196891343852333181432387730302044767688728495783936182687704666362864775460604089535377456991567872365375409332725
+729550921208179070754913983135744730750818665451459101842416358141509827966271488146150163733090291820368483271628301965593254297629
+230032746618058364073696654325660393118650859525846006549323611672814739330865132078623730171904116920130986472233456294786617302641
+572474603438082338402619729444669125895732346052831449492068761646768052394588893382517914646921056628989841375232935361047891777867
+650358292938421132579796827504641870722095783555735300716585876842265159593655009283741444191567111470601433171753684530319187310018
+567482888383134222941202866343507369060638374620037121496577676626844588240573268701473812127674924007424299315535325368917648114653
+740294762425534984801484859863107065073783529622930748058952485106996960296961197262141301475670592458614961179049702139939205939223
+945242826029513411849172299223580994042798784118784478904856520590268236983445984471619880855975682375689578097130411805364739668919
+689432397617119513647513619156194260823610729479337839378864795234239027295027238312388521647221458958675678757729590468478054590054
+476624777043294442917917351357515459180936956109180108815324955408658888583583470271503091836187391221836021763064991081731777716716
+694054300618367237478244367204352612998216346355543343338810860123673447495648873440870412259964326927110866866776217202473468949912
+977468817408245199286538542217337335524344049469378998259549376348164903985730770844346746710486880989387579965190987526963298079714
+615416886934934209737619787751599303819750539264196159429230833773869868419475239575503198607639501078528392318858461667547739736838
+950479151006397215279002157056784637716923335095479473677900958302012794430558004314112156927543384667019095894735580191660402558886
+111600862822431385508676933403819178947116038332080511777222320172564486277101735386680763835789423207666416102355444464034512896125
+542034707733615276715788464153328322047108889280690257922510840694154672305534315769283066566440942177785613805158450216813883093446
+110686315385661331328818843555712276103168100433627766186892221372630771322662657637687111424552206336200867255532373784442745261542
+645325315275374222849104412672401734511064747568885490523085290650630550748445698208825344803469022129495137770981046170581301261101
+496891396417650688160693804425899027554196209234116260252220299378279283530137632138760885179805510839241846823252050444059875655856
+706027526427752177035961102167848369364650410088811975131171341205504128555043540719222043356967387293008201776239502623426824110082
+571100870814384440867139347745860164035524790052468536482201651422017416287688817342786954917203280710495801049370729644032102844034
+832575377634685573909834406561420991602098741459288064205688069665150755269371147819668813122841983204197482918576128411376139330301
+510538742295639337626245683966408394965837152256822752278660603021077484591278675252491367932816789931674304512164550455732120604215
+496918255735050498273586563357986334860902432910091146424120843099383651147010099654717312671597266972180486582018229284824168619876
+730229402019930943462534319453394436096131640364585696483372397534604588040398618869250686389067888721922632807291713929667447950692
+091760807972377385013727781357774438452656145834278593348959013841835216159447547700274555627155488768105312291668557186697918027683
+670432318895095400549111254310977536210624583337114373395836055367340864637790190801098222508621955072421249166674228746791672110734
+681729275580381602196445017243910144842498333348457493583344221469363458551160763204392890034487820288168499666669691498716668844293
+872691710232152640878578006897564057633699933333938299743333768858774538342046430528175715601379512811526739986666787659948666753771
+754907668409286105635143120275902562304134799733335753198973335075435098153368185722112702862405518051246082695994666715063979466701
+508701963067363714442254057248110361024921653919893334301279589334030174039261347274288845081144962207220498432107839786668602559178
+668060348078522694548577690162289924414440996864215679573337205118357336120696157045389097155380324579848828881993728431359146674410
+236714672241392314090778194310760649159697657763987456862718293348820473429344482784628181556388621521298319395315527974912172543658
+669764094685868896556925636311277724304259663879063105594982434508731733952818937173779311385127262255544860851932775812621118996486
+901746346790563787434755862277025452451108972170386555162524223799296138034926935811275748695117245540509049022179443407731103250484
+475985922760698538716225514973902344910810180980443588868154622065009689519718455213970774324510299478046898216203619608871777363092
+441300193790394368110427941548649020598956093796432407239217743554726184882600387580788736220855883097298041197912187592864814478435
+487109452369765200775161577472441711766194596082395824375185729628956870974218904739530401550323154944883423532389192164791648750371
+459257913741948437809479060803100646309888176684706477838432958329750074291851582748389687561895812160620129261977635336941295567686
+591665950014858370316549677937512379162432124025852395527067388259113537318333190002971674063309935587502475832486424805170479104141
+347765182270746366663800059433481266198711750049516649728496103409582082826955303645414927333276001188669625323974235000990332994569
+922068191641656539106072908298546665520023773392506479484700019806659891398441363832832113078212145816597093331040047546785012958969
+400039613319782796882727665664226156424291633194186662080095093570025917938800079226639565593765455331328452312848583266388373324160
+190187140051835877600158453279131187530910662656904625697166532776746648320380374280103671755200316906558262375061821325312180925139
+433306555349329664076074856020734351040063381311652475012364265062436185027886661311069865932815214971204146870208012676262330495002
+472853012487237005577332262213973186563042994240829374041602535252466099000494570602496144740111546645244279463731260859884816587480
+832050705049321980009891412049922894802230932904885589274625217197696331749616641014100986439600197828240998457896044618658097711785
+492504343953926634992332820282019728792003956564819968115792089237316195423570985008687907853269984665640564039457584007913129639936
+]]});]]></ProtectedString>
+					<int64 name="SourceAssetId">-1</int64>
+					<BinaryString name="Tags"></BinaryString>
+				</Properties>
+			</Item>
+			<Item class="ModuleScript" referent="RBX3A7D19DE547C461AA2FC438CF6B3938C">
+				<Properties>
+					<BinaryString name="AttributesSerialize"></BinaryString>
+					<Content name="LinkedSource"><null></null></Content>
+					<string name="Name">Bytes</string>
+					<string name="ScriptGuid">{D1A55407-B364-4191-AA20-502BD696BF09}</string>
+					<ProtectedString name="Source"><![CDATA[--[[::
+
+Copyright (C) 2022, Luc Rodriguez (Aliases : Shambi, StyledDev).
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌
+-->> 𝗪𝗔𝗥𝗡𝗜𝗡𝗚! 𝗧𝗛𝗜𝗦 𝗠𝗢𝗗𝗨𝗟𝗘 𝗖𝗢𝗡𝗧𝗔𝗜𝗡𝗦 𝗦𝗘𝗡𝗦𝗜𝗧𝗜𝗩𝗘 𝗜𝗡𝗙𝗢𝗥𝗠𝗔𝗧𝗜𝗢𝗡! 𝗥𝗘𝗙𝗥𝗔𝗜𝗡 𝗙𝗥𝗢𝗠 𝗠𝗔𝗞𝗜𝗡𝗚 𝗖𝗛𝗔𝗡𝗚𝗘𝗦! <<--
+▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌
+
+--::]]
+
+return ({
+
+	0x01, 0x01, 0x01, 0x02, 0x02, 0x02, 0x03, 0x03, 0x03, 0x04, 0x04, 0x04, 0x04, 0x05, 0x05, 0x05,
+	0x06, 0x06, 0x06, 0x07, 0x07, 0x07, 0x07, 0x08, 0x08, 0x08, 0x09, 0x09, 0x09, 0x10, 0x10, 0x10,
+	0x10, 0x11, 0x11, 0x11, 0x12, 0x12, 0x12, 0x13, 0x13, 0x13, 0x13, 0x14, 0x14, 0x14, 0x15, 0x15,
+	0x15, 0x16, 0x16, 0x16, 0x16, 0x17, 0x17, 0x17, 0x18, 0x18, 0x18, 0x19, 0x19, 0x19, 0x19, 0x20,
+	0x20, 0x20, 0x21, 0x21, 0x21, 0x22, 0x22, 0x22, 0x22, 0x23, 0x23, 0x23, 0x24, 0x24, 0x24, 0x25,
+	0x25, 0x25, 0x25, 0x26, 0x26, 0x26, 0x27, 0x27, 0x27, 0x28, 0x28, 0x28, 0x28, 0x29, 0x29, 0x29,
+	0x30, 0x30, 0x30, 0x31, 0x31, 0x31, 0x32, 0x32, 0x32, 0x32, 0x33, 0x33, 0x33, 0x34, 0x34, 0x34,
+	0x35, 0x35, 0x35, 0x35, 0x36, 0x36, 0x36, 0x37, 0x37, 0x37, 0x38, 0x38, 0x38, 0x38, 0x39, 0x39,
+	0x39, 0x40, 0x40, 0x40, 0x41, 0x41, 0x41, 0x41, 0x42, 0x42, 0x42, 0x43, 0x43, 0x43, 0x44, 0x44,
+	0x44, 0x44, 0x45, 0x45, 0x45, 0x46, 0x46, 0x46, 0x47, 0x47, 0x47, 0x47, 0x48, 0x48, 0x48, 0x49,
+	0x49, 0x49, 0x50, 0x50, 0x50, 0x50, 0x51, 0x51, 0x51, 0x52, 0x52, 0x52, 0x53, 0x53, 0x53, 0x53,
+	0x54, 0x54, 0x54, 0x55, 0x55, 0x55, 0x56, 0x56, 0x56, 0x56, 0x57, 0x57, 0x57, 0x58, 0x58, 0x58,
+	0x59, 0x59, 0x59, 0x60, 0x60, 0x60, 0x60, 0x61, 0x61, 0x61, 0x62, 0x62, 0x62, 0x63, 0x63, 0x63,
+	0x63, 0x64, 0x64, 0x64, 0x65, 0x65, 0x65, 0x66, 0x66, 0x66, 0x66, 0x67, 0x67, 0x67, 0x68, 0x68,
+	0x68, 0x69, 0x69, 0x69, 0x69, 0x70, 0x70, 0x70, 0x71, 0x71, 0x71, 0x72, 0x72, 0x72, 0x72, 0x73,
+	0x73, 0x73, 0x74, 0x74, 0x74, 0x75, 0x75, 0x75, 0x75, 0x76, 0x76, 0x76, 0x77, 0x77, 0x77, 0x78
+
+});]]></ProtectedString>
+					<int64 name="SourceAssetId">-1</int64>
+					<BinaryString name="Tags"></BinaryString>
+				</Properties>
+			</Item>
+		</Item>
+		<Item class="ModuleScript" referent="RBXF40405ADA5D546C883F95BC68A1CD0E9">
+			<Properties>
+				<BinaryString name="AttributesSerialize"></BinaryString>
+				<Content name="LinkedSource"><null></null></Content>
+				<string name="Name">Sha256</string>
+				<string name="ScriptGuid">{E55BFC35-90BA-4D55-96A3-C8A609BCFE70}</string>
+				<ProtectedString name="Source"><![CDATA[--[[::
+
+Copyright (C) 2021, Luc Rodriguez (Aliases : Shambi, StyledDev).
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+(Original Repository can be found here : https://github.com/Shambi-0/Luau-Sha256)
+
+--::]]
+
+-- Type definitions.
+type Array<Type> = {[number] : Type};
+type Dictionary<Type> = {[string] : Type};
+
+-- Initalize the permutation table.
+local Permutations : Array<number> = require(script:WaitForChild("Permutations"));
+
+-- Freeze the permutation table, to avoid unwanted changes.
+table.freeze(Permutations);
+
+-- Convert a number into a string of a fixed length.
+local function ProcessNumber(Input : number, Length : number) : string
+
+	-- Initalize a blank string to contain our output.
+	local Output : string = "";
+
+	-- Count up to the given length.
+	for Index : number = 1, Length do
+
+		-- Get the remainder of a modulus of 256.
+		local Remainder : number = bit32.band(Input, 255);
+
+		-- Convert the remainder to a character
+		-- then add that character to the output.
+		Output ..= string.char(Remainder);
+
+		-- Set our input as : our input minus our 
+		-- remainder divided by 256.
+		Input = bit32.rshift(Input - Remainder, 8);
+	end;
+
+	-- Reverse the output then return it.
+	return (string.reverse(Output));
+end;
+
+-- Convert a string into
+-- a 232 bit number.
+local function StringTo232BitNumber(Input : string, Offset : number) : number
+
+	-- Initalize our output at 0.
+	local Output : number = 0;
+
+	-- Count from our offset, to our offset plus 3.
+	for Index : number = Offset, Offset + 3 do
+
+		-- Multiply our output by 256.
+		Output *= 256;
+
+		-- Convert the input into a byte, then
+		-- add it to our output.
+		Output += string.byte(Input, Index);
+	end;
+
+	-- Return our output.
+	return (Output);
+end;
+
+-- Preprocess data so that it can be
+-- processed further down the line.
+local function PreProcess(Content : string, Length : number) : string
+
+	-- Solve for the numerical padding used to offset the data.
+	local Padding : number = 64 - bit32.band(Length + 9, 63);
+
+	-- Compress the length the message to a fixed length of 8 bytes.
+	Length = ProcessNumber(8 * Length, 8);
+
+	-- Concat the content, divider, padding, and length.
+	Content = Content .. "\128" .. string.rep("\0", Padding) .. Length;
+
+	-- Check that the result has an exact length of 64 bytes.
+	assert(#Content % 64 == 0, "Preprocessed content does not have a valid length of 64 bytes, and can not continue.");
+
+	-- If everything checks out, return the result.
+	return (Content);
+end;
+
+-- Digest a 64 bit block for a 256 bit hash.
+local function Digestblock(Content : string, Offset : number, Hash : Array<number>) : nil?
+
+	-- Initalize a blank array to contain
+	-- each of the offsets used in the digest.
+	local Offsets : Array<number> = {};
+
+	-- Calculate the offsets 
+	-- for the first byte.
+	for Index : number = 1, 16 do 
+
+		-- Convert the string into a 232 bit number
+		-- with the result being set at the index.
+		Offsets[Index] = StringTo232BitNumber(Content, Offset + (Index - 1) * 4); 
+	end;
+
+	-- Count from 17 up to 64.
+	for Index : number = 17, 64 do
+		-- Calculate the value of the current index.
+		local Value : number = Offsets[Index - 15];
+
+		-- Solve for the current section given the value.
+		local Section0 : number = bit32.bxor(bit32.rrotate(Value, 7), bit32.rrotate(Value, 18), bit32.rshift(Value, 3));
+
+		-- Offset the value.
+		Value = Offsets[Index - 2];
+
+		-- Overwrite the offset at the current
+		-- index with some more calculations.
+		Offsets[Index] = Offsets[Index - 16] + Section0 + Offsets[Index - 7] + bit32.bxor(bit32.rrotate(Value, 17), bit32.rrotate(Value, 19), bit32.rshift(Value, 10));
+	end;
+
+	-- Unpack the hash into 8 permutated sections.
+	local a : number, b : number, c : number, d : number, e : number, f : number, g : number, h : number = 
+		Hash[1], Hash[2], Hash[3], Hash[4], Hash[5], Hash[6], Hash[7], Hash[8];
+
+	-- Count from 1 up to 64.
+	-- updating the block for each index.
+	for Index : number = 1, 64 do
+
+		-- Solve for the first section and the "maj"
+		local Section0 : number = bit32.bxor(bit32.rrotate(a, 2), bit32.rrotate(a, 13), bit32.rrotate(a, 22));
+		local maj : number = bit32.bxor(bit32.band(a, b), bit32.band(a, c), bit32.band(b, c));
+
+		-- Solve the tail's secondary component.
+		local Tail2 : number = Section0 + maj;
+
+		-- Solve the second section & the main chunk.
+		local Section1 : number = bit32.bxor(bit32.rrotate(e, 6), bit32.rrotate(e, 11), bit32.rrotate(e, 25));
+		local Chunk : number = bit32.bxor(bit32.band(e, f), bit32.band(bit32.bnot(e), g));
+
+		-- With the other components, solve for the tail's main component.
+		local Tail1 = h + Section1 + Chunk + Permutations[Index] + Offsets[Index];
+
+		-- Overwrite each of the permutated sections
+		-- with offset and modified equivilents.
+		h, g, f, e, d, c, b, a = g, f, e, d + Tail1, c, b, a, Tail1 + Tail2;
+	end;
+
+	-- Iterate over each digested value.
+	for Index : number, Value : number in ipairs({a, b, c, d, e, f, g, h}) do
+
+		-- Overite the current value with the digested one.
+		Hash[Index] = bit32.band(Hash[Index] + Value);
+	end;
+end
+
+-- Primary method.
+return (function(Content : string, Salt : string?) : string
+	-- Check that the content provided is valid.
+	assert(type(Content) == "string", "Argument #1 must be type\"string\".");
+
+	-- Apply salt if one is provided.
+	Content ..= if (type(Salt) == "string") then "_" .. Salt else "";
+
+	-- Process the data for further changes.
+	Content = PreProcess(Content, #Content);
+
+	-- Initalize a base hash.
+	local Base : Array<number> = {
+		0x6a09e667,
+		0xbb67ae85,
+		0x3c6ef372,
+		0xa54ff53a,
+		0x510e527f,
+		0x9b05688c,
+		0x1f83d9ab,
+		0x5be0cd19	
+	};
+
+	-- Iterate over the length of
+	-- the data in chunks of 64.
+	for Index : number = 1, #Content, 64 do
+
+		-- Digest the content with the base.
+		Digestblock(Content, Index, Base);
+	end;
+
+	-- Initalize a blank table to contain our hash.
+	local Hash : Array<string?> = {};
+
+	-- Iterate over each chunk in the "base hash".
+	for Index : number, Value : number in ipairs(Base) do
+
+		-- Convert the chunk into a string, the overwrite the current value.
+		Hash[Index] = ProcessNumber(Value, 4);
+	end;
+
+	-- Concat the results, then convert to a hexadecimal format.
+	return (string.gsub(table.concat(Hash), ".", function(Character : string) : string
+
+		-- Convert the character into a byte, then format as a hexadecimal pair.
+		return (string.format("%02x", string.byte(Character)));
+	end));
+end);]]></ProtectedString>
+				<int64 name="SourceAssetId">-1</int64>
+				<BinaryString name="Tags"></BinaryString>
+			</Properties>
+			<Item class="ModuleScript" referent="RBX9D326CFF5504423FAAC77CDDF8EEA3C8">
+				<Properties>
+					<BinaryString name="AttributesSerialize"></BinaryString>
+					<Content name="LinkedSource"><null></null></Content>
+					<string name="Name">Permutations</string>
+					<string name="ScriptGuid">{B960FDD3-F226-4D80-AF02-95A82A6B9224}</string>
+					<ProtectedString name="Source"><![CDATA[-- WARNING : This array contains very sensitive information, making changes can & will 
+-- effect the integrity of the module that requires it.
+
+return ({
+	
+	0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5,
+	0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+	0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3,
+	0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+	0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc,
+	0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+	0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7,
+	0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+	0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13,
+	0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+	0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3,
+	0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+	0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5,
+	0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+	0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208,
+	0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
+	
+});]]></ProtectedString>
+					<int64 name="SourceAssetId">-1</int64>
+					<BinaryString name="Tags"></BinaryString>
+				</Properties>
+			</Item>
+		</Item>
+		<Item class="ModuleScript" referent="RBXFB4E251DAD90448499D80552AEDDAC79">
+			<Properties>
+				<BinaryString name="AttributesSerialize"></BinaryString>
+				<Content name="LinkedSource"><null></null></Content>
+				<string name="Name">AES</string>
+				<string name="ScriptGuid">{C0B24259-6AD1-48CA-8476-77F16B641F85}</string>
+				<ProtectedString name="Source"><![CDATA[--[[::
+
+Copyright (C) 2022, Luc Rodriguez (Aliases : Shambi, StyledDev).
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+--::]]
+
+-- Reference : https://en.wikipedia.org/wiki/Advanced_Encryption_Standard
+--			   https://en.wikipedia.org/wiki/Substitution%E2%80%93permutation_network
+--			   https://en.wikipedia.org/wiki/Symmetric-key_algorithm
+
+--// Type Definitions //--
+
+type Array<Type> = {[number] : Type};
+type Dictionary<Type> = {[string] : Type};
+
+--// 256-Bit Key Constants //--
+
+local EncryptionKeySizeInBytes : number = 32; -- Number of bytes in the 256-Bit Encryption Key.
+local RoundKeySizeInBytes : number = 240; -- Number of bytes in 15 128-Bit Round Keys.
+
+--// Constant Arrays //--
+
+-- Reference[s] : https://en.wikipedia.org/wiki/S-box
+--                https://en.wikipedia.org/wiki/Rijndael_S-box
+-- 				  https://en.wikipedia.org/wiki/AES_key_schedule
+--				  https://crypto.stackexchange.com/questions/14443/simple-multiplication-in-gf8
+
+local GF8x2 : Array<number>, GF8x3 : Array<number>, GF8x9 : Array<number>, GF8x11 : Array<number>, GF8x13 : Array<number>, 
+	GF8x14 : Array<number>, SBox : Array<number>, InverseSBox : Array<number>, KeySchedule : Array<number> = unpack(require(script:WaitForChild("Datasets")));
+
+--// Freeze all array's to prevent unintended changes.
+
+table.freeze(GF8x2);
+table.freeze(GF8x3);
+table.freeze(GF8x9);
+table.freeze(GF8x11);
+table.freeze(GF8x13);
+table.freeze(GF8x14);
+table.freeze(SBox);
+table.freeze(InverseSBox);
+table.freeze(KeySchedule);
+
+--// Functions //--
+
+local function AddRoundKey(State : Array<number>, Key : number) : nil?
+	for Index : number, Byte : number in next, State do
+		State[Index] = bit32.bxor(Byte, Key[Index]);
+	end;
+end;
+
+local function SubstituteBytes(State : Array<number>, S_Box : Array<number>) : nil?
+	for Index : number, Byte : number in next, State do
+		State[Index] = S_Box[Byte];
+	end;
+end;
+
+local function ShiftRows(State : Array<number>) : nil?
+	State[5], State[6], State[7], State[8] = State[6], State[7], State[8], State[5]; -- Shift DOWN by 1.
+	State[9], State[10], State[11], State[12] = State[11], State[12], State[9], State[10]; -- Shift DOWN by 2.
+	State[13], State[14], State[15], State[16] = State[16], State[13], State[14], State[15]; -- Shift DOWN by 3.
+end;
+
+local function InverseShiftRows(State : Array<number>) : nil?
+	State[6], State[7], State[8], State[5] = State[5], State[6], State[7], State[8]; -- Shift UP by 1.
+	State[11], State[12], State[9], State[10] = State[9], State[10], State[11], State[12]; -- Shift UP by 2.
+	State[16], State[13], State[14], State[15] = State[13], State[14], State[15], State[16]; -- Shift UP by 3.
+end;
+
+
+local function MixColumns(State : Array<number>) : nil?
+	for Current : number = 1, 4 do
+		local FirstIndex : number, SecondIndex : number, ThirdIndex : number = Current + 4, Current + 8, Current + 12;
+		
+		local First : number, Second : number = State[Current], State[FirstIndex];
+		local Third : number, Fourth : number = State[SecondIndex], State[ThirdIndex];
+
+		State[Current] = bit32.bxor(bit32.bxor(bit32.bxor(GF8x2[First], GF8x3[Second]), Third), Fourth);
+		State[FirstIndex] = bit32.bxor(bit32.bxor(bit32.bxor(First, GF8x2[Second]), GF8x3[Third]), Fourth);
+		State[SecondIndex] = bit32.bxor(bit32.bxor(bit32.bxor(First, Second), GF8x2[Third]), GF8x3[Fourth]);
+		State[ThirdIndex] = bit32.bxor(bit32.bxor(bit32.bxor(GF8x3[First], Second), Third), GF8x2[Fourth]);
+	end;
+end;
+
+local function InverseMixColumns(State : Array<number>) : nil?
+	for Current : number = 1, 4 do
+		local FirstIndex : number, SecondIndex : number, ThirdIndex : number = Current + 4, Current + 8, Current + 12;
+		
+		local First : number, Second : number = State[Current], State[FirstIndex];
+		local Third : number, Fourth : number = State[SecondIndex], State[ThirdIndex];
+
+		State[Current] = bit32.bxor(bit32.bxor(bit32.bxor(GF8x14[First], GF8x11[Second]), GF8x13[Third]), GF8x9[Fourth]);
+		State[FirstIndex] = bit32.bxor(bit32.bxor(bit32.bxor(GF8x9[First],  GF8x14[Second]), GF8x11[Third]), GF8x13[Fourth]);
+		State[SecondIndex] = bit32.bxor(bit32.bxor(bit32.bxor(GF8x13[First], GF8x9[Second]),  GF8x14[Third]), GF8x11[Fourth]);
+		State[ThirdIndex] = bit32.bxor(bit32.bxor(bit32.bxor(GF8x11[First], GF8x13[Second]), GF8x9[Third]),  GF8x14[Fourth]);
+	end;
+end;
+
+--// Primary Functions //--
+
+local function Schedule256(Key : number) : Array<number>
+	local Expanded : Array<number> = {};
+
+	for Count : number = 0, EncryptionKeySizeInBytes do
+		local Byte : number = Key % 256;
+
+		Expanded[Count] = Byte;
+		Key = (Key - Byte) * 0.00390625;
+	end;
+
+	local Index : number, Count : number = 1, EncryptionKeySizeInBytes;
+
+	local First : number, Second : number = Expanded[1], Expanded[2];
+	local Third : number, Fourth : number = Expanded[3], Expanded[4];
+
+	while (Count < RoundKeySizeInBytes) do
+		First, Second, Third, Fourth = bit32.bxor(KeySchedule[Index], SBox[Second]), SBox[Third], SBox[Fourth], SBox[First];
+		Index += 1;
+
+		for Index : number = 1, 8 do
+			if (Index == 5) then
+				First, Second, Third, Fourth = SBox[First], SBox[Second], SBox[Third], SBox[Fourth];
+			end;
+			
+			Count += 1;
+			First = bit32.bxor(First, Expanded[Count - EncryptionKeySizeInBytes]);
+			Expanded[Count] = First;
+
+			Count += 1;
+			Second = bit32.bxor(Second, Expanded[Count - EncryptionKeySizeInBytes]);
+			Expanded[Count] = Second;
+
+			Count += 1;
+			Third = bit32.bxor(Third, Expanded[Count - EncryptionKeySizeInBytes]);
+			Expanded[Count] = Third;
+
+			Count += 1;
+			Fourth = bit32.bxor(Fourth, Expanded[Count - EncryptionKeySizeInBytes]);
+			Expanded[Count] = Fourth;
+		end;
+	end;
+
+	local RoundKeys : Array<number> = {};
+
+	for Round : number = 0, 14 do
+		local RoundKey : Array<number> = {};
+
+		for Byte : number = 1, 16 do
+			RoundKey[Byte] = Expanded[Round * 16 + Byte];
+		end;
+
+		RoundKeys[Round] = RoundKey;
+	end;
+
+	return (RoundKeys);
+end;
+
+local function Chunks(Text : string, PrimaryIndex : number) : (number?, Array<number>?)
+	local First : number = PrimaryIndex * 16 + 1;
+
+	if (First > #Text) then
+		return;
+	end;
+
+	PrimaryIndex += 1;
+	local Chunk : Array<number> = {string.byte(Text, First, First + 15)};
+
+	for SecondaryIndex : number = #Chunk + 1, 16 do
+		Chunk[SecondaryIndex] = 0;
+	end;
+
+	return PrimaryIndex, Chunk;
+end
+
+--// Methods //--
+
+local function Encrypt(State : Array<number>, RoundKeys : Array<number>) : nil?
+	AddRoundKey(State, RoundKeys[0]);
+
+	for Round : number = 1, 13 do
+		SubstituteBytes(State, SBox);
+		ShiftRows(State);
+		MixColumns(State);
+		AddRoundKey(State, RoundKeys[Round]);
+	end;
+
+	SubstituteBytes(State, SBox);
+	ShiftRows(State);
+	AddRoundKey(State, RoundKeys[14]);
+end;
+
+local function Decrypt(State : Array<number>, RoundKeys : Array<number>) : nil?
+	AddRoundKey(State, RoundKeys[14]);
+	InverseShiftRows(State);
+	SubstituteBytes(State, InverseSBox);
+
+	for Round : number = 13, 1, -1 do
+		AddRoundKey(State, RoundKeys[Round]);
+		InverseMixColumns(State);
+		InverseShiftRows(State);
+		SubstituteBytes(State, InverseSBox);
+	end;
+
+	AddRoundKey(State, RoundKeys[0]);
+end;
+
+--// Primary Methods //--
+
+-- Reference : https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Electronic_codebook_(ECB)
+local function ElectronicCodebook(Method : (... Array<number>) -> ... any?, Key : number, OriginalText : string) : string
+	local Text : Array<string>, RoundKeys : Array<number> = {}, Schedule256(Key);
+
+	for Chunk : number, State : Array<number> in Chunks, OriginalText, 0 do
+		Method(State, RoundKeys);
+		Text[Chunk] = string.char(unpack(State));
+	end;
+
+	return (table.concat(Text));
+end;
+
+--// Module Initalization //--
+
+local Module : any?, Generator : Random = {}, Random.new(tick());
+
+--// Module Methods //--
+
+function Module:GenerateKey() : string
+	local Blank : string = string.rep("\0", 64);
+
+	if (game:GetService("RunService"):IsStudio()) then
+		return (Blank);
+	else
+		return (string.gsub(Blank, ".", function() : string
+			return (string.format("%02x", Generator:NextInteger(0, 255)));
+		end));
+	end;
+end;
+
+function Module:Encrypt(Data : string, Key : string) : string
+	return (ElectronicCodebook(Encrypt, tonumber(Key, 16), Data));
+end;
+
+function Module:Decrypt(Data : string, Key : string) : string
+	return (ElectronicCodebook(Decrypt, tonumber(Key, 16), Data));
+end;
+
+--// Ending //--
+
+return (Module);]]></ProtectedString>
+				<int64 name="SourceAssetId">-1</int64>
+				<BinaryString name="Tags"></BinaryString>
+			</Properties>
+			<Item class="ModuleScript" referent="RBX5C636E402FFD4BC290690F2F305B1F25">
+				<Properties>
+					<BinaryString name="AttributesSerialize"></BinaryString>
+					<Content name="LinkedSource"><null></null></Content>
+					<string name="Name">Datasets</string>
+					<string name="ScriptGuid">{7CD648C0-9639-4778-87B2-675B077DEC03}</string>
+					<ProtectedString name="Source"><![CDATA[-- WARNING : These array's contain very sensitive information, making changes can & will 
+-- effect the integrity of the module that requires it.
+
+return ({
+	{[0]=
+		
+		0x00, 0x02, 0x04, 0x06, 0x08, 0x0a, 0x0c, 0x0e, 0x10, 0x12, 0x14, 0x16, 0x18, 0x1a, 0x1c, 0x1e,
+		0x20, 0x22, 0x24, 0x26, 0x28, 0x2a, 0x2c, 0x2e, 0x30, 0x32, 0x34, 0x36, 0x38, 0x3a, 0x3c, 0x3e,
+		0x40, 0x42, 0x44, 0x46, 0x48, 0x4a, 0x4c, 0x4e, 0x50, 0x52, 0x54, 0x56, 0x58, 0x5a, 0x5c, 0x5e,
+		0x60, 0x62, 0x64, 0x66, 0x68, 0x6a, 0x6c, 0x6e, 0x70, 0x72, 0x74, 0x76, 0x78, 0x7a, 0x7c, 0x7e,
+		0x80, 0x82, 0x84, 0x86, 0x88, 0x8a, 0x8c, 0x8e, 0x90, 0x92, 0x94, 0x96, 0x98, 0x9a, 0x9c, 0x9e,
+		0xa0, 0xa2, 0xa4, 0xa6, 0xa8, 0xaa, 0xac, 0xae, 0xb0, 0xb2, 0xb4, 0xb6, 0xb8, 0xba, 0xbc, 0xbe,
+		0xc0, 0xc2, 0xc4, 0xc6, 0xc8, 0xca, 0xcc, 0xce, 0xd0, 0xd2, 0xd4, 0xd6, 0xd8, 0xda, 0xdc, 0xde,
+		0xe0, 0xe2, 0xe4, 0xe6, 0xe8, 0xea, 0xec, 0xee, 0xf0, 0xf2, 0xf4, 0xf6, 0xf8, 0xfa, 0xfc, 0xfe,
+		0x1b, 0x19, 0x1f, 0x1d, 0x13, 0x11, 0x17, 0x15, 0x0b, 0x09, 0x0f, 0x0d, 0x03, 0x01, 0x07, 0x05,
+		0x3b, 0x39, 0x3f, 0x3d, 0x33, 0x31, 0x37, 0x35, 0x2b, 0x29, 0x2f, 0x2d, 0x23, 0x21, 0x27, 0x25,
+		0x5b, 0x59, 0x5f, 0x5d, 0x53, 0x51, 0x57, 0x55, 0x4b, 0x49, 0x4f, 0x4d, 0x43, 0x41, 0x47, 0x45,
+		0x7b, 0x79, 0x7f, 0x7d, 0x73, 0x71, 0x77, 0x75, 0x6b, 0x69, 0x6f, 0x6d, 0x63, 0x61, 0x67, 0x65,
+		0x9b, 0x99, 0x9f, 0x9d, 0x93, 0x91, 0x97, 0x95, 0x8b, 0x89, 0x8f, 0x8d, 0x83, 0x81, 0x87, 0x85,
+		0xbb, 0xb9, 0xbf, 0xbd, 0xb3, 0xb1, 0xb7, 0xb5, 0xab, 0xa9, 0xaf, 0xad, 0xa3, 0xa1, 0xa7, 0xa5,
+		0xdb, 0xd9, 0xdf, 0xdd, 0xd3, 0xd1, 0xd7, 0xd5, 0xcb, 0xc9, 0xcf, 0xcd, 0xc3, 0xc1, 0xc7, 0xc5,
+		0xfb, 0xf9, 0xff, 0xfd, 0xf3, 0xf1, 0xf7, 0xf5, 0xeb, 0xe9, 0xef, 0xed, 0xe3, 0xe1, 0xe7, 0xe5
+		
+	}, {[0]=
+		
+		0x00, 0x03, 0x06, 0x05, 0x0c, 0x0f, 0x0a, 0x09, 0x18, 0x1b, 0x1e, 0x1d, 0x14, 0x17, 0x12, 0x11,
+		0x30, 0x33, 0x36, 0x35, 0x3c, 0x3f, 0x3a, 0x39, 0x28, 0x2b, 0x2e, 0x2d, 0x24, 0x27, 0x22, 0x21,
+		0x60, 0x63, 0x66, 0x65, 0x6c, 0x6f, 0x6a, 0x69, 0x78, 0x7b, 0x7e, 0x7d, 0x74, 0x77, 0x72, 0x71,
+		0x50, 0x53, 0x56, 0x55, 0x5c, 0x5f, 0x5a, 0x59, 0x48, 0x4b, 0x4e, 0x4d, 0x44, 0x47, 0x42, 0x41,
+		0xc0, 0xc3, 0xc6, 0xc5, 0xcc, 0xcf, 0xca, 0xc9, 0xd8, 0xdb, 0xde, 0xdd, 0xd4, 0xd7, 0xd2, 0xd1,
+		0xf0, 0xf3, 0xf6, 0xf5, 0xfc, 0xff, 0xfa, 0xf9, 0xe8, 0xeb, 0xee, 0xed, 0xe4, 0xe7, 0xe2, 0xe1,
+		0xa0, 0xa3, 0xa6, 0xa5, 0xac, 0xaf, 0xaa, 0xa9, 0xb8, 0xbb, 0xbe, 0xbd, 0xb4, 0xb7, 0xb2, 0xb1,
+		0x90, 0x93, 0x96, 0x95, 0x9c, 0x9f, 0x9a, 0x99, 0x88, 0x8b, 0x8e, 0x8d, 0x84, 0x87, 0x82, 0x81,
+		0x9b, 0x98, 0x9d, 0x9e, 0x97, 0x94, 0x91, 0x92, 0x83, 0x80, 0x85, 0x86, 0x8f, 0x8c, 0x89, 0x8a,
+		0xab, 0xa8, 0xad, 0xae, 0xa7, 0xa4, 0xa1, 0xa2, 0xb3, 0xb0, 0xb5, 0xb6, 0xbf, 0xbc, 0xb9, 0xba,
+		0xfb, 0xf8, 0xfd, 0xfe, 0xf7, 0xf4, 0xf1, 0xf2, 0xe3, 0xe0, 0xe5, 0xe6, 0xef, 0xec, 0xe9, 0xea,
+		0xcb, 0xc8, 0xcd, 0xce, 0xc7, 0xc4, 0xc1, 0xc2, 0xd3, 0xd0, 0xd5, 0xd6, 0xdf, 0xdc, 0xd9, 0xda,
+		0x5b, 0x58, 0x5d, 0x5e, 0x57, 0x54, 0x51, 0x52, 0x43, 0x40, 0x45, 0x46, 0x4f, 0x4c, 0x49, 0x4a,
+		0x6b, 0x68, 0x6d, 0x6e, 0x67, 0x64, 0x61, 0x62, 0x73, 0x70, 0x75, 0x76, 0x7f, 0x7c, 0x79, 0x7a,
+		0x3b, 0x38, 0x3d, 0x3e, 0x37, 0x34, 0x31, 0x32, 0x23, 0x20, 0x25, 0x26, 0x2f, 0x2c, 0x29, 0x2a,
+		0x0b, 0x08, 0x0d, 0x0e, 0x07, 0x04, 0x01, 0x02, 0x13, 0x10, 0x15, 0x16, 0x1f, 0x1c, 0x19, 0x1a
+		
+	}, {[0]=
+		
+		0x00, 0x09, 0x12, 0x1b, 0x24, 0x2d, 0x36, 0x3f, 0x48, 0x41, 0x5a, 0x53, 0x6c, 0x65, 0x7e, 0x77,
+		0x90, 0x99, 0x82, 0x8b, 0xb4, 0xbd, 0xa6, 0xaf, 0xd8, 0xd1, 0xca, 0xc3, 0xfc, 0xf5, 0xee, 0xe7,
+		0x3b, 0x32, 0x29, 0x20, 0x1f, 0x16, 0x0d, 0x04, 0x73, 0x7a, 0x61, 0x68, 0x57, 0x5e, 0x45, 0x4c,
+		0xab, 0xa2, 0xb9, 0xb0, 0x8f, 0x86, 0x9d, 0x94, 0xe3, 0xea, 0xf1, 0xf8, 0xc7, 0xce, 0xd5, 0xdc,
+		0x76, 0x7f, 0x64, 0x6d, 0x52, 0x5b, 0x40, 0x49, 0x3e, 0x37, 0x2c, 0x25, 0x1a, 0x13, 0x08, 0x01,
+		0xe6, 0xef, 0xf4, 0xfd, 0xc2, 0xcb, 0xd0, 0xd9, 0xae, 0xa7, 0xbc, 0xb5, 0x8a, 0x83, 0x98, 0x91,
+		0x4d, 0x44, 0x5f, 0x56, 0x69, 0x60, 0x7b, 0x72, 0x05, 0x0c, 0x17, 0x1e, 0x21, 0x28, 0x33, 0x3a,
+		0xdd, 0xd4, 0xcf, 0xc6, 0xf9, 0xf0, 0xeb, 0xe2, 0x95, 0x9c, 0x87, 0x8e, 0xb1, 0xb8, 0xa3, 0xaa,
+		0xec, 0xe5, 0xfe, 0xf7, 0xc8, 0xc1, 0xda, 0xd3, 0xa4, 0xad, 0xb6, 0xbf, 0x80, 0x89, 0x92, 0x9b,
+		0x7c, 0x75, 0x6e, 0x67, 0x58, 0x51, 0x4a, 0x43, 0x34, 0x3d, 0x26, 0x2f, 0x10, 0x19, 0x02, 0x0b,
+		0xd7, 0xde, 0xc5, 0xcc, 0xf3, 0xfa, 0xe1, 0xe8, 0x9f, 0x96, 0x8d, 0x84, 0xbb, 0xb2, 0xa9, 0xa0,
+		0x47, 0x4e, 0x55, 0x5c, 0x63, 0x6a, 0x71, 0x78, 0x0f, 0x06, 0x1d, 0x14, 0x2b, 0x22, 0x39, 0x30,
+		0x9a, 0x93, 0x88, 0x81, 0xbe, 0xb7, 0xac, 0xa5, 0xd2, 0xdb, 0xc0, 0xc9, 0xf6, 0xff, 0xe4, 0xed,
+		0x0a, 0x03, 0x18, 0x11, 0x2e, 0x27, 0x3c, 0x35, 0x42, 0x4b, 0x50, 0x59, 0x66, 0x6f, 0x74, 0x7d,
+		0xa1, 0xa8, 0xb3, 0xba, 0x85, 0x8c, 0x97, 0x9e, 0xe9, 0xe0, 0xfb, 0xf2, 0xcd, 0xc4, 0xdf, 0xd6,
+		0x31, 0x38, 0x23, 0x2a, 0x15, 0x1c, 0x07, 0x0e, 0x79, 0x70, 0x6b, 0x62, 0x5d, 0x54, 0x4f, 0x46
+		
+	}, {[0]=
+		
+		0x00, 0x0b, 0x16, 0x1d, 0x2c, 0x27, 0x3a, 0x31, 0x58, 0x53, 0x4e, 0x45, 0x74, 0x7f, 0x62, 0x69,
+		0xb0, 0xbb, 0xa6, 0xad, 0x9c, 0x97, 0x8a, 0x81, 0xe8, 0xe3, 0xfe, 0xf5, 0xc4, 0xcf, 0xd2, 0xd9,
+		0x7b, 0x70, 0x6d, 0x66, 0x57, 0x5c, 0x41, 0x4a, 0x23, 0x28, 0x35, 0x3e, 0x0f, 0x04, 0x19, 0x12,
+		0xcb, 0xc0, 0xdd, 0xd6, 0xe7, 0xec, 0xf1, 0xfa, 0x93, 0x98, 0x85, 0x8e, 0xbf, 0xb4, 0xa9, 0xa2,
+		0xf6, 0xfd, 0xe0, 0xeb, 0xda, 0xd1, 0xcc, 0xc7, 0xae, 0xa5, 0xb8, 0xb3, 0x82, 0x89, 0x94, 0x9f,
+		0x46, 0x4d, 0x50, 0x5b, 0x6a, 0x61, 0x7c, 0x77, 0x1e, 0x15, 0x08, 0x03, 0x32, 0x39, 0x24, 0x2f,
+		0x8d, 0x86, 0x9b, 0x90, 0xa1, 0xaa, 0xb7, 0xbc, 0xd5, 0xde, 0xc3, 0xc8, 0xf9, 0xf2, 0xef, 0xe4,
+		0x3d, 0x36, 0x2b, 0x20, 0x11, 0x1a, 0x07, 0x0c, 0x65, 0x6e, 0x73, 0x78, 0x49, 0x42, 0x5f, 0x54,
+		0xf7, 0xfc, 0xe1, 0xea, 0xdb, 0xd0, 0xcd, 0xc6, 0xaf, 0xa4, 0xb9, 0xb2, 0x83, 0x88, 0x95, 0x9e,
+		0x47, 0x4c, 0x51, 0x5a, 0x6b, 0x60, 0x7d, 0x76, 0x1f, 0x14, 0x09, 0x02, 0x33, 0x38, 0x25, 0x2e,
+		0x8c, 0x87, 0x9a, 0x91, 0xa0, 0xab, 0xb6, 0xbd, 0xd4, 0xdf, 0xc2, 0xc9, 0xf8, 0xf3, 0xee, 0xe5,
+		0x3c, 0x37, 0x2a, 0x21, 0x10, 0x1b, 0x06, 0x0d, 0x64, 0x6f, 0x72, 0x79, 0x48, 0x43, 0x5e, 0x55,
+		0x01, 0x0a, 0x17, 0x1c, 0x2d, 0x26, 0x3b, 0x30, 0x59, 0x52, 0x4f, 0x44, 0x75, 0x7e, 0x63, 0x68,
+		0xb1, 0xba, 0xa7, 0xac, 0x9d, 0x96, 0x8b, 0x80, 0xe9, 0xe2, 0xff, 0xf4, 0xc5, 0xce, 0xd3, 0xd8,
+		0x7a, 0x71, 0x6c, 0x67, 0x56, 0x5d, 0x40, 0x4b, 0x22, 0x29, 0x34, 0x3f, 0x0e, 0x05, 0x18, 0x13,
+		0xca, 0xc1, 0xdc, 0xd7, 0xe6, 0xed, 0xf0, 0xfb, 0x92, 0x99, 0x84, 0x8f, 0xbe, 0xb5, 0xa8, 0xa3
+		
+	}, {[0]=
+		
+		0x00, 0x0d, 0x1a, 0x17, 0x34, 0x39, 0x2e, 0x23, 0x68, 0x65, 0x72, 0x7f, 0x5c, 0x51, 0x46, 0x4b,
+		0xd0, 0xdd, 0xca, 0xc7, 0xe4, 0xe9, 0xfe, 0xf3, 0xb8, 0xb5, 0xa2, 0xaf, 0x8c, 0x81, 0x96, 0x9b,
+		0xbb, 0xb6, 0xa1, 0xac, 0x8f, 0x82, 0x95, 0x98, 0xd3, 0xde, 0xc9, 0xc4, 0xe7, 0xea, 0xfd, 0xf0,
+		0x6b, 0x66, 0x71, 0x7c, 0x5f, 0x52, 0x45, 0x48, 0x03, 0x0e, 0x19, 0x14, 0x37, 0x3a, 0x2d, 0x20,
+		0x6d, 0x60, 0x77, 0x7a, 0x59, 0x54, 0x43, 0x4e, 0x05, 0x08, 0x1f, 0x12, 0x31, 0x3c, 0x2b, 0x26,
+		0xbd, 0xb0, 0xa7, 0xaa, 0x89, 0x84, 0x93, 0x9e, 0xd5, 0xd8, 0xcf, 0xc2, 0xe1, 0xec, 0xfb, 0xf6,
+		0xd6, 0xdb, 0xcc, 0xc1, 0xe2, 0xef, 0xf8, 0xf5, 0xbe, 0xb3, 0xa4, 0xa9, 0x8a, 0x87, 0x90, 0x9d,
+		0x06, 0x0b, 0x1c, 0x11, 0x32, 0x3f, 0x28, 0x25, 0x6e, 0x63, 0x74, 0x79, 0x5a, 0x57, 0x40, 0x4d,
+		0xda, 0xd7, 0xc0, 0xcd, 0xee, 0xe3, 0xf4, 0xf9, 0xb2, 0xbf, 0xa8, 0xa5, 0x86, 0x8b, 0x9c, 0x91,
+		0x0a, 0x07, 0x10, 0x1d, 0x3e, 0x33, 0x24, 0x29, 0x62, 0x6f, 0x78, 0x75, 0x56, 0x5b, 0x4c, 0x41,
+		0x61, 0x6c, 0x7b, 0x76, 0x55, 0x58, 0x4f, 0x42, 0x09, 0x04, 0x13, 0x1e, 0x3d, 0x30, 0x27, 0x2a,
+		0xb1, 0xbc, 0xab, 0xa6, 0x85, 0x88, 0x9f, 0x92, 0xd9, 0xd4, 0xc3, 0xce, 0xed, 0xe0, 0xf7, 0xfa,
+		0xb7, 0xba, 0xad, 0xa0, 0x83, 0x8e, 0x99, 0x94, 0xdf, 0xd2, 0xc5, 0xc8, 0xeb, 0xe6, 0xf1, 0xfc,
+		0x67, 0x6a, 0x7d, 0x70, 0x53, 0x5e, 0x49, 0x44, 0x0f, 0x02, 0x15, 0x18, 0x3b, 0x36, 0x21, 0x2c,
+		0x0c, 0x01, 0x16, 0x1b, 0x38, 0x35, 0x22, 0x2f, 0x64, 0x69, 0x7e, 0x73, 0x50, 0x5d, 0x4a, 0x47,
+		0xdc, 0xd1, 0xc6, 0xcb, 0xe8, 0xe5, 0xf2, 0xff, 0xb4, 0xb9, 0xae, 0xa3, 0x80, 0x8d, 0x9a, 0x97
+		
+	}, {[0]=
+		
+		0x00, 0x0e, 0x1c, 0x12, 0x38, 0x36, 0x24, 0x2a, 0x70, 0x7e, 0x6c, 0x62, 0x48, 0x46, 0x54, 0x5a,
+		0xe0, 0xee, 0xfc, 0xf2, 0xd8, 0xd6, 0xc4, 0xca, 0x90, 0x9e, 0x8c, 0x82, 0xa8, 0xa6, 0xb4, 0xba,
+		0xdb, 0xd5, 0xc7, 0xc9, 0xe3, 0xed, 0xff, 0xf1, 0xab, 0xa5, 0xb7, 0xb9, 0x93, 0x9d, 0x8f, 0x81,
+		0x3b, 0x35, 0x27, 0x29, 0x03, 0x0d, 0x1f, 0x11, 0x4b, 0x45, 0x57, 0x59, 0x73, 0x7d, 0x6f, 0x61,
+		0xad, 0xa3, 0xb1, 0xbf, 0x95, 0x9b, 0x89, 0x87, 0xdd, 0xd3, 0xc1, 0xcf, 0xe5, 0xeb, 0xf9, 0xf7,
+		0x4d, 0x43, 0x51, 0x5f, 0x75, 0x7b, 0x69, 0x67, 0x3d, 0x33, 0x21, 0x2f, 0x05, 0x0b, 0x19, 0x17,
+		0x76, 0x78, 0x6a, 0x64, 0x4e, 0x40, 0x52, 0x5c, 0x06, 0x08, 0x1a, 0x14, 0x3e, 0x30, 0x22, 0x2c,
+		0x96, 0x98, 0x8a, 0x84, 0xae, 0xa0, 0xb2, 0xbc, 0xe6, 0xe8, 0xfa, 0xf4, 0xde, 0xd0, 0xc2, 0xcc,
+		0x41, 0x4f, 0x5d, 0x53, 0x79, 0x77, 0x65, 0x6b, 0x31, 0x3f, 0x2d, 0x23, 0x09, 0x07, 0x15, 0x1b,
+		0xa1, 0xaf, 0xbd, 0xb3, 0x99, 0x97, 0x85, 0x8b, 0xd1, 0xdf, 0xcd, 0xc3, 0xe9, 0xe7, 0xf5, 0xfb,
+		0x9a, 0x94, 0x86, 0x88, 0xa2, 0xac, 0xbe, 0xb0, 0xea, 0xe4, 0xf6, 0xf8, 0xd2, 0xdc, 0xce, 0xc0,
+		0x7a, 0x74, 0x66, 0x68, 0x42, 0x4c, 0x5e, 0x50, 0x0a, 0x04, 0x16, 0x18, 0x32, 0x3c, 0x2e, 0x20,
+		0xec, 0xe2, 0xf0, 0xfe, 0xd4, 0xda, 0xc8, 0xc6, 0x9c, 0x92, 0x80, 0x8e, 0xa4, 0xaa, 0xb8, 0xb6,
+		0x0c, 0x02, 0x10, 0x1e, 0x34, 0x3a, 0x28, 0x26, 0x7c, 0x72, 0x60, 0x6e, 0x44, 0x4a, 0x58, 0x56,
+		0x37, 0x39, 0x2b, 0x25, 0x0f, 0x01, 0x13, 0x1d, 0x47, 0x49, 0x5b, 0x55, 0x7f, 0x71, 0x63, 0x6d,
+		0xd7, 0xd9, 0xcb, 0xc5, 0xef, 0xe1, 0xf3, 0xfd, 0xa7, 0xa9, 0xbb, 0xb5, 0x9f, 0x91, 0x83, 0x8d
+		
+	}, {[0]=
+		
+		0x63, 0x7C, 0x77, 0x7B, 0xF2, 0x6B, 0x6F, 0xC5, 0x30, 0x01, 0x67, 0x2B, 0xFE, 0xD7, 0xAB, 0x76,
+		0xCA, 0x82, 0xC9, 0x7D, 0xFA, 0x59, 0x47, 0xF0, 0xAD, 0xD4, 0xA2, 0xAF, 0x9C, 0xA4, 0x72, 0xC0,
+		0xB7, 0xFD, 0x93, 0x26, 0x36, 0x3F, 0xF7, 0xCC, 0x34, 0xA5, 0xE5, 0xF1, 0x71, 0xD8, 0x31, 0x15,
+		0x04, 0xC7, 0x23, 0xC3, 0x18, 0x96, 0x05, 0x9A, 0x07, 0x12, 0x80, 0xE2, 0xEB, 0x27, 0xB2, 0x75,
+		0x09, 0x83, 0x2C, 0x1A, 0x1B, 0x6E, 0x5A, 0xA0, 0x52, 0x3B, 0xD6, 0xB3, 0x29, 0xE3, 0x2F, 0x84,
+		0x53, 0xD1, 0x00, 0xED, 0x20, 0xFC, 0xB1, 0x5B, 0x6A, 0xCB, 0xBE, 0x39, 0x4A, 0x4C, 0x58, 0xCF,
+		0xD0, 0xEF, 0xAA, 0xFB, 0x43, 0x4D, 0x33, 0x85, 0x45, 0xF9, 0x02, 0x7F, 0x50, 0x3C, 0x9F, 0xA8,
+		0x51, 0xA3, 0x40, 0x8F, 0x92, 0x9D, 0x38, 0xF5, 0xBC, 0xB6, 0xDA, 0x21, 0x10, 0xFF, 0xF3, 0xD2,
+		0xCD, 0x0C, 0x13, 0xEC, 0x5F, 0x97, 0x44, 0x17, 0xC4, 0xA7, 0x7E, 0x3D, 0x64, 0x5D, 0x19, 0x73,
+		0x60, 0x81, 0x4F, 0xDC, 0x22, 0x2A, 0x90, 0x88, 0x46, 0xEE, 0xB8, 0x14, 0xDE, 0x5E, 0x0B, 0xDB,
+		0xE0, 0x32, 0x3A, 0x0A, 0x49, 0x06, 0x24, 0x5C, 0xC2, 0xD3, 0xAC, 0x62, 0x91, 0x95, 0xE4, 0x79,
+		0xE7, 0xC8, 0x37, 0x6D, 0x8D, 0xD5, 0x4E, 0xA9, 0x6C, 0x56, 0xF4, 0xEA, 0x65, 0x7A, 0xAE, 0x08,
+		0xBA, 0x78, 0x25, 0x2E, 0x1C, 0xA6, 0xB4, 0xC6, 0xE8, 0xDD, 0x74, 0x1F, 0x4B, 0xBD, 0x8B, 0x8A,
+		0x70, 0x3E, 0xB5, 0x66, 0x48, 0x03, 0xF6, 0x0E, 0x61, 0x35, 0x57, 0xB9, 0x86, 0xC1, 0x1D, 0x9E,
+		0xE1, 0xF8, 0x98, 0x11, 0x69, 0xD9, 0x8E, 0x94, 0x9B, 0x1E, 0x87, 0xE9, 0xCE, 0x55, 0x28, 0xDF,
+		0x8C, 0xA1, 0x89, 0x0D, 0xBF, 0xE6, 0x42, 0x68, 0x41, 0x99, 0x2D, 0x0F, 0xB0, 0x54, 0xBB, 0x16
+		
+	}, {[0]=
+		
+		0x52, 0x09, 0x6A, 0xD5, 0x30, 0x36, 0xA5, 0x38, 0xBF, 0x40, 0xA3, 0x9E, 0x81, 0xF3, 0xD7, 0xFB,
+		0x7C, 0xE3, 0x39, 0x82, 0x9B, 0x2F, 0xFF, 0x87, 0x34, 0x8E, 0x43, 0x44, 0xC4, 0xDE, 0xE9, 0xCB,
+		0x54, 0x7B, 0x94, 0x32, 0xA6, 0xC2, 0x23, 0x3D, 0xEE, 0x4C, 0x95, 0x0B, 0x42, 0xFA, 0xC3, 0x4E,
+		0x08, 0x2E, 0xA1, 0x66, 0x28, 0xD9, 0x24, 0xB2, 0x76, 0x5B, 0xA2, 0x49, 0x6D, 0x8B, 0xD1, 0x25,
+		0x72, 0xF8, 0xF6, 0x64, 0x86, 0x68, 0x98, 0x16, 0xD4, 0xA4, 0x5C, 0xCC, 0x5D, 0x65, 0xB6, 0x92,
+		0x6C, 0x70, 0x48, 0x50, 0xFD, 0xED, 0xB9, 0xDA, 0x5E, 0x15, 0x46, 0x57, 0xA7, 0x8D, 0x9D, 0x84,
+		0x90, 0xD8, 0xAB, 0x00, 0x8C, 0xBC, 0xD3, 0x0A, 0xF7, 0xE4, 0x58, 0x05, 0xB8, 0xB3, 0x45, 0x06,
+		0xD0, 0x2C, 0x1E, 0x8F, 0xCA, 0x3F, 0x0F, 0x02, 0xC1, 0xAF, 0xBD, 0x03, 0x01, 0x13, 0x8A, 0x6B,
+		0x3A, 0x91, 0x11, 0x41, 0x4F, 0x67, 0xDC, 0xEA, 0x97, 0xF2, 0xCF, 0xCE, 0xF0, 0xB4, 0xE6, 0x73,
+		0x96, 0xAC, 0x74, 0x22, 0xE7, 0xAD, 0x35, 0x85, 0xE2, 0xF9, 0x37, 0xE8, 0x1C, 0x75, 0xDF, 0x6E,
+		0x47, 0xF1, 0x1A, 0x71, 0x1D, 0x29, 0xC5, 0x89, 0x6F, 0xB7, 0x62, 0x0E, 0xAA, 0x18, 0xBE, 0x1B,
+		0xFC, 0x56, 0x3E, 0x4B, 0xC6, 0xD2, 0x79, 0x20, 0x9A, 0xDB, 0xC0, 0xFE, 0x78, 0xCD, 0x5A, 0xF4,
+		0x1F, 0xDD, 0xA8, 0x33, 0x88, 0x07, 0xC7, 0x31, 0xB1, 0x12, 0x10, 0x59, 0x27, 0x80, 0xEC, 0x5F,
+		0x60, 0x51, 0x7F, 0xA9, 0x19, 0xB5, 0x4A, 0x0D, 0x2D, 0xE5, 0x7A, 0x9F, 0x93, 0xC9, 0x9C, 0xEF,
+		0xA0, 0xE0, 0x3B, 0x4D, 0xAE, 0x2A, 0xF5, 0xB0, 0xC8, 0xEB, 0xBB, 0x3C, 0x83, 0x53, 0x99, 0x61,
+		0x17, 0x2B, 0x04, 0x7E, 0xBA, 0x77, 0xD6, 0x26, 0xE1, 0x69, 0x14, 0x63, 0x55, 0x21, 0x0C, 0x7D
+		
+	}, {
+		
+		0x8d, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36, 0x6c, 0xd8, 0xab, 0x4d, 0x9a,
+		0x2f, 0x5e, 0xbc, 0x63, 0xc6, 0x97, 0x35, 0x6a, 0xd4, 0xb3, 0x7d, 0xfa, 0xef, 0xc5, 0x91, 0x39,
+		0x72, 0xe4, 0xd3, 0xbd, 0x61, 0xc2, 0x9f, 0x25, 0x4a, 0x94, 0x33, 0x66, 0xcc, 0x83, 0x1d, 0x3a,
+		0x74, 0xe8, 0xcb, 0x8d, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36, 0x6c, 0xd8,
+		0xab, 0x4d, 0x9a, 0x2f, 0x5e, 0xbc, 0x63, 0xc6, 0x97, 0x35, 0x6a, 0xd4, 0xb3, 0x7d, 0xfa, 0xef,
+		0xc5, 0x91, 0x39, 0x72, 0xe4, 0xd3, 0xbd, 0x61, 0xc2, 0x9f, 0x25, 0x4a, 0x94, 0x33, 0x66, 0xcc,
+		0x83, 0x1d, 0x3a, 0x74, 0xe8, 0xcb, 0x8d, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b,
+		0x36, 0x6c, 0xd8, 0xab, 0x4d, 0x9a, 0x2f, 0x5e, 0xbc, 0x63, 0xc6, 0x97, 0x35, 0x6a, 0xd4, 0xb3,
+		0x7d, 0xfa, 0xef, 0xc5, 0x91, 0x39, 0x72, 0xe4, 0xd3, 0xbd, 0x61, 0xc2, 0x9f, 0x25, 0x4a, 0x94,
+		0x33, 0x66, 0xcc, 0x83, 0x1d, 0x3a, 0x74, 0xe8, 0xcb, 0x8d, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20,
+		0x40, 0x80, 0x1b, 0x36, 0x6c, 0xd8, 0xab, 0x4d, 0x9a, 0x2f, 0x5e, 0xbc, 0x63, 0xc6, 0x97, 0x35,
+		0x6a, 0xd4, 0xb3, 0x7d, 0xfa, 0xef, 0xc5, 0x91, 0x39, 0x72, 0xe4, 0xd3, 0xbd, 0x61, 0xc2, 0x9f,
+		0x25, 0x4a, 0x94, 0x33, 0x66, 0xcc, 0x83, 0x1d, 0x3a, 0x74, 0xe8, 0xcb, 0x8d, 0x01, 0x02, 0x04,
+		0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36, 0x6c, 0xd8, 0xab, 0x4d, 0x9a, 0x2f, 0x5e, 0xbc, 0x63,
+		0xc6, 0x97, 0x35, 0x6a, 0xd4, 0xb3, 0x7d, 0xfa, 0xef, 0xc5, 0x91, 0x39, 0x72, 0xe4, 0xd3, 0xbd,
+		0x61, 0xc2, 0x9f, 0x25, 0x4a, 0x94, 0x33, 0x66, 0xcc, 0x83, 0x1d, 0x3a, 0x74, 0xe8, 0xcb, 0x8d
+		
+	}
+});]]></ProtectedString>
+					<int64 name="SourceAssetId">-1</int64>
+					<BinaryString name="Tags"></BinaryString>
+				</Properties>
+			</Item>
+		</Item>
+		<Item class="ModuleScript" referent="RBXFFCC87AC01AC4B23B67AEC1AFCE159B0">
+			<Properties>
+				<BinaryString name="AttributesSerialize"></BinaryString>
+				<Content name="LinkedSource"><null></null></Content>
+				<string name="Name">Deflate</string>
+				<string name="ScriptGuid">{10288CC9-1699-45BD-8CE1-A3C46D58280B}</string>
+				<ProtectedString name="Source"><![CDATA[--[[::
+
+Copyright (C) 2022, Luc Rodriguez (Aliases : Shambi, StyledDev).
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+- This copy has been modified to suit YUCON FRAMEWORK.
+
+(Note to self) TODO : Redo this module with more optimizations, and better variables names.
+
+--::]]
+
+local L_1_, L_2_ = {}, {}
+
+L_1_.Deflate = {}
+L_1_.Zlib = {}
+L_1_.Library = L_2_
+
+function L_1_.Deflate.Compress(L_68_arg1, L_69_arg2)
+	return L_2_:CompressDeflate(L_68_arg1, L_69_arg2)
+end;
+
+function L_1_.Deflate.Decompress(L_70_arg1)
+	return L_2_:DecompressDeflate(L_70_arg1)
+end;
+
+function L_1_.Zlib.Compress(L_71_arg1, L_72_arg2)
+	return L_2_:CompressZlib(L_71_arg1, L_72_arg2)
+end;
+
+function L_1_.Zlib.Decompress(L_73_arg1)
+	return L_2_:DecompressZlib(L_73_arg1)
+end;
+
+local L_3_, L_4_, L_5_, L_6_, L_7_, L_8_, L_9_, L_10_, L_11_ = {}, {}, {}, {}, {}, {}, {}, {}, {}
+local L_12_ = {3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 15, 17, 19, 23, 27, 31, 35, 43, 51, 59, 67, 83, 99, 115, 131, 163, 195, 227, 258}
+local L_13_ = {0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 0}
+local L_14_ = {[0] = 1, 2, 3, 4, 5, 7, 9, 13, 17, 25, 33, 49, 65, 97, 129, 193, 257, 385, 513, 769, 1025, 1537, 2049, 3073, 4097, 6145, 8193, 12289, 16385, 24577}
+local L_15_ = {[0] = 0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13}
+local L_16_ = {16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15}
+local L_17_, L_18_, L_19_, L_20_, L_21_, L_22_, L_23_, L_24_
+
+for L_74_forvar1 = 0, 255 do
+	L_4_[L_74_forvar1] = string.char(L_74_forvar1)
+end;
+
+do
+	local L_75_ = 1
+	
+	for L_76_forvar1 = 0, 32 do
+		L_3_[L_76_forvar1] = L_75_
+		L_75_ *= 2
+	end;
+end;
+
+for L_77_forvar1 = 1, 9 do
+	L_5_[L_77_forvar1] = {}
+	
+	for L_78_forvar1 = 0, L_3_[L_77_forvar1 + 1] - 1 do
+		local L_79_, L_80_ = 0, L_78_forvar1
+		
+		for L_81_forvar1 = 1, L_77_forvar1 do
+			L_79_ = L_79_ - L_79_ % 2 + (((L_79_ % 2 == 1) or (L_80_ % 2) == 1) and 1 or 0) 
+			L_80_ = (L_80_ - L_80_ % 2) / 2
+			L_79_ *= 2
+		end;
+		
+		L_5_[L_77_forvar1][L_78_forvar1] = (L_79_ - L_79_ % 2) / 2
+	end;
+end;
+
+do
+	local L_82_, L_83_, L_84_, L_85_ = 18, 16, 265, 1
+	
+	for L_86_forvar1 = 3, 258 do
+		if L_86_forvar1 <= 10 then 
+			L_6_[L_86_forvar1] = L_86_forvar1 + 254
+			L_8_[L_86_forvar1] = 0
+			
+		elseif L_86_forvar1 == 258 then
+			L_6_[L_86_forvar1] = 285
+			L_8_[L_86_forvar1] = 0
+		else
+			if L_86_forvar1 > L_82_ then
+				L_82_ += L_83_
+				L_83_ *= 2
+				L_84_ += 4
+				L_85_ += 1
+			end;
+			
+			local L_87_ = L_86_forvar1 - L_82_ - 1 + L_83_ / 2 
+			
+			L_6_[L_86_forvar1] = (L_87_ - (L_87_ % (L_83_ / 8))) / (L_83_ / 8) + L_84_
+			L_8_[L_86_forvar1] = L_85_
+			L_7_[L_86_forvar1] = L_87_ % (L_83_ / 8)
+		end;
+	end;
+end;
+
+do
+	L_9_[1], L_9_[2], L_11_[1], L_11_[2] = 0, 1, 0, 0
+	
+	local L_88_, L_89_, L_90_, L_91_ = 3, 4, 2, 0
+	
+	for L_92_forvar1 = 3, 256 do
+		if L_92_forvar1 > L_89_ then
+			L_88_ *= 2
+			L_89_ *= 2
+			L_90_ += 2
+			L_91_ += 1
+		end;
+		
+		L_9_[L_92_forvar1] = (L_92_forvar1 <= L_88_) and L_90_ or (L_90_ + 1)
+		L_11_[L_92_forvar1] = (L_91_ < 0) and 0 or L_91_
+		
+		if L_89_ >= 8 then 
+			L_10_[L_92_forvar1] = (L_92_forvar1 - L_89_ / 2 - 1) % (L_89_ / 4)
+		end;
+	end;
+end;
+
+function L_2_:Adler32(L_93_arg1)
+	if type(L_93_arg1) ~= "string" then 
+		error(("Usage: Deflate:Adler32(str):".." 'str' - string expected got '%s'."):format(type(L_93_arg1)), 2)
+	end;
+	
+	local L_94_, L_95_, L_96_, L_97_ = #L_93_arg1, 1, 1, 0
+	
+	while L_95_ <= L_94_ - 15 do
+		local L_98_, L_99_, L_100_, L_101_, L_102_, L_103_, L_104_, L_105_, L_106_, L_107_, L_108_, L_109_, L_110_, L_111_, L_112_, L_113_ = string.byte(L_93_arg1, L_95_, L_95_ + 15) 
+		L_97_ = (L_97_ + 16 * L_96_ + 16 * L_98_ + 15 * L_99_ + 14 * L_100_ + 13 * L_101_ + 12 * L_102_ + 11 * L_103_ + 10 * L_104_ + 9 * L_105_ + 8 * L_106_ + 7 * L_107_ + 6 * L_108_ + 5 * L_109_ + 4 * L_110_ + 3 * L_111_ + 2 * L_112_ + L_113_) % 65521
+		L_96_ = (L_96_ + L_98_ + L_99_ + L_100_ + L_101_ + L_102_ + L_103_ + L_104_ + L_105_ + L_106_ + L_107_ + L_108_ + L_109_ + L_110_ + L_111_ + L_112_ + L_113_) % 65521 
+		L_95_ += 16
+	end;
+	
+	while (L_95_ <= L_94_) do
+		local L_114_ = string.byte(L_93_arg1, L_95_, L_95_)
+		
+		L_96_ = (L_96_ + L_114_) % 65521
+		L_97_ = (L_97_ + L_96_) % 65521
+		L_95_ += 1
+	end;
+	
+	return (L_97_ * 65536 + L_96_) % 4294967296
+end;
+
+local function L_25_func(L_115_arg1, L_116_arg2)
+	return (L_115_arg1 % 4294967296) == (L_116_arg2 % 4294967296)
+end;
+
+function L_2_:CreateDictionary(L_117_arg1, L_118_arg2, L_119_arg3)
+	if type(L_117_arg1) ~= "string" then
+		error(string.format("Usage: Deflate:CreateDictionary(string, string_length, adler32): 'string' - string expected got '%s'.", type(L_117_arg1)), 2);
+	end;
+	
+	if type(L_118_arg2) ~= "number" then
+		error(string.format("Usage: Deflate:CreateDictionary(string, string_length, adler32): 'string_length' - number expected got '%s'.", type(L_118_arg2)), 2);
+	end;
+	
+	if type(L_119_arg3) ~= "number" then
+		error(string.format("Usage: Deflate:CreateDictionary(string, string_length, adler32): 'adler32' - number expected got '%s'.", type(L_119_arg3)), 2);
+	end;
+	
+	if L_118_arg2 ~= #L_117_arg1 then
+		error(string.format("Usage: Deflate:CreateDictionary(string, string_length, adler32): 'string_length' does not match the actual length of 'string'. 'string_length': %u, '#string': %u . Please check if 'string' is modified unintentionally.", L_118_arg2, #L_117_arg1), 2);
+	end;
+	
+	if L_118_arg2 == 0 then 
+		error("Usage: Deflate:CreateDictionary(string, string_length, adler32): 'string' - Empty string is not allowed.", 2);
+	end;
+	
+	if L_118_arg2 > 32768 then 
+		error(string.format("Usage: Deflate:CreateDictionary(string, string_length, adler32): 'string' - string longer than 32768 bytes is not allowed. Got %d bytes.", L_118_arg2), 2);
+	end;
+	
+	local L_120_ = self:Adler32(L_117_arg1)
+	
+	if not L_25_func(L_119_arg3, L_120_) then
+		error(string.format("Usage: Deflate:CreateDictionary(string, string_length, adler32): 'adler32' does not match the actual adler32 of 'string'. 'adler32': %u, 'Adler32(string)': %u . Please check if 'string' is modified unintentionally.", L_119_arg3, L_120_), 2);
+	end;
+	
+	local L_121_ = {}
+	
+	L_121_.adler32 = L_119_arg3
+	L_121_.hash_tables = {}
+	L_121_.string_table = {}
+	L_121_.strlen = L_118_arg2
+	
+	local L_122_ = L_121_.string_table
+	local L_123_ = L_121_.hash_tables
+	
+	L_122_[1] = string.byte(L_117_arg1, 1, 1) 
+	L_122_[2] = string.byte(L_117_arg1, 2, 2)
+	
+	if L_118_arg2 >= 3 then
+		local L_124_ = 1
+		local L_125_ = L_122_[1] * 256 + L_122_[2]
+		
+		while L_124_ <= L_118_arg2 - 2 - 3 do
+			local L_126_, L_127_, L_128_, L_129_ = string.byte(L_117_arg1, L_124_ + 2, L_124_ + 5)
+			
+			L_122_[L_124_ + 2] = L_126_
+			L_122_[L_124_ + 3] = L_127_
+			L_122_[L_124_ + 4] = L_128_ 
+			L_122_[L_124_ + 5] = L_129_
+			L_125_ = (L_125_ * 256 + L_126_) % 16777216
+			
+			local L_130_ = L_123_[L_125_]
+			
+			if not L_130_ then
+				L_130_ = {}
+				L_123_[L_125_] = L_130_
+			end;
+			
+			L_130_[#L_130_ + 1] = L_124_ - L_118_arg2
+			L_124_ += 1
+			L_125_ = (L_125_ * 256 + L_127_) % 16777216
+			L_130_ = L_123_[L_125_]
+			
+			if not L_130_ then
+				L_130_ = {}
+				L_123_[L_125_] = L_130_
+			end;
+			
+			L_130_[#L_130_ + 1] = L_124_ - L_118_arg2
+			L_124_ += 1
+			L_125_ = (L_125_ * 256 + L_128_) % 16777216
+			L_130_ = L_123_[L_125_]
+			
+			if not L_130_ then
+				L_130_ = {}
+				L_123_[L_125_] = L_130_
+			end;
+			
+			L_130_[#L_130_ + 1] = L_124_ - L_118_arg2
+			L_124_ += 1
+			L_125_ = (L_125_ * 256 + L_129_) % 16777216
+			L_130_ = L_123_[L_125_]
+			
+			if not L_130_ then
+				L_130_ = {}
+				L_123_[L_125_] = L_130_ 
+			end;
+			
+			L_130_[#L_130_ + 1] = L_124_ - L_118_arg2
+			L_124_ += 1
+		end;
+		
+		while L_124_ <= L_118_arg2 - 2 do
+			local L_131_ = string.byte(L_117_arg1, L_124_ + 2)
+			
+			L_122_[L_124_ + 2] = L_131_
+			L_125_ = (L_125_ * 256 + L_131_) % 16777216
+			
+			local L_132_ = L_123_[L_125_]
+			
+			if not L_132_ then
+				L_132_ = {}
+				L_123_[L_125_] = L_132_
+			end;
+			
+			L_132_[#L_132_ + 1] = L_124_ - L_118_arg2
+			L_124_ += 1
+		end;
+	end;
+	
+	return L_121_
+end;
+
+local function L_26_func(L_133_arg1)
+	if type(L_133_arg1) ~= "table" then
+		return false, string.format("'dictionary' - table expected got '%s'.", type(L_133_arg1))
+	end;
+	
+	if type(L_133_arg1.adler32) ~= "number" or type(L_133_arg1.string_table) ~= "table" or type(L_133_arg1.strlen) ~= "number" or L_133_arg1.strlen <= 0 or L_133_arg1.strlen > 32768 or L_133_arg1.strlen ~= #L_133_arg1.string_table or type(L_133_arg1.hash_tables) ~= "table" then
+		return false, string.format("'dictionary' - corrupted dictionary.", type(L_133_arg1))
+	end;
+	
+	return true, ""
+end;
+
+local L_27_ = {
+	[0] = {false, nil, 0, 0, 0},
+	[1] = {false, nil, 4, 8, 4},
+	[2] = {false, nil, 5, 18, 8},
+	[3] = {false, nil, 6, 32, 32},
+	[4] = {true, 4, 4, 16, 16},
+	[5] = {true, 8, 16, 32, 32},
+	[6] = {true, 8, 16, 128, 128},
+	[7] = {true, 8, 32, 128, 256},
+	[8] = {true, 32, 128, 258, 1024},
+	[9] = {true, 32, 258, 258, 4096}
+}
+
+local function L_28_func(L_134_arg1, L_135_arg2, L_136_arg3, L_137_arg4, L_138_arg5)
+	if type(L_134_arg1) ~= "string" then
+		return false, string.format("'string' - string expected got '%s'.", type(L_134_arg1))
+	end;
+	
+	if L_135_arg2 then
+		local L_139_, L_140_ = L_26_func(L_136_arg3)
+		
+		if not L_139_ then
+			return false, L_140_ 
+		end;
+	end;
+	
+	if L_137_arg4 then
+		local L_141_ = type(L_138_arg5)
+		
+		if L_141_ ~= "nil" and L_141_ ~= "table" then
+			return false, string.format("'configuration' - nil or table expected got '%s'.", type(L_138_arg5))
+		end;
+		
+		if L_141_ == "table" then
+			for L_142_forvar1, L_143_forvar2 in pairs(L_138_arg5) do
+				if L_142_forvar1 ~= "level" and L_142_forvar1 ~= "strategy" then
+					return false, string.format("'configuration' - unsupported table key in the configs: '%s'.", L_142_forvar1)
+					
+				elseif L_142_forvar1 == "level" and not L_27_[L_143_forvar2] then
+					return false, string.format("'configuration' - unsupported 'level': %s.", tostring(L_143_forvar2))
+					
+				elseif L_142_forvar1 == "strategy" and L_143_forvar2 ~= "fixed" and L_143_forvar2 ~= "huffman_only" and L_143_forvar2 ~= "dynamic" then
+					return false, string.format("'configuration' - unsupported 'strategy': '%s'.", tostring(L_143_forvar2))
+				end;
+			end;
+		end;
+	end;
+	
+	return true, ""
+end;
+
+local L_29_, L_30_, L_31_, L_32_ = 0, 1, 2, 3
+
+local function L_33_func()
+	local L_144_, L_145_, L_146_, L_147_, L_148_, L_149_ = 0, 0, 0, 0, {}, {}
+	
+	local function L_150_func(L_153_arg1, L_154_arg2)
+		L_145_ += L_153_arg1 * L_3_[L_146_]
+		L_146_ += L_154_arg2 
+		L_147_ += L_154_arg2
+		
+		if L_146_ >= 32 then
+			L_144_ += 1
+			L_148_[L_144_] = L_4_[L_145_ % 256]..L_4_[((L_145_ - L_145_ % 256) / 256 % 256)]..L_4_[((L_145_ - L_145_ % 65536) / 65536 % 256)]..L_4_[((L_145_ - L_145_ % 16777216) / 16777216 % 256)]
+			
+			local L_155_ = L_3_[32 - L_146_ + L_154_arg2]
+			
+			L_145_ = (L_153_arg1 - L_153_arg1 % L_155_) / L_155_
+			L_146_ -= 32
+		end;
+	end;
+	
+	local function L_151_func(L_156_arg1)
+		for L_157_forvar1 = 1, L_146_, 8 do
+			L_144_ += 1
+			L_148_[L_144_] = string.char(L_145_ % 256)
+			L_145_ = (L_145_ - L_145_ % 256) / 256
+		end;
+		
+		L_146_ = 0
+		L_144_ += 1
+		L_148_[L_144_] = L_156_arg1
+		L_147_ += #L_156_arg1 * 8
+	end;
+	
+	local function L_152_func(L_158_arg1)
+		if L_158_arg1 == L_32_ then
+			return L_147_
+		end;
+		
+		if L_158_arg1 == L_30_ or L_158_arg1 == L_31_ then
+			local L_160_ = (8 - L_146_ % 8) % 8
+			
+			if L_146_ > 0 then
+				L_145_ -= L_3_[L_146_] + L_3_[L_146_ + L_160_]
+				
+				for L_161_forvar1 = 1, L_146_, 8 do 
+					L_144_ += 1
+					L_148_[L_144_] = L_4_[L_145_ % 256]
+					L_145_ = (L_145_ - L_145_ % 256) / 256
+				end;
+				
+				L_145_, L_146_ = 0, 0
+			end;
+			
+			if L_158_arg1 == L_31_ then
+				L_147_ += L_160_
+				return L_147_
+			end;
+		end;
+		
+		local L_159_ = table.concat(L_148_)
+		
+		L_148_, L_144_ = {}, 0
+		L_149_[#L_149_ + 1] = L_159_
+		
+		if L_158_arg1 == L_29_ then 
+			return L_147_
+		else
+			return L_147_, table.concat(L_149_)
+		end;
+	end;
+	
+	return L_150_func, L_151_func, L_152_func
+end;
+
+local function L_34_func(L_162_arg1, L_163_arg2, L_164_arg3)
+	L_164_arg3 += 1
+	L_162_arg1[L_164_arg3] = L_163_arg2
+	
+	local L_165_ = L_163_arg2[1]
+	local L_166_ = L_164_arg3
+	local L_167_ = (L_166_ - L_166_ % 2) / 2 
+	
+	while (L_167_ >= 1 and L_162_arg1[L_167_][1] > L_165_) do
+		local L_168_ = L_162_arg1[L_167_]
+		
+		L_162_arg1[L_167_] = L_163_arg2
+		L_162_arg1[L_166_] = L_168_
+		L_166_ = L_167_
+		L_167_ = (L_167_ - L_167_ % 2) / 2
+	end;
+end;
+
+local function L_35_func(L_169_arg1, L_170_arg2)
+	local L_171_ = L_169_arg1[1]
+	local L_172_ = L_169_arg1[L_170_arg2]
+	local L_173_ = L_172_[1]
+	
+	L_169_arg1[1] = L_172_
+	L_169_arg1[L_170_arg2] = L_171_
+	L_170_arg2 -= 1
+	
+	local L_174_, L_175_, L_176_ = 1, 2, 3
+	
+	while (L_175_ <= L_170_arg2) do
+		local L_177_ = L_169_arg1[L_175_]
+		
+		if (L_176_ <= L_170_arg2 and L_169_arg1[L_176_][1] < L_177_[1]) then
+			local L_178_ = L_169_arg1[L_176_]
+			
+			if L_178_[1] < L_173_ then 
+				L_169_arg1[L_176_] = L_172_
+				L_169_arg1[L_174_] = L_178_
+				L_174_ = L_176_
+				L_175_ = L_174_ * 2
+				L_176_ = L_175_ + 1
+			else
+				break;
+			end;
+		else
+			if L_177_[1] < L_173_ then
+				L_169_arg1[L_175_] = L_172_
+				L_169_arg1[L_174_] = L_177_
+				L_174_ = L_175_
+				L_175_ = L_174_ * 2
+				L_176_ = L_175_ + 1
+			else
+				break;
+			end;
+		end;
+	end;
+	
+	return L_171_
+end;
+
+local function L_36_func(L_179_arg1, L_180_arg2, L_181_arg3, L_182_arg4)
+	local L_183_, L_184_, L_185_ = 0, {}, {}
+	
+	for L_186_forvar1 = 1, L_182_arg4 do
+		L_183_ = (L_183_ + (L_179_arg1[L_186_forvar1 - 1] or 0)) * 2
+		L_184_[L_186_forvar1] = L_183_
+	end;
+	
+	for L_187_forvar1 = 0, L_181_arg3 do
+		local L_188_ = L_180_arg2[L_187_forvar1]
+		
+		if L_188_ then 
+			L_183_ = L_184_[L_188_]
+			L_184_[L_188_] = L_183_ + 1
+			
+			if L_188_ <= 9 then
+				L_185_[L_187_forvar1] = L_5_[L_188_][L_183_]
+			else
+				local L_189_ = 0
+				
+				for L_190_forvar1 = 1, L_188_ do
+					L_189_ = L_189_ - L_189_ % 2 + (((L_189_ % 2 == 1) or (L_183_ % 2) == 1) and 1 or 0)
+					L_183_ = (L_183_ - L_183_ % 2) / 2
+					L_189_ *= 2
+				end;
+				
+				L_185_[L_187_forvar1] = (L_189_ - L_189_ % 2) / 2
+			end;
+		end;
+	end;
+	
+	return L_185_
+end;
+
+local function L_37_func(L_191_arg1, L_192_arg2)
+	return L_191_arg1[1] < L_192_arg2[1] or (L_191_arg1[1] == L_192_arg2[1] and L_191_arg1[2] < L_192_arg2[2])
+end;
+
+local function L_38_func(L_193_arg1, L_194_arg2, L_195_arg3)
+	local L_196_, L_197_, L_198_, L_199_, L_200_, L_201_, L_202_, L_203_ = nil, -1, {}, {}, {}, {}, {}, 0
+	
+	for L_204_forvar1, L_205_forvar2 in pairs(L_193_arg1) do
+		L_203_ += 1
+		L_198_[L_203_] = {L_205_forvar2, L_204_forvar1}
+	end;
+	
+	if (L_203_ == 0) then 
+		return {}, {}, -1
+		
+	elseif (L_203_ == 1) then
+		local L_206_ = L_198_[1][2]
+		
+		L_200_[L_206_] = 1
+		L_201_[L_206_] = 0
+		
+		return L_200_, L_201_, L_206_
+	else
+		table.sort(L_198_, L_37_func)
+		
+		L_196_ = L_203_
+		
+		for L_211_forvar1 = 1, L_196_ do
+			L_199_[L_211_forvar1] = L_198_[L_211_forvar1]
+		end;
+		
+		while (L_196_ > 1) do 
+			local L_212_ = L_35_func(L_199_, L_196_)
+			
+			L_196_ -= 1
+			
+			local L_213_ = L_35_func(L_199_, L_196_)
+			
+			L_196_ -= 1
+			
+			local L_214_ = {L_212_[1] + L_213_[1], -1, L_212_, L_213_}
+			
+			L_34_func(L_199_, L_214_, L_196_)
+			
+			L_196_ += 1
+		end;
+		
+		local L_208_ = {L_199_[1], 0, 0, 0}
+		local L_209_, L_210_, L_207_ = 1, 1, 0
+		
+		L_199_[1][1] = 0 
+		
+		while (L_210_ <= L_209_) do
+			local L_215_ = L_208_[L_210_]
+			local L_216_, L_217_ = L_215_[1], L_215_[2]
+			local L_218_, L_219_ = L_215_[3], L_215_[4]
+			
+			if L_218_ then
+				L_209_ += 1
+				L_208_[L_209_] = L_218_
+				L_218_[1] = L_216_ + 1
+			end;
+			
+			if L_219_ then
+				L_209_ += 1
+				L_208_[L_209_] = L_219_
+				L_219_[1] = L_216_ + 1 
+			end;
+			
+			L_210_ += 1
+			
+			if (L_216_ > L_194_arg2) then
+				L_207_ += 1
+				L_216_ = L_194_arg2
+			end;
+			
+			if L_217_ >= 0 then
+				L_200_[L_217_] = L_216_
+				L_197_ = (L_217_ > L_197_) and L_217_ or L_197_
+				L_202_[L_216_] = (L_202_[L_216_] or 0) + 1
+			end;
+		end;
+		
+		if (L_207_ > 0) then
+			repeat
+				local L_220_ = L_194_arg2 - 1
+				
+				while ((L_202_[L_220_] or 0) == 0) do 
+					L_220_ -= 1
+				end;
+				
+				L_202_[L_220_] -= 1
+				L_202_[L_220_ + 1] = (L_202_[L_220_ + 1] or 0) + 2
+				L_202_[L_194_arg2] -= 1
+				L_207_ -= 2
+			until (L_207_ <= 0)
+			
+			L_210_ = 1
+			
+			for L_221_forvar1 = L_194_arg2, 1, -1 do
+				local L_222_ = L_202_[L_221_forvar1] or 0
+				
+				while (L_222_ > 0) do
+					local L_223_ = L_198_[L_210_][2]
+					
+					L_200_[L_223_] = L_221_forvar1
+					L_222_ -= 1
+					L_210_ += 1
+				end;
+			end;
+		end;
+		
+		L_201_ = L_36_func(L_202_, L_200_, L_195_arg3, L_194_arg2)
+		
+		return L_200_, L_201_, L_197_
+	end;
+end;
+
+local function L_39_func(L_224_arg1, L_225_arg2, L_226_arg3, L_227_arg4)
+	local L_228_, L_229_, L_230_, L_231_, L_232_, L_233_, L_234_ = 0, {}, {}, 0, {}, nil, 0
+	
+	L_227_arg4 = (L_227_arg4 < 0) and 0 or L_227_arg4 
+	
+	local L_235_ = L_225_arg2 + L_227_arg4 + 1
+	
+	for L_236_forvar1 = 0, L_235_ + 1 do
+		local L_237_ = (L_236_forvar1 <= L_225_arg2) and (L_224_arg1[L_236_forvar1] or 0) or ((L_236_forvar1 <= L_235_) and (L_226_arg3[L_236_forvar1 - L_225_arg2 - 1] or 0) or nil)
+		
+		if L_237_ == L_233_ then
+			L_234_ += 1
+			
+			if L_237_ ~= 0 and L_234_ == 6 then
+				L_228_ += 1
+				L_229_[L_228_] = 16
+				L_231_ += 1
+				L_232_[L_231_] = 3 
+				L_230_[16] = (L_230_[16] or 0) + 1
+				L_234_ = 0
+				
+			elseif L_237_ == 0 and L_234_ == 138 then
+				L_228_ += 1
+				L_229_[L_228_] = 18
+				L_231_ += 1
+				L_232_[L_231_] = 127
+				L_230_[18] = (L_230_[18] or 0) + 1
+				L_234_ = 0
+			end;
+		else
+			if L_234_ == 1 then
+				L_228_ += 1
+				L_229_[L_228_] = L_233_
+				L_230_[L_233_] = (L_230_[L_233_] or 0) + 1
+				
+			elseif L_234_ == 2 then
+				L_228_ += 1
+				L_229_[L_228_] = L_233_
+				L_228_ += 1
+				L_229_[L_228_] = L_233_
+				L_230_[L_233_] = (L_230_[L_233_] or 0) + 2
+				
+			elseif L_234_ >= 3 then
+				L_228_ += 1
+				
+				local L_238_ = (L_233_ ~= 0) and 16 or (L_234_ <= 10 and 17 or 18)
+				
+				L_229_[L_228_] = L_238_
+				L_230_[L_238_] = (L_230_[L_238_] or 0) + 1 
+				L_231_ += 1
+				L_232_[L_231_] = (L_234_ <= 10) and (L_234_ - 3) or (L_234_ - 11)
+			end;
+			
+			L_233_ = L_237_
+			
+			if L_237_ and L_237_ ~= 0 then
+				L_228_ += 1
+				L_229_[L_228_] = L_237_
+				L_230_[L_237_] = (L_230_[L_237_] or 0) + 1
+				L_234_ = 0
+			else
+				L_234_ = 1
+			end;
+		end;
+	end;
+	
+	return L_229_, L_232_, L_230_
+end;
+
+local function L_40_func(L_239_arg1, L_240_arg2, L_241_arg3, L_242_arg4, L_243_arg5)
+	local L_244_ = L_241_arg3 - L_243_arg5
+	
+	while L_244_ <= L_242_arg4 - 15 - L_243_arg5 do
+		L_240_arg2[L_244_], L_240_arg2[L_244_ + 1], L_240_arg2[L_244_ + 2], L_240_arg2[L_244_ + 3], L_240_arg2[L_244_ + 4], L_240_arg2[L_244_ + 5], L_240_arg2[L_244_ + 6], L_240_arg2[L_244_ + 7], L_240_arg2[L_244_ + 8], L_240_arg2[L_244_ + 9], L_240_arg2[L_244_ + 10], L_240_arg2[L_244_ + 11], L_240_arg2[L_244_ + 12], L_240_arg2[L_244_ + 13], L_240_arg2[L_244_ + 14], L_240_arg2[L_244_ + 15] = string.byte(L_239_arg1, L_244_ + L_243_arg5, L_244_ + 15 + L_243_arg5)
+		L_244_ += 16
+	end;
+	
+	while (L_244_ <= L_242_arg4 - L_243_arg5) do
+		L_240_arg2[L_244_] = string.byte(L_239_arg1, L_244_ + L_243_arg5, L_244_ + L_243_arg5)
+		L_244_ += 1
+	end;
+	
+	return L_240_arg2
+end;
+
+local function L_41_func(L_245_arg1, L_246_arg2, L_247_arg3, L_248_arg4, L_249_arg5, L_250_arg6, L_251_arg7)
+	local L_252_ = L_27_[L_245_arg1]
+	local L_253_, L_254_, L_255_, L_256_, L_257_ = L_252_[1], L_252_[2], L_252_[3], L_252_[4], L_252_[5]
+	local L_258_ = (not L_253_) and L_255_ or 2147483646
+	local L_259_ = (L_257_ - L_257_ % 4 / 4) 
+	local L_260_, L_261_, L_262_
+	local L_263_ = 0
+	
+	if L_251_arg7 then
+		L_261_, L_262_, L_263_ = L_251_arg7.hash_tables, L_251_arg7.string_table, L_251_arg7.strlen
+		
+		assert(L_248_arg4 == 1)
+		
+		if L_249_arg5 >= L_248_arg4 and L_263_ >= 2 then
+			L_260_ = L_262_[L_263_ - 1] * 65536 + L_262_[L_263_] * 256 + L_246_arg2[1]
+			
+			local L_282_ = L_247_arg3[L_260_]
+			
+			if not L_282_ then
+				L_282_ = {}
+				L_247_arg3[L_260_] = L_282_
+			end;
+			
+			L_282_[#L_282_ + 1] = -1
+		end;
+		
+		if L_249_arg5 >= L_248_arg4 + 1 and L_263_ >= 1 then
+			L_260_ = L_262_[L_263_] * 65536 + L_246_arg2[1] * 256 + L_246_arg2[2]
+			
+			local L_283_ = L_247_arg3[L_260_]
+			
+			if not L_283_ then
+				L_283_ = {}
+				L_247_arg3[L_260_] = L_283_
+			end;
+			
+			L_283_[#L_283_ + 1] = 0
+		end;
+	end;
+	
+	local L_264_ = L_263_ + 3
+	
+	L_260_ = (L_246_arg2[L_248_arg4 - L_250_arg6] or 0) * 256 + (L_246_arg2[L_248_arg4 + 1 - L_250_arg6] or 0)
+	
+	local L_265_, L_266_, L_267_, L_268_, L_269_, L_270_ = {}, 0, {}, {}, 0, {}
+	local L_271_, L_272_, L_273_, L_274_, L_275_, L_276_, L_277_, L_278_, L_279_, L_280_, L_281_ = {}, 0, {}, 0, false, nil, nil, 0, 0, L_248_arg4, L_249_arg5 + (L_253_ and 1 or 0)
+	
+	while (L_280_ <= L_281_) do
+		local L_284_ = L_280_ - L_250_arg6
+		local L_285_ = L_250_arg6 - 3
+		
+		L_276_, L_277_, L_278_ = L_278_, L_279_, 0
+		L_260_ = (L_260_ * 256 + (L_246_arg2[L_284_ + 2] or 0)) % 16777216 
+		
+		local L_286_, L_287_, L_289_
+		local L_288_ = L_247_arg3[L_260_]
+		
+		if not L_288_ then
+			L_289_, L_288_ = 0, {}
+			L_247_arg3[L_260_] = L_288_
+			
+			if L_261_ then
+				L_287_ = L_261_[L_260_]
+				L_286_ = L_287_ and #L_287_ or 0
+			else
+				L_286_ = 0
+			end;
+		else
+			L_289_ = #L_288_
+			L_287_, L_286_ = L_288_, L_289_
+		end;
+		
+		if L_280_ <= L_249_arg5 then 
+			L_288_[L_289_ + 1] = L_280_
+		end;
+		
+		if (L_286_ > 0 and L_280_ + 2 <= L_249_arg5 and (not L_253_ or L_276_ < L_255_)) then
+			local L_290_ = (L_253_ and L_276_ >= L_254_) and L_259_ or L_257_
+			local L_291_ = L_249_arg5 - L_280_
+			
+			L_291_ = (L_291_ >= 257) and 257 or L_291_
+			L_291_ += L_284_
+			
+			local L_292_ = L_284_ + 3 
+			
+			while L_286_ >= 1 and L_290_ > 0 do
+				local L_293_ = L_287_[L_286_]
+				
+				if L_280_ - L_293_ > 32768 then
+					break;
+				end;
+				
+				if L_293_ < L_280_ then
+					local L_294_ = L_292_
+					
+					if L_293_ >= -257 then
+						local L_296_ = L_293_ - L_285_
+						
+						while (L_294_ <= L_291_ and L_246_arg2[L_296_] == L_246_arg2[L_294_]) do 
+							L_294_ += 1
+							L_296_ += 1
+						end;
+					else
+						local L_297_ = L_264_ + L_293_
+						
+						while (L_294_ <= L_291_ and L_262_[L_297_] == L_246_arg2[L_294_]) do
+							L_294_ += 1
+							L_297_ += 1
+						end;
+					end;
+					
+					local L_295_ = L_294_ - L_284_
+					
+					if L_295_ > L_278_ then
+						L_278_ = L_295_
+						L_279_ = L_280_ - L_293_
+					end;
+					
+					if L_278_ >= L_256_ then
+						break;
+					end;
+				end;
+				
+				L_286_ -= 1
+				L_290_ -= 1 
+				
+				if L_286_ == 0 and L_293_ > 0 and L_261_ then
+					L_287_ = L_261_[L_260_]
+					L_286_ = L_287_ and #L_287_ or 0
+				end;
+			end;
+		end;
+		
+		if not L_253_ then
+			L_276_, L_277_ = L_278_, L_279_
+		end;
+		
+		if ((not L_253_ or L_275_) and (L_276_ > 3 or (L_276_ == 3 and L_277_ < 4096)) and L_278_ <= L_276_) then
+			local L_298_ = L_6_[L_276_]
+			local L_299_ = L_8_[L_276_]
+			local L_300_, L_301_, L_302_
+			
+			if L_277_ <= 256 then
+				L_300_ = L_9_[L_277_]
+				L_302_ = L_10_[L_277_]
+				L_301_ = L_11_[L_277_]
+			else
+				L_300_, L_301_ = 16, 7
+				
+				local L_303_, L_304_ = 384, 512
+				
+				while true do
+					if L_277_ <= L_303_ then
+						L_302_ = (L_277_ - (L_304_ / 2) - 1) % (L_304_ / 4)
+						break;
+						
+					elseif L_277_ <= L_304_ then
+						L_302_ = (L_277_ - (L_304_ / 2) - 1) % (L_304_ / 4)
+						L_300_ += 1
+						break;
+					else
+						L_300_ += 2
+						L_301_ += 1
+						L_303_ *= 2
+						L_304_ *= 2
+					end;
+				end;
+			end;
+			
+			L_266_ += 1
+			L_265_[L_266_] = L_298_
+			L_267_[L_298_] = (L_267_[L_298_] or 0) + 1
+			
+			L_269_ += 1
+			L_268_[L_269_] = L_300_
+			L_270_[L_300_] = (L_270_[L_300_] or 0) + 1
+			
+			if L_299_ > 0 then 
+				local L_305_ = L_7_[L_276_]
+				L_272_ += 1
+				L_271_[L_272_] = L_305_
+			end;
+			
+			if L_301_ > 0 then
+				L_274_ += 1
+				L_273_[L_274_] = L_302_
+			end;
+			
+			for L_306_forvar1 = L_280_ + 1, L_280_ + L_276_ - (L_253_ and 2 or 1) do
+				L_260_ = (L_260_ * 256 + (L_246_arg2[L_306_forvar1 - L_250_arg6 + 2] or 0)) % 16777216
+				
+				if L_276_ <= L_258_ then
+					L_288_ = L_247_arg3[L_260_]
+					
+					if not L_288_ then
+						L_288_ = {}
+						L_247_arg3[L_260_] = L_288_
+					end;
+					
+					L_288_[#L_288_ + 1] = L_306_forvar1
+				end;
+			end;
+			
+			L_280_ += L_276_ - (L_253_ and 1 or 0)
+			L_275_ = false
+			
+		elseif (not L_253_) or L_275_ then
+			local L_307_ = L_246_arg2[L_253_ and (L_284_ - 1) or L_284_]
+			
+			L_266_ += 1
+			L_265_[L_266_] = L_307_
+			L_267_[L_307_] = (L_267_[L_307_] or 0) + 1
+			L_280_ += 1
+		else
+			L_275_ = true
+			L_280_ += 1
+		end;
+	end;
+	
+	L_266_ += 1
+	L_265_[L_266_] = 256
+	L_267_[256] = (L_267_[256] or 0) + 1
+	
+	return L_265_, L_271_, L_267_, L_268_, L_273_, L_270_
+end;
+
+local function L_42_func(L_308_arg1, L_309_arg2)
+	local L_310_, L_311_, L_312_ = L_38_func(L_308_arg1, 15, 285)
+	local L_313_, L_314_, L_315_ = L_38_func(L_309_arg2, 15, 29)
+	local L_316_, L_317_, L_318_ = L_39_func(L_310_, L_312_, L_313_, L_315_) 
+	local L_319_, L_320_ = L_38_func(L_318_, 7, 18)
+	local L_321_ = 0
+	
+	for L_324_forvar1 = 1, 19 do
+		local L_325_ = L_16_[L_324_forvar1]
+		local L_326_ = L_319_[L_325_] or 0
+		
+		if L_326_ ~= 0 then
+			L_321_ = L_324_forvar1
+		end;
+	end;
+	
+	L_321_ -= 4
+	
+	local L_322_ = L_312_ + 1 - 257
+	local L_323_ = L_315_ + 1 - 1
+	
+	if L_323_ < 0 then
+		L_323_ = 0
+	end;
+	
+	return L_322_, L_323_, L_321_, L_319_, L_320_, L_316_, L_317_, L_310_, L_311_, L_313_, L_314_
+end;
+
+local function L_43_func(L_327_arg1, L_328_arg2, L_329_arg3, L_330_arg4, L_331_arg5, L_332_arg6, L_333_arg7)
+	local L_334_ = 17
+	
+	L_334_ += (L_329_arg3 + 4) * 3
+	
+	for L_336_forvar1 = 1, #L_331_arg5 do
+		local L_337_ = L_331_arg5[L_336_forvar1]
+		
+		L_334_ += L_330_arg4[L_337_]
+		
+		if L_337_ >= 16 then
+			L_334_ += ((L_337_ == 16) and 2 or (L_337_ == 17 and 3 or 7))
+		end;
+	end;
+	
+	local L_335_ = 0
+	
+	for L_338_forvar1 = 1, #L_327_arg1 do
+		local L_339_ = L_327_arg1[L_338_forvar1]
+		local L_340_ = L_332_arg6[L_339_]
+		
+		L_334_ += L_340_
+		
+		if L_339_ > 256 then
+			L_335_ += 1
+			
+			if L_339_ > 264 and L_339_ < 285 then
+				local L_343_ = L_13_[L_339_ - 256]
+				
+				L_334_ += L_343_
+			end;
+			
+			local L_341_ = L_328_arg2[L_335_]
+			local L_342_ = L_333_arg7[L_341_]
+			
+			L_334_ += L_342_
+			
+			if L_341_ > 3 then 
+				local L_344_ = (L_341_ - L_341_ % 2) / 2 - 1
+				
+				L_334_ += L_344_
+			end;
+		end;
+	end;
+	
+	return L_334_
+end;
+
+local function L_44_func(L_345_arg1, L_346_arg2, L_347_arg3, L_348_arg4, L_349_arg5, L_350_arg6, L_351_arg7, L_352_arg8, L_353_arg9, L_354_arg10, L_355_arg11, L_356_arg12, L_357_arg13, L_358_arg14, L_359_arg15, L_360_arg16, L_361_arg17)
+	L_345_arg1(L_346_arg2 and 1 or 0, 1);
+	L_345_arg1(2, 2);
+	L_345_arg1(L_351_arg7, 5);
+	L_345_arg1(L_352_arg8, 5);
+	L_345_arg1(L_353_arg9, 4);
+	
+	for L_366_forvar1 = 1, L_353_arg9 + 4 do 
+		local L_367_ = L_16_[L_366_forvar1];
+		local L_368_ = L_354_arg10[L_367_] or 0;
+		
+		L_345_arg1(L_368_, 3);
+	end;
+	
+	local L_362_ = 1;
+	
+	for L_369_forvar1 = 1, #L_356_arg12 do
+		local L_370_ = L_356_arg12[L_369_forvar1];
+		
+		L_345_arg1(L_355_arg11[L_370_], L_354_arg10[L_370_]);
+		
+		if L_370_ >= 16 then
+			local L_371_ = L_357_arg13[L_362_];
+			
+			L_345_arg1(L_371_, (L_370_ == 16) and 2 or (L_370_ == 17 and 3 or 7));
+			L_362_ += 1;
+		end;
+	end;
+	
+	local L_363_, L_364_, L_365_ = 0, 0, 0;
+	
+	for L_372_forvar1 = 1, #L_347_arg3 do
+		local L_373_ = L_347_arg3[L_372_forvar1];
+		local L_374_ = L_359_arg15[L_373_];
+		local L_375_ = L_358_arg14[L_373_];
+		
+		L_345_arg1(L_374_, L_375_);
+		
+		if L_373_ > 256 then
+			L_363_ += 1;
+			
+			if (L_373_ > 264) and (L_373_ < 285) then
+				L_364_ += 1;
+				
+				local L_379_ = L_348_arg4[L_364_];
+				local L_380_ = L_13_[L_373_ - 256];
+				
+				L_345_arg1(L_379_, L_380_);
+			end;
+			
+			local L_376_ = L_349_arg5[L_363_];
+			local L_377_ = L_361_arg17[L_376_];
+			local L_378_ = L_360_arg16[L_376_];
+			
+			L_345_arg1(L_377_, L_378_);
+			
+			if (L_376_ > 3) then
+				L_365_ += 1;
+				
+				local L_381_ = L_350_arg6[L_365_];
+				local L_382_ = (L_376_ - L_376_ % 2) / 2 - 1;
+				
+				L_345_arg1(L_381_, L_382_);
+			end;
+		end;
+	end;
+end;
+
+local function L_45_func(L_383_arg1, L_384_arg2)
+	local L_385_, L_386_ = 3, 0;
+	
+	for L_387_forvar1 = 1, #L_383_arg1 do
+		local L_388_ = L_383_arg1[L_387_forvar1];
+		local L_389_ = L_19_[L_388_];
+		
+		L_385_ += L_389_;
+		
+		if (L_388_ > 256) then
+			L_386_ += 1;
+			
+			if (L_388_ > 264) and (L_388_ < 285) then
+				local L_391_ = L_13_[L_388_ - 256];
+				
+				L_385_ += L_391_;
+			end;
+			
+			local L_390_ = L_384_arg2[L_386_];
+			
+			L_385_ += 5;
+			
+			if (L_390_ > 3) then
+				local L_392_ = (L_390_ - L_390_ % 2) / 2 - 1;
+				
+				L_385_ += L_392_;
+			end;
+		end;
+	end;
+	
+	return L_385_
+end;
+
+local function L_46_func(L_393_arg1, L_394_arg2, L_395_arg3, L_396_arg4, L_397_arg5, L_398_arg6)
+	L_393_arg1(L_394_arg2 and 1 or 0, 1);
+	L_393_arg1(1, 2);
+	
+	local L_399_, L_400_, L_401_ = 0, 0, 0;
+	
+	for L_402_forvar1 = 1, #L_395_arg3 do
+		local L_403_ = L_395_arg3[L_402_forvar1];
+		local L_404_, L_405_ = L_17_[L_403_], L_19_[L_403_];
+		
+		L_393_arg1(L_404_, L_405_);
+		
+		if (L_403_ > 256) then
+			L_399_ += 1;
+			
+			if (L_403_ > 264) and (L_403_ < 285) then
+				L_400_ += 1;
+				
+				local L_408_ = L_396_arg4[L_400_];
+				local L_409_ = L_13_[L_403_ - 256];
+				
+				L_393_arg1(L_408_, L_409_);
+			end;
+			
+			local L_406_ = L_397_arg5[L_399_];
+			local L_407_ = L_21_[L_406_];
+			
+			L_393_arg1(L_407_, 5);
+			
+			if (L_406_ > 3) then
+				L_401_ += 1;
+				
+				local L_410_ = L_398_arg6[L_401_];
+				local L_411_ = (L_406_ - L_406_ % 2) / 2 - 1;
+				
+				L_393_arg1(L_410_, L_411_);
+			end;
+		end;
+	end;
+end;
+
+local function L_47_func(L_412_arg1, L_413_arg2, L_414_arg3)
+	assert(L_413_arg2 - L_412_arg1 + 1 <= 65535);
+	
+	local L_415_ = 3;
+	
+	L_414_arg3 += 3;
+	
+	local L_416_ = (8 - L_414_arg3 % 8) % 8;
+	
+	L_415_ += L_416_ + 32;
+	L_415_ += (L_413_arg2 - L_412_arg1 + 1) * 8;
+	
+	return L_415_;
+end;
+
+local function L_48_func(L_417_arg1, L_418_arg2, L_419_arg3, L_420_arg4, L_421_arg5, L_422_arg6, L_423_arg7)
+	assert(L_422_arg6 - L_421_arg5 + 1 <= 65535);
+	
+	L_417_arg1(L_419_arg3 and 1 or 0, 1);
+	L_417_arg1(0, 2);
+	
+	L_423_arg7 += 3;
+	
+	local L_424_ = (8 - L_423_arg7 % 8) % 8;
+	
+	if (L_424_ > 0) then
+		L_417_arg1(L_3_[L_424_] - 1, L_424_);
+	end;
+
+	local L_425_ = L_422_arg6 - L_421_arg5 + 1;
+	
+	L_417_arg1(L_425_, 16);
+	
+	local L_426_ = (255 - L_425_ % 256) + (255 - (L_425_ - L_425_ % 256) / 256) * 256;
+	
+	L_417_arg1(L_426_, 16);
+	L_418_arg2(L_420_arg4:sub(L_421_arg5, L_422_arg6));
+end;
+
+local function L_49_func(L_427_arg1, L_428_arg2, L_429_arg3, L_430_arg4, L_431_arg5, L_432_arg6)
+	local L_433_ = {};
+	local L_434_, L_435_, L_436_, L_437_, L_438_, L_439_, L_440_, L_441_, L_442_, L_443_ = {}, nil, nil, nil, nil, L_430_arg4(L_32_), #L_431_arg5, nil, nil, nil;
+	
+	if L_427_arg1 then
+		if L_427_arg1.level then
+			L_442_ = L_427_arg1.level;
+		end;
+		
+		if L_427_arg1.strategy then
+			L_443_ = L_427_arg1.strategy;
+		end;
+	end;
+	
+	if not L_442_ then 
+		if (L_440_ < 2048) then
+			L_442_ = 7;
+			
+		elseif (L_440_ > 65536) then
+			L_442_ = 3;
+		else
+			L_442_ = 5;
+		end;
+	end;
+	
+	while not L_435_ do
+		if not L_436_ then
+			L_436_, L_437_, L_441_ = 1, 65535, 0; --// 65535 = 64 * 1024 - 1
+		else
+			L_436_ = L_437_ + 1;
+			L_437_ += 32768; --// 32768 = 32 * 1024
+			L_441_ = L_436_ - 32 * 1024 - 1;
+		end;
+		
+		if (L_437_ >= L_440_) then 
+			L_437_, L_435_ = L_440_, true;
+		else
+			L_435_ = false;
+		end;
+		
+		local L_444_, L_445_, L_446_, L_447_, L_448_, L_449_, L_450_, L_451_, L_452_, L_453_;
+		local L_454_, L_455_, L_456_, L_457_, L_458_, L_459_, L_460_, L_461_, L_462_, L_463_;
+		
+		if (L_442_ ~= 0) then
+			L_40_func(L_431_arg5, L_433_, L_436_, L_437_ + 3, L_441_);
+			
+			if (L_436_ == 1) and L_432_arg6 then
+				local L_465_, L_466_ = L_432_arg6.string_table, L_432_arg6.strlen
+				
+				for L_467_forvar1 = 0, (-L_466_ + 1) < -257 and -257 or (-L_466_ + 1), -1 do
+					L_433_[L_467_forvar1] = L_465_[L_466_ + L_467_forvar1];
+				end;
+			end;
+			
+			if (L_443_ == "huffman_only") then
+				L_444_ = {}
+				
+				L_40_func(L_431_arg5, L_444_, L_436_, L_437_, L_436_ - 1)
+				
+				L_445_, L_446_ = {}, {}
+				L_444_[L_437_ - L_436_ + 2] = 256
+				
+				for L_468_forvar1 = 1, L_437_ - L_436_ + 2 do 
+					local L_469_ = L_444_[L_468_forvar1];
+					
+					L_446_[L_469_] = (L_446_[L_469_] or 0) + 1;
+				end;
+				
+				L_447_, L_448_, L_449_ = {}, {}, {};
+			else
+				L_444_, L_445_, L_446_, L_447_, L_448_, L_449_ = L_41_func(L_442_, L_433_, L_434_, L_436_, L_437_, L_441_, L_432_arg6);
+			end;
+			
+			L_450_, L_451_, L_452_, L_453_, L_454_, L_455_, L_456_, L_457_, L_458_, L_459_, L_460_ = L_42_func(L_446_, L_449_);
+			L_461_ = L_43_func(L_444_, L_447_, L_452_, L_453_, L_455_, L_457_, L_459_);
+			L_462_ = L_45_func(L_444_, L_447_);
+		end;
+		
+		L_463_ = L_47_func(L_436_, L_437_, L_439_);
+		
+		local L_464_ = L_463_;
+		
+		L_464_ = (L_462_ and L_462_ < L_464_) and L_462_ or L_464_;
+		L_464_ = (L_461_ and L_461_ < L_464_) and L_461_ or L_464_;
+		
+		if (L_442_ == 0) or (L_443_ ~= "fixed" and L_443_ ~= "dynamic" and L_463_ == L_464_) then
+			L_48_func(L_428_arg2, L_429_arg3, L_435_, L_431_arg5, L_436_, L_437_, L_439_);
+			L_439_ += L_463_;
+			
+		elseif (L_443_ ~= "dynamic") and (L_443_ == "fixed" or L_462_ == L_464_) then 
+			L_46_func(L_428_arg2, L_435_, L_444_, L_445_, L_447_, L_448_);
+			L_439_ += L_462_;
+			
+		elseif (L_443_ == "dynamic") or (L_461_ == L_464_) then
+			L_44_func(L_428_arg2, L_435_, L_444_, L_445_, L_447_, L_448_, L_450_, L_451_, L_452_, L_453_, L_454_, L_455_, L_456_, L_457_, L_458_, L_459_, L_460_);
+			L_439_ += L_461_;
+		end;
+		
+		if L_435_ then
+			L_438_ = L_430_arg4(L_32_);
+		else
+			L_438_ = L_430_arg4(L_29_);
+		end;
+		
+		assert(L_438_ == L_439_);
+		
+		if not L_435_ then
+			local L_470_;
+			
+			if L_432_arg6 and (L_436_ == 1) then
+				L_470_ = 0;
+				
+				while (L_433_[L_470_]) do
+					L_433_[L_470_] = nil;
+					L_470_ -= 1;
+				end;
+			end;
+			
+			L_432_arg6, L_470_ = nil, 1;
+			
+			for L_471_forvar1 = L_437_ - 32767, L_437_ do
+				L_433_[L_470_] = L_433_[L_471_forvar1 - L_441_]
+				L_470_ += 1
+			end;
+			
+			for L_472_forvar1, L_473_forvar2 in pairs(L_434_) do
+				local L_474_ = #L_473_forvar2
+				
+				if L_474_ > 0 and L_437_ + 1 - L_473_forvar2[1] > 32768 then 
+					if L_474_ == 1 then
+						L_434_[L_472_forvar1] = nil
+					else
+						local L_475_ = {}
+						local L_476_ = 0
+						
+						for L_477_forvar1 = 2, L_474_ do
+							L_470_ = L_473_forvar2[L_477_forvar1]
+							
+							if L_437_ + 1 - L_470_ <= 32768 then
+								L_476_ += 1
+								L_475_[L_476_] = L_470_
+							end;
+						end;
+						
+						L_434_[L_472_forvar1] = L_475_
+					end;
+				end;
+			end;
+		end;
+	end;
+end;
+
+local function L_50_func(L_478_arg1, L_479_arg2, L_480_arg3)
+	local L_481_, L_482_, L_483_ = L_33_func()
+	
+	L_49_func(L_480_arg3, L_481_, L_482_, L_483_, L_478_arg1, L_479_arg2)
+	
+	local L_484_, L_485_ = L_483_(L_30_)
+	local L_486_ = (8 - L_484_ % 8) % 8
+	
+	return L_485_, L_486_
+end;
+
+local function L_51_func(L_487_arg1, L_488_arg2, L_489_arg3)
+	local L_490_, L_491_, L_492_ = L_33_func()
+	local L_493_, L_494_ = 8, 7
+	local L_495_ = L_494_ * 16 + L_493_
+	
+	L_490_(L_495_, 8) 
+	
+	local L_496_, L_497_ = L_488_arg2 and 1 or 0, 2
+	local L_498_ = L_497_ * 64 + L_496_ * 32
+	local L_499_ = (31 - (L_495_ * 256 + L_498_) % 31)
+	
+	L_498_ += L_499_
+	L_490_(L_498_, 8)
+	
+	if L_496_ == 1 then
+		local L_508_ = L_488_arg2.adler32
+		local L_509_ = L_508_ % 256
+		
+		L_508_ = (L_508_ - L_509_) / 256
+		
+		local L_510_ = L_508_ % 256
+		
+		L_508_ = (L_508_ - L_510_) / 256 
+		
+		local L_511_ = L_508_ % 256
+		
+		L_508_ = (L_508_ - L_511_) / 256
+		
+		local L_512_ = L_508_ % 256
+		
+		L_490_(L_512_, 8)
+		L_490_(L_511_, 8)
+		L_490_(L_510_, 8)
+		L_490_(L_509_, 8)
+	end;
+	
+	L_49_func(L_489_arg3, L_490_, L_491_, L_492_, L_487_arg1, L_488_arg2)
+	L_492_(L_31_)
+	
+	local L_500_ = L_2_:Adler32(L_487_arg1)
+	local L_501_ = L_500_ % 256
+	
+	L_500_ = (L_500_ - L_501_) / 256
+	
+	local L_502_ = L_500_ % 256
+	
+	L_500_ = (L_500_ - L_502_) / 256 
+	
+	local L_503_ = L_500_ % 256
+	
+	L_500_ = (L_500_ - L_503_) / 256
+	
+	local L_504_ = L_500_ % 256
+	
+	L_490_(L_504_, 8)
+	L_490_(L_503_, 8)
+	L_490_(L_502_, 8)
+	L_490_(L_501_, 8)
+	
+	local L_505_, L_506_ = L_492_(L_30_)
+	local L_507_ = (8 - L_505_ % 8) % 8
+	
+	return L_506_, L_507_
+end;
+
+function L_2_:CompressDeflate(L_513_arg1, L_514_arg2)
+	local L_515_, L_516_ = L_28_func(L_513_arg1, false, nil, true, L_514_arg2) 
+	
+	if not L_515_ then
+		error("Usage: Deflate:CompressDeflate(string, configuration): " .. L_516_, 2);
+	end;
+	
+	return L_50_func(L_513_arg1, nil, L_514_arg2)
+end;
+
+function L_2_:CompressZlib(L_522_arg1, L_523_arg2)
+	local L_524_, L_525_ = L_28_func(L_522_arg1, false, nil, true, L_523_arg2) 
+	
+	if not L_524_ then
+		error("Usage: Deflate:CompressZlib(string, configuration): " .. L_525_, 2);
+	end;
+	
+	return L_51_func(L_522_arg1, nil, L_523_arg2)
+end;
+
+local function L_52_func(L_531_arg1)
+	local L_532_ = L_531_arg1;
+	local L_533_, L_534_, L_535_, L_536_ = #L_531_arg1, 1, 0, 0 
+	
+	local function L_537_func(L_542_arg1)
+		local L_543_ = L_3_[L_542_arg1]
+		local L_544_
+		
+		if L_542_arg1 <= L_535_ then
+			L_544_ = L_536_ % L_543_
+			L_536_ = (L_536_ - L_544_) / L_543_
+			L_535_ = L_535_ - L_542_arg1
+		else
+			local L_545_ = L_3_[L_535_]
+			local L_546_, L_547_, L_548_, L_549_ = string.byte(L_532_, L_534_, L_534_ + 3) 
+			
+			L_536_ += ((L_546_ or 0) + (L_547_ or 0) * 256 + (L_548_ or 0) * 65536 + (L_549_ or 0) * 16777216) * L_545_
+			L_534_ += 4
+			L_535_ += 32 - L_542_arg1
+			L_544_ = L_536_ % L_543_
+			L_536_ = (L_536_ - L_544_) / L_543_
+		end;
+		
+		return L_544_
+	end;
+	
+	local function L_538_func(L_550_arg1, L_551_arg2, L_552_arg3)
+		assert(L_535_ % 8 == 0)
+		
+		local L_553_ = (L_535_ / 8 < L_550_arg1) and (L_535_ / 8) or L_550_arg1
+		
+		for L_554_forvar1 = 1, L_553_ do
+			local L_555_ = L_536_ % 256
+			
+			L_552_arg3 += 1
+			L_551_arg2[L_552_arg3] = string.char(L_555_)
+			L_536_ = (L_536_ - L_555_) / 256
+		end;
+		
+		L_535_ -= L_553_ * 8
+		L_550_arg1 -= L_553_
+		
+		if (L_533_ - L_534_ - L_550_arg1 + 1) * 8 + L_535_ < 0 then 
+			return -1
+		end;
+		
+		for L_556_forvar1 = L_534_, L_534_ + L_550_arg1 - 1 do
+			L_552_arg3 += 1
+			L_551_arg2[L_552_arg3] = string.sub(L_532_, L_556_forvar1, L_556_forvar1)
+		end;
+		
+		L_534_ += L_550_arg1
+		
+		return L_552_arg3
+	end;
+	
+	local function L_539_func(L_557_arg1, L_558_arg2, L_559_arg3)
+		local L_560_, L_561_, L_562_ = 0, 0, 0
+		local L_563_
+		
+		if L_559_arg3 > 0 then 
+			if L_535_ < 15 and L_532_ then
+				local L_565_ = L_3_[L_535_]
+				local L_566_, L_567_, L_568_, L_569_ = string.byte(L_532_, L_534_, L_534_ + 3)
+				
+				L_536_ += ((L_566_ or 0) + (L_567_ or 0) * 256 + (L_568_ or 0) * 65536 + (L_569_ or 0) * 16777216) * L_565_
+				L_534_ += 4
+				L_535_ += 32
+			end;
+			
+			local L_564_ = L_3_[L_559_arg3]
+			
+			L_535_ -= L_559_arg3
+			L_560_ = L_536_ % L_564_
+			L_536_ = (L_536_ - L_560_) / L_564_
+			L_560_ = L_5_[L_559_arg3][L_560_]
+			L_563_ = L_557_arg1[L_559_arg3]
+			
+			if L_560_ < L_563_ then
+				return L_558_arg2[L_560_]
+			end;
+			
+			L_562_ = L_563_
+			L_561_ = L_563_ * 2
+			L_560_ *= 2
+		end;
+		
+		for L_570_forvar1 = L_559_arg3 + 1, 15 do
+			local L_571_
+			
+			L_571_ = L_536_ % 2
+			L_536_ = (L_536_ - L_571_) / 2
+			L_535_ = L_535_ - 1
+			L_560_ = (L_571_ == 1) and (L_560_ + 1 - L_560_ % 2) or L_560_
+			L_563_ = L_557_arg1[L_570_forvar1] or 0 
+			
+			local L_572_ = L_560_ - L_561_
+			
+			if L_572_ < L_563_ then
+				return L_558_arg2[L_562_ + L_572_]
+			end;
+			
+			L_562_ += L_563_
+			L_561_ += L_563_
+			L_561_ *= 2
+			L_560_ *= 2
+		end;
+		
+		return -10
+	end;
+	
+	local function L_540_func()
+		return (L_533_ - L_534_ + 1) * 8 + L_535_
+	end;
+	
+	local function L_541_func()
+		local L_573_ = L_535_ % 8 
+		local L_574_ = L_3_[L_573_]
+		
+		L_535_ -= L_573_
+		L_536_ = (L_536_ - L_536_ % L_574_) / L_574_
+	end;
+	
+	return L_537_func, L_538_func, L_539_func, L_540_func, L_541_func
+end;
+
+local function L_53_func(L_575_arg1, L_576_arg2)
+	local L_577_, L_578_, L_579_, L_580_, L_581_ = L_52_func(L_575_arg1)
+	
+	local L_582_ = {
+		ReadBits = L_577_,
+		ReadBytes = L_578_,
+		Decode = L_579_,
+		ReaderBitlenLeft = L_580_,
+		SkipToByteBoundary = L_581_,
+		buffer_size = 0,
+		buffer = {},
+		result_buffer = {},
+		dictionary = L_576_arg2
+	}
+	
+	return L_582_
+end;
+
+local function L_54_func(L_583_arg1, L_584_arg2, L_585_arg3)
+	local L_586_, L_587_ = {}, L_585_arg3
+	
+	for L_591_forvar1 = 0, L_584_arg2 do
+		local L_592_ = L_583_arg1[L_591_forvar1] or 0
+		
+		L_587_ = (L_592_ > 0 and L_592_ < L_587_) and L_592_ or L_587_
+		L_586_[L_592_] = (L_586_[L_592_] or 0) + 1 
+	end;
+	
+	if L_586_[0] == L_584_arg2 + 1 then
+		return 0, L_586_, {}, 0
+	end;
+	
+	local L_588_ = 1
+	
+	for L_593_forvar1 = 1, L_585_arg3 do
+		L_588_ *= 2
+		L_588_ -= (L_586_[L_593_forvar1] or 0)
+		
+		if L_588_ < 0 then
+			return L_588_
+		end;
+	end;
+	
+	local L_589_ = {}
+	
+	L_589_[1] = 0
+	
+	for L_594_forvar1 = 1, L_585_arg3 - 1 do
+		L_589_[L_594_forvar1 + 1] = L_589_[L_594_forvar1] + (L_586_[L_594_forvar1] or 0)
+	end;
+	
+	local L_590_ = {}
+	
+	for L_595_forvar1 = 0, L_584_arg2 do
+		local L_596_ = L_583_arg1[L_595_forvar1] or 0
+		
+		if L_596_ ~= 0 then
+			local L_597_ = L_589_[L_596_]
+			
+			L_590_[L_597_] = L_595_forvar1
+			L_589_[L_596_] += 1
+		end;
+	end;
+	
+	return L_588_, L_586_, L_590_, L_587_
+end;
+
+local function L_55_func(L_598_arg1, L_599_arg2, L_600_arg3, L_601_arg4, L_602_arg5, L_603_arg6, L_604_arg7)
+	local L_605_, L_606_, L_607_, L_608_, L_609_, L_610_ = L_598_arg1.buffer, L_598_arg1.buffer_size, L_598_arg1.ReadBits, L_598_arg1.Decode, L_598_arg1.ReaderBitlenLeft, L_598_arg1.result_buffer
+	local L_611_ = L_598_arg1.dictionary
+	local L_612_, L_613_
+	local L_614_ = 1
+	
+	if L_611_ and not L_605_[0] then 
+		L_612_ = L_611_.string_table
+		L_613_ = L_611_.strlen
+		L_614_ = -L_613_ + 1
+		
+		for L_615_forvar1 = 0, (-L_613_ + 1) < -257 and -257 or (-L_613_ + 1), -1 do
+			L_605_[L_615_forvar1] = L_4_[L_612_[L_613_ + L_615_forvar1]]
+		end;
+	end;
+	
+	repeat
+		local L_616_ = L_608_(L_599_arg2, L_600_arg3, L_601_arg4)
+		
+		if L_616_ < 0 or L_616_ > 285 then
+			return -10
+			
+		elseif L_616_ < 256 then 
+			L_606_ += 1
+			L_605_[L_606_] = L_4_[L_616_]
+			
+		elseif L_616_ > 256 then
+			L_616_ -= 256
+			
+			local L_617_ = L_12_[L_616_]
+			
+			L_617_ = (L_616_ >= 8) and (L_617_ + L_607_(L_13_[L_616_])) or L_617_
+			L_616_ = L_608_(L_602_arg5, L_603_arg6, L_604_arg7)
+			
+			if L_616_ < 0 or L_616_ > 29 then
+				return -10
+			end;
+			
+			local L_618_ = L_14_[L_616_]
+			
+			L_618_ = (L_618_ > 4) and (L_618_ + L_607_(L_15_[L_616_])) or L_618_ 
+			
+			local L_619_ = L_606_ - L_618_ + 1
+			
+			if L_619_ < L_614_ then
+				return -11
+			end;
+			
+			if L_619_ >= -257 then
+				for L_620_forvar1 = 1, L_617_ do
+					L_606_ += 1
+					L_605_[L_606_] = L_605_[L_619_]
+					L_619_ += 1
+				end;
+			else
+				L_619_ += L_613_
+				
+				for L_621_forvar1 = 1, L_617_ do
+					L_606_ += 1
+					L_605_[L_606_] = L_4_[L_612_[L_619_]]
+					L_619_ += 1
+				end;
+			end;
+		end;
+		
+		if L_609_() < 0 then 
+			return 2
+		end;
+		
+		if L_606_ >= 65536 then
+			L_610_[#L_610_ + 1] = table.concat(L_605_, "", 1, 32768)
+			
+			for L_622_forvar1 = 32769, L_606_ do
+				L_605_[L_622_forvar1 - 32768] = L_605_[L_622_forvar1]
+			end;
+			
+			L_606_ -= 32768
+			L_605_[L_606_ + 1] = nil
+		end;
+	until L_616_ == 256
+	
+	L_598_arg1.buffer_size = L_606_
+	
+	return 0
+end;
+
+local function L_56_func(L_623_arg1)
+	local L_624_, L_625_, L_626_, L_627_, L_628_, L_629_, L_630_ = L_623_arg1.buffer, L_623_arg1.buffer_size, L_623_arg1.ReadBits, L_623_arg1.ReadBytes, L_623_arg1.ReaderBitlenLeft, L_623_arg1.SkipToByteBoundary, L_623_arg1.result_buffer
+	
+	L_629_()
+	
+	local L_631_ = L_626_(16)
+	
+	if L_628_() < 0 then 
+		return 2
+	end;
+	
+	local L_632_ = L_626_(16)
+	
+	if L_628_() < 0 then
+		return 2
+	end;
+	
+	if L_631_ % 256 + L_632_ % 256 ~= 255 then
+		return -2
+	end;
+	
+	if (L_631_ - L_631_ % 256) / 256 + (L_632_ - L_632_ % 256) / 256 ~= 255 then
+		return -2
+	end;
+	
+	L_625_ = L_627_(L_631_, L_624_, L_625_)
+	
+	if L_625_ < 0 then 
+		return 2
+	end;
+	
+	if L_625_ >= 65536 then
+		L_630_[#L_630_ + 1] = table.concat(L_624_, "", 1, 32768)
+		
+		for L_633_forvar1 = 32769, L_625_ do
+			L_624_[L_633_forvar1 - 32768] = L_624_[L_633_forvar1]
+		end;
+		
+		L_625_ = L_625_ - 32768
+		L_624_[L_625_ + 1] = nil
+	end;
+	
+	L_623_arg1.buffer_size = L_625_
+	
+	return 0
+end;
+
+local function L_57_func(L_634_arg1)
+	return L_55_func(L_634_arg1, L_20_, L_18_, 7, L_24_, L_22_, 5)
+end;
+
+local function L_58_func(L_635_arg1)
+	local L_636_, L_637_ = L_635_arg1.ReadBits, L_635_arg1.Decode
+	local L_638_ = L_636_(5) + 257
+	local L_639_ = L_636_(5) + 1
+	local L_640_ = L_636_(4) + 4
+	
+	if L_638_ > 286 or L_639_ > 30 then 
+		return -3
+	end;
+	
+	local L_641_ = {}
+	
+	for L_657_forvar1 = 1, L_640_ do
+		L_641_[L_16_[L_657_forvar1]] = L_636_(3)
+	end;
+	
+	local L_642_, L_643_, L_644_, L_645_ = L_54_func(L_641_, 18, 7)
+	
+	if L_642_ ~= 0 then
+		return -4
+	end;
+	
+	local L_646_, L_647_, L_648_ = {}, {}, 0
+	
+	while L_648_ < L_638_ + L_639_ do
+		local L_658_, L_659_
+		
+		L_658_ = L_637_(L_643_, L_644_, L_645_) 
+		
+		if L_658_ < 0 then
+			return L_658_
+			
+		elseif L_658_ < 16 then
+			if L_648_ < L_638_ then
+				L_646_[L_648_] = L_658_
+			else
+				L_647_[L_648_ - L_638_] = L_658_
+			end;
+			
+			L_648_ += 1
+		else
+			L_659_ = 0
+			
+			if L_658_ == 16 then
+				if L_648_ == 0 then
+					return -5
+				end;
+				
+				if L_648_ - 1 < L_638_ then
+					L_659_ = L_646_[L_648_ - 1]
+				else
+					L_659_ = L_647_[L_648_ - L_638_ - 1]
+				end;
+				
+				L_658_ = 3 + L_636_(2)
+				
+			elseif L_658_ == 17 then
+				L_658_ = 3 + L_636_(3)
+			else
+				L_658_ = 11 + L_636_(7)
+			end;
+			
+			if L_648_ + L_658_ > L_638_ + L_639_ then
+				return -6
+			end;
+			
+			while L_658_ > 0 do
+				L_658_ -= 1
+				
+				if L_648_ < L_638_ then
+					L_646_[L_648_] = L_659_
+				else
+					L_647_[L_648_ - L_638_] = L_659_
+				end;
+				
+				L_648_ += 1
+			end;
+		end;
+	end;
+	
+	if (L_646_[256] or 0) == 0 then 
+		return -9
+	end;
+	
+	local L_649_, L_650_, L_651_, L_652_ = L_54_func(L_646_, L_638_ - 1, 15)
+	
+	if (L_649_ ~= 0 and (L_649_ < 0 or L_638_ ~= (L_650_[0] or 0) + (L_650_[1] or 0))) then
+		return -7
+	end;
+	
+	local L_653_, L_654_, L_655_, L_656_ = L_54_func(L_647_, L_639_ - 1, 15)
+	
+	if (L_653_ ~= 0 and (L_653_ < 0 or L_639_ ~= (L_654_[0] or 0) + (L_654_[1] or 0))) then 
+		return -8
+	end;
+	
+	return L_55_func(L_635_arg1, L_650_, L_651_, L_652_, L_654_, L_655_, L_656_)
+end;
+
+local function L_59_func(L_660_arg1)
+	local L_661_ = L_660_arg1.ReadBits
+	local L_662_
+	
+	while not L_662_ do
+		L_662_ = (L_661_(1) == 1)
+		
+		local L_664_ = L_661_(2)
+		local L_665_
+		
+		if L_664_ == 0 then
+			L_665_ = L_56_func(L_660_arg1)
+			
+		elseif L_664_ == 1 then
+			L_665_ = L_57_func(L_660_arg1)
+			
+		elseif L_664_ == 2 then
+			L_665_ = L_58_func(L_660_arg1)
+		else
+			return nil, -1
+		end;
+		
+		if L_665_ ~= 0 then
+			return nil, L_665_
+		end;
+	end;
+	
+	L_660_arg1.result_buffer[#L_660_arg1.result_buffer + 1] = table.concat(L_660_arg1.buffer, "", 1, L_660_arg1.buffer_size) 
+	
+	local L_663_ = table.concat(L_660_arg1.result_buffer)
+	
+	return L_663_
+end;
+
+local function L_60_func(L_666_arg1, L_667_arg2)
+	local L_668_ = L_53_func(L_666_arg1, L_667_arg2)
+	local L_669_, L_670_ = L_59_func(L_668_)
+	
+	if not L_669_ then
+		return nil, L_670_
+	end;
+	
+	local L_671_ = L_668_.ReaderBitlenLeft() 
+	local L_672_ = (L_671_ - L_671_ % 8) / 8
+	
+	return L_669_, L_672_
+end;
+
+local function L_61_func(L_673_arg1, L_674_arg2)
+	local L_675_ = L_53_func(L_673_arg1, L_674_arg2)
+	local L_676_ = L_675_.ReadBits
+	local L_677_ = L_676_(8)
+	
+	if L_675_.ReaderBitlenLeft() < 0 then
+		return nil, 2
+	end;
+	
+	local L_678_ = L_677_ % 16 
+	local L_679_ = (L_677_ - L_678_) / 16
+	
+	if L_678_ ~= 8 then
+		return nil, -12
+	end;
+	
+	if L_679_ > 7 then
+		return nil, -13
+	end;
+	
+	local L_680_ = L_676_(8)
+	
+	if L_675_.ReaderBitlenLeft() < 0 then
+		return nil, 2
+	end;
+	
+	if (L_677_ * 256 + L_680_) % 31 ~= 0 then 
+		return nil, -14
+	end;
+	
+	local L_681_ = ((L_680_ - L_680_ % 32) / 32 % 2)
+	local L_682_ = ((L_680_ - L_680_ % 64) / 64 % 4)
+	
+	if L_681_ == 1 then
+		if not L_674_arg2 then
+			return nil, -16
+		end;
+		
+		local L_693_, L_694_, L_695_, L_696_ = L_676_(8), L_676_(8), L_676_(8), L_676_(8)
+		local L_697_ = L_693_ * 16777216 + L_694_ * 65536 + L_695_ * 256 + L_696_ 
+		
+		if L_675_.ReaderBitlenLeft() < 0 then
+			return nil, 2
+		end;
+		
+		if not L_25_func(L_697_, L_674_arg2.adler32) then
+			return nil, -17
+		end;
+	end;
+	
+	local L_683_, L_684_ = L_59_func(L_675_)
+	
+	if not L_683_ then
+		return nil, L_684_
+	end;
+	
+	L_675_.SkipToByteBoundary() 
+	
+	local L_685_ = L_676_(8)
+	local L_686_ = L_676_(8)
+	local L_687_ = L_676_(8)
+	local L_688_ = L_676_(8)
+	
+	if L_675_.ReaderBitlenLeft() < 0 then
+		return nil, 2
+	end;
+	
+	local L_689_ = L_685_ * 16777216 + L_686_ * 65536 + L_687_ * 256 + L_688_
+	local L_690_ = L_2_:Adler32(L_683_)
+	
+	if not L_25_func(L_689_, L_690_) then 
+		return nil, -15
+	end;
+	
+	local L_691_ = L_675_.ReaderBitlenLeft()
+	local L_692_ = (L_691_ - L_691_ % 8) / 8
+	
+	return L_683_, L_692_
+end;
+
+function L_2_:DecompressDeflate(L_698_arg1)
+	local L_699_, L_700_ = L_28_func(L_698_arg1)
+	
+	if not L_699_ then 
+		error("Usage: Deflate:DecompressDeflate(string): " .. L_700_, 2);
+	end;
+	
+	return L_60_func(L_698_arg1)
+end;
+
+function L_2_:DecompressZlib(L_705_arg1)
+	local L_706_, L_707_ = L_28_func(L_705_arg1)
+	
+	if not L_706_ then 
+		error("Usage: Deflate:DecompressZlib(string): " .. L_707_, 2);
+	end;
+	
+	return L_61_func(L_705_arg1)
+end;
+
+do
+	L_19_ = {}
+	
+	for L_713_forvar1 = 0, 143 do
+		L_19_[L_713_forvar1] = 8
+	end;
+	
+	for L_714_forvar1 = 144, 255 do
+		L_19_[L_714_forvar1] = 9
+	end;
+	
+	for L_715_forvar1 = 256, 279 do
+		L_19_[L_715_forvar1] = 7
+	end;
+	
+	for L_716_forvar1 = 280, 287 do
+		L_19_[L_716_forvar1] = 8
+	end;
+	
+	L_23_ = {}
+	
+	for L_717_forvar1 = 0, 31 do
+		L_23_[L_717_forvar1] = 5
+	end;
+	
+	local L_712_
+	
+	L_712_, L_20_, L_18_ = L_54_func(L_19_, 287, 9)
+	
+	assert(L_712_ == 0)
+	
+	L_712_, L_24_, L_22_ = L_54_func(L_23_, 31, 5)
+	
+	assert(L_712_ == 0)
+	
+	L_17_ = L_36_func(L_20_, L_19_, 287, 9) 
+	L_21_ = L_36_func(L_24_, L_23_, 31, 5)
+end;
+
+local L_62_ = {["\000"] = "%z", ["("] = "%(", [")"] = "%)", ["."] = "%.", ["%"] = "%%", ["+"] = "%+", ["-"] = "%-", ["*"] = "%*", ["?"] = "%?", ["["] = "%[", ["]"] = "%]", ["^"] = "%^", ["$"] = "%$"}
+
+local function L_63_func(L_718_arg1)
+	return string.gsub(L_718_arg1, "([%z%(%)%.%%%+%-%*%?%[%]%^%$])", L_62_)
+end;
+
+function L_2_:CreateCodec(L_719_arg1, L_720_arg2, L_721_arg3)
+	if type(L_719_arg1) ~= "string" or type(L_720_arg2) ~= "string" or type(L_721_arg3) ~= "string" then 
+		error("Usage: Deflate:CreateCodec(reserved_chars, escape_chars, map_chars): All arguments must be string.", 2)
+	end;
+	
+	if L_720_arg2 == "" then 
+		return nil, "No escape characters supplied."
+	end;
+	
+	if #L_719_arg1 < #L_721_arg3 then
+		return nil, "The number of reserved characters must be at least as many as the number of mapped chars."
+	end;
+	
+	if L_719_arg1 == "" then
+		return nil, "No characters to encode."
+	end;
+	
+	local L_722_, L_723_ = L_719_arg1 .. L_720_arg2 .. L_721_arg3, {}
+	
+	for L_738_forvar1 = 1, #L_722_ do
+		local L_739_ = string.byte(L_722_, L_738_forvar1, L_738_forvar1)
+		
+		if L_723_[L_739_] then 
+			return nil, "There must be no duplicate characters in the concatenation of reserved_chars, escape_chars and map_chars."
+		end;
+		
+		L_723_[L_739_] = true
+	end;
+	
+	local L_724_, L_725_, L_726_, L_727_ = {}, {}, {}, {}
+	
+	if #L_721_arg3 > 0 then
+		local L_740_, L_741_ = {}, {}
+		
+		for L_742_forvar1 = 1, #L_721_arg3 do
+			local L_743_ = string.sub(L_719_arg1, L_742_forvar1, L_742_forvar1)
+			local L_744_ = string.sub(L_721_arg3, L_742_forvar1, L_742_forvar1)
+			
+			L_727_[L_743_] = L_744_
+			L_726_[#L_726_ + 1] = L_743_
+			L_741_[L_744_] = L_743_
+			L_740_[#L_740_ + 1] = L_744_
+		end;
+		
+		L_724_[#L_724_ + 1] = "(["..L_63_func(table.concat(L_740_)).."])" 
+		L_725_[#L_725_ + 1] = L_741_
+	end;
+	
+	local L_728_ = 1
+	local L_729_ = string.sub(L_720_arg2, L_728_, L_728_)
+	local L_730_, L_731_, L_732_ = 0, {}, {}
+	
+	for L_745_forvar1 = 1, #L_722_ do
+		local L_746_ = string.sub(L_722_, L_745_forvar1, L_745_forvar1)
+		
+		if not L_727_[L_746_] then
+			while L_730_ >= 256 or L_723_[L_730_] do
+				L_730_ += 1
+				
+				if L_730_ > 255 then 
+					L_724_[#L_724_ + 1] = L_63_func(L_729_).."(["..L_63_func(table.concat(L_731_)).."])"
+					L_725_[#L_725_ + 1] = L_732_
+					L_728_ += 1
+					L_729_ = string.sub(L_720_arg2, L_728_, L_728_)
+					L_730_, L_731_, L_732_ = 0, {}, {}
+					
+					if not L_729_ or L_729_ == "" then
+						return nil, "Out of escape characters."
+					end;
+				end;
+			end;
+			
+			local L_747_ = L_4_[L_730_]
+			
+			L_727_[L_746_] = L_729_..L_747_
+			L_726_[#L_726_ + 1] = L_746_
+			L_732_[L_747_] = L_746_
+			L_731_[#L_731_ + 1] = L_747_
+			L_730_ += 1
+		end;
+		
+		if L_745_forvar1 == #L_722_ then
+			L_724_[#L_724_ + 1] = L_63_func(L_729_) .. "([" .. L_63_func(table.concat(L_731_)) .. "])"
+			L_725_[#L_725_ + 1] = L_732_
+		end;
+	end;
+	
+	local L_733_ = {}
+	local L_734_ = "([" .. L_63_func(table.concat(L_726_)) .. "])"
+	local L_735_ = L_727_
+	
+	function L_733_:Encode(L_748_arg1)
+		if type(L_748_arg1) ~= "string" then
+			error(("Usage: codec:Encode(string): 'string' - string expected got '%s'."):format(type(L_748_arg1)), 2)
+		end;
+		
+		return string.gsub(L_748_arg1, L_734_, L_735_)
+	end;
+	
+	local L_736_, L_737_ = #L_724_, "([" .. L_63_func(L_719_arg1) .. "])"
+	
+	function L_733_:Decode(L_749_arg1)
+		if type(L_749_arg1) ~= "string" then 
+			error(("Usage: codec:Decode(string): 'string' - string expected got '%s'."):format(type(L_749_arg1)), 2)
+		end;
+		
+		if string.find(L_749_arg1, L_737_) then
+			return nil
+		end;
+		
+		for L_750_forvar1 = 1, L_736_ do
+			L_749_arg1 = string.gsub(L_749_arg1, L_724_[L_750_forvar1], L_725_[L_750_forvar1])
+		end;
+		
+		return L_749_arg1
+	end;
+	
+	return L_733_
+end;
+
+L_2_.internals = {
+	LoadStringToTable = L_40_func,
+	IsValidDictionary = L_26_func,
+	IsEqualAdler32 = L_25_func
+}
+
+return L_1_]]></ProtectedString>
+				<int64 name="SourceAssetId">-1</int64>
+				<BinaryString name="Tags"></BinaryString>
+			</Properties>
+		</Item>
+		<Item class="ModuleScript" referent="RBXFBDBC0D33C9741EA94D2FB38ADC50385">
+			<Properties>
+				<BinaryString name="AttributesSerialize">AQAAAAoAAABBc3NpZ25EYXRhAwA=</BinaryString>
+				<Content name="LinkedSource"><null></null></Content>
+				<string name="Name">Base64</string>
+				<string name="ScriptGuid">{2FF212AE-DD9D-4A8E-8A74-AA4C8B335D3B}</string>
+				<ProtectedString name="Source"><![CDATA[--[[::
+
+Copyright (C) 2021, Luc Rodriguez (Aliases : Shambi, StyledDev).
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+(Original Repository can be found here : https://github.com/Shambi-0/Luau-Base64)
+
+--::]]
+
+--// Type Definitions.
+
+type Array<Type> = {[number] : Type};
+type Dictionary<Type> = {[string] : Type};
+
+--// Plugin Initalization.
+
+local Base64 : Dictionary<any?> = {
+	["Dictionary"] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+};
+
+--// Plugin Methods.
+
+function Base64:Encode(Data : string) : string
+	local InputType : string = type(Data);
+	assert(InputType == "string", string.format("Expected type \"string\" for argument #1 of \"Base64:Decode()\". Recieved type \"%s\".", InputType));
+	
+	return (string.gsub(string.gsub(Data, '.', function(Character : string) : string
+		local Result : string, Byte : number = '', string.byte(Character)
+
+		for Index : number = 8, 1, -1 do
+			Result ..= if (bit32.band(Byte, math.pow(2, Index) - 1) - bit32.band(Byte, math.pow(2, Index - 1) - 1) > 0) then '1' else '0';
+		end;
+
+		return (Result);
+
+	end) .. '0000', "%d%d%d?%d?%d?%d?", function(Character : string) : string
+		if (#Character < 6) then 
+			return ('');
+		end;
+
+		local Counter : number = 0;
+
+		for Index : number = 1, 6 do
+			Counter += if (string.sub(Character, Index, Index) == '1') then math.pow(2, 6 - Index) else 0;
+		end;
+
+		Counter += 1;
+
+		return (string.sub(self.Dictionary, Counter, Counter));
+	end) .. ({ '', '==', '=' })[#Data % 3 + 1]);
+end;
+
+function Base64:Decode(Data : string) : string
+	local InputType : string = type(Data);
+	assert(InputType == "string", string.format("Expected type \"string\" for argument #1 of \"Base64:Decode()\". Recieved type \"%s\".", InputType));
+	
+	return (string.gsub(string.gsub(string.gsub(Data, '[^' .. self.Dictionary .. '=]', ''), '.', function(Character : string) : string
+		if (Character == '=') then
+			return ('');
+		end;
+
+		local Result : string, Format : number = '', string.find(self.Dictionary, Character) - 1;
+
+		for Index : number = 6, 1, -1 do
+			Result ..= if (bit32.band(Format, math.pow(2, Index) - 1) - bit32.band(Format, math.pow(2, Index - 1) - 1) > 0) then '1' else '0';
+		end;
+
+		return (Result);
+
+	end), "%d%d%d?%d?%d?%d?%d?%d?", function(Pair : string) : string
+		if (#Pair ~= 8) then
+			return ('');
+		end;
+
+		local Counter : number = 0;
+
+		for Index : number = 1, 8 do
+			Counter += if (string.sub(Pair, Index, Index) == '1') then math.pow(2, 7 - Index) else 0;
+		end;
+
+		return (string.char(Counter));
+	end));
+end;
+
+--// Plugin Finalization.
+
+return (Base64);]]></ProtectedString>
+				<int64 name="SourceAssetId">8088020910</int64>
+				<BinaryString name="Tags"></BinaryString>
+			</Properties>
+		</Item>
+		<Item class="ModuleScript" referent="RBX0BCD57C51B64463D8022EA0EBAB88F10">
+			<Properties>
+				<BinaryString name="AttributesSerialize"></BinaryString>
+				<Content name="LinkedSource"><null></null></Content>
+				<string name="Name">Curve25519</string>
+				<string name="ScriptGuid">{968C0B2F-FE34-4D3E-9136-04A2380B7448}</string>
+				<ProtectedString name="Source"><![CDATA[--// Type Definitions //--
+
+type Array<Type> = {[number] : Type};
+type Dictionary<Type> = {[string] : Type};
+
+--// Plugin Initalization //--
+
+local Curve25519 : any? = {};
+Curve25519.__index = Curve25519;
+
+--// Plugin Variables //--
+
+local SHA256 : (string, string?) -> string = require(script.Parent:WaitForChild("Sha256"));
+local KEY : () -> Array<number> = require(script:WaitForChild("KEY"));
+local EC25519 : any? = require(script:WaitForChild("EC25519"));
+local AES : any? = require(script.Parent:WaitForChild("AES"));
+
+--// Plugin Functions //--
+
+local function Package(x : {number}) : string
+	local y : string = "";
+	
+	for _, z : number in ipairs(x) do
+		y ..= string.format("%02x", z);
+	end;
+	
+	return (y);
+end;
+
+local function Unpackage(x : string) : {number}
+	local y : {number} = {};
+	
+	string.gsub(x, "..", function(z : string) : string?
+		table.insert(y, tonumber(z, 16));
+	end);
+	
+	return (y);
+end;
+
+--// Plugin Methods //--
+
+function Curve25519:GenerateKeyPair() : { Secret : string, Public : string }
+	local Secret : {number}, Public : {number?} = KEY(), {};
+
+	EC25519.ScalarMultiplicationBase(Public, Secret);
+
+	return ({
+		["Secret"] = Package(Secret);
+		["Public"] = Package(Public);
+	});
+end;
+
+function Curve25519:GenerateSessionKey(Sender : string, Recipient : string) : string
+	local SessionKey : {number} = {};
+
+	EC25519.ScalarMultiplication(SessionKey, Unpackage(Sender), Unpackage(Recipient));
+
+	return (SHA256(Package(SessionKey), game.Name));
+end;
+
+--// Plugin Finalization //--
+
+return (Curve25519);]]></ProtectedString>
+				<int64 name="SourceAssetId">-1</int64>
+				<BinaryString name="Tags"></BinaryString>
+			</Properties>
+			<Item class="ModuleScript" referent="RBX414A1A1342FF435A89230C58FFF4E0F3">
+				<Properties>
+					<BinaryString name="AttributesSerialize"></BinaryString>
+					<Content name="LinkedSource"><null></null></Content>
+					<string name="Name">SHA256</string>
+					<string name="ScriptGuid">{AE3991A2-DA9D-4A85-9A3C-6DB2EED1F900}</string>
+					<ProtectedString name="Source"><![CDATA[--[[::
+
+Copyright (C) 2021, Luc Rodriguez (Aliases : Shambi, StyledDev).
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+--::]]
+
+-- Initalize the permutation table.
+local Permutations : {[number] : number} = {
+	0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5,
+	0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+	0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3,
+	0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+	0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc,
+	0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+	0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7,
+	0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+	0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13,
+	0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+	0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3,
+	0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+	0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5,
+	0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+	0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208,
+	0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
+};
+
+-- Convert a number into a string of a fixed length.
+local function ProcessNumber(Input : number, Length : number) : string
+
+	-- Initalize a blank string to contain our output.
+	local Output : string = "";
+
+	-- Count up to the given length.
+	for Index : number = 1, Length do
+
+		-- Get the remainder of a modulus of 256.
+		local Remainder : number = bit32.band(Input, 255);
+
+		-- Convert the remainder to a character
+		-- then add that character to the output.
+		Output ..= string.char(Remainder);
+
+		-- Set our input as : our input minus our 
+		-- remainder divided by 256.
+		Input = bit32.rshift(Input - Remainder, 8);
+	end;
+
+	-- Reverse the output then return it.
+	return (string.reverse(Output));
+end;
+
+-- Convert a string into
+-- a 232 bit number.
+local function StringTo232BitNumber(Input : string, Offset : number) : number
+
+	-- Initalize our output at 0.
+	local Output : number = 0;
+
+	-- Count from our offset, to our offset plus 3.
+	for Index : number = Offset, Offset + 3 do
+
+		-- Multiply our output by 256.
+		Output *= 256;
+
+		-- Convert the input into a byte, then
+		-- add it to our output.
+		Output += string.byte(Input, Index);
+	end;
+
+	-- Return our output.
+	return (Output);
+end;
+
+-- Preprocess data so that it can be
+-- processed further down the line.
+local function PreProcess(Content : string, Length : number) : string
+
+	-- Solve for the numerical padding used to offset the data.
+	local Padding : number = 64 - bit32.band(Length + 9, 63);
+
+	-- Compress the length the message to a fixed length of 8 bytes.
+	Length = ProcessNumber(8 * Length, 8);
+
+	-- Concat the content, divider, padding, and length.
+	Content = Content .. "\128" .. string.rep("\0", Padding) .. Length;
+
+	-- Check that the result has an exact length of 64 bytes.
+	assert(#Content % 64 == 0, "Preprocessed content does not have a valid length of 64 bytes, and can not continue.");
+
+	-- If everything checks out, return the result.
+	return (Content);
+end;
+
+-- Digest a 64 bit block for a 256 bit hash.
+local function Digestblock(Content : string, Offset : number, Hash : {[number] : number}) : nil?
+
+	-- Initalize a blank array to contain
+	-- each of the offsets used in the digest.
+	local Offsets : {[number] : number} = {};
+
+	-- Calculate the offsets 
+	-- for the first byte.
+	for Index : number = 1, 16 do 
+
+		-- Convert the string into a 232 bit number
+		-- with the result being set at the index.
+		Offsets[Index] = StringTo232BitNumber(Content, Offset + (Index - 1) * 4); 
+	end;
+
+	-- Count from 17 up to 64.
+	for Index : number = 17, 64 do
+		-- Calculate the value of the current index.
+		local Value : number = Offsets[Index - 15];
+
+		-- Solve for the current section given the value.
+		local Section0 : number = bit32.bxor(bit32.rrotate(Value, 7), bit32.rrotate(Value, 18), bit32.rshift(Value, 3));
+
+		-- Offset the value.
+		Value = Offsets[Index - 2];
+
+		-- Overwrite the offset at the current
+		-- index with some more calculations.
+		Offsets[Index] = Offsets[Index - 16] + Section0 + Offsets[Index - 7] + bit32.bxor(bit32.rrotate(Value, 17), bit32.rrotate(Value, 19), bit32.rshift(Value, 10));
+	end;
+
+	-- Unpack the hash into 8 permutated sections.
+	local a : number, b : number, c : number, d : number, e : number, f : number, g : number, h : number = 
+		Hash[1], Hash[2], Hash[3], Hash[4], Hash[5], Hash[6], Hash[7], Hash[8];
+
+	-- Count from 1 up to 64.
+	-- updating the block for each index.
+	for Index : number = 1, 64 do
+
+		-- Solve for the first section and the "maj"
+		local Section0 : number = bit32.bxor(bit32.rrotate(a, 2), bit32.rrotate(a, 13), bit32.rrotate(a, 22));
+		local maj : number = bit32.bxor(bit32.band(a, b), bit32.band(a, c), bit32.band(b, c));
+
+		-- Solve the tail's secondary component.
+		local Tail2 : number = Section0 + maj;
+
+		-- Solve the second section & the main chunk.
+		local Section1 : number = bit32.bxor(bit32.rrotate(e, 6), bit32.rrotate(e, 11), bit32.rrotate(e, 25));
+		local Chunk : number = bit32.bxor(bit32.band(e, f), bit32.band(bit32.bnot(e), g));
+
+		-- With the other components, solve for the tail's main component.
+		local Tail1 = h + Section1 + Chunk + Permutations[Index] + Offsets[Index];
+
+		-- Overwrite each of the permutated sections
+		-- with offset and modified equivilents.
+		h, g, f, e, d, c, b, a = g, f, e, d + Tail1, c, b, a, Tail1 + Tail2;
+	end;
+
+	-- Iterate over each digested value.
+	for Index : number, Value : number in ipairs({a, b, c, d, e, f, g, h}) do
+
+		-- Overite the current value with the digested one.
+		Hash[Index] = bit32.band(Hash[Index] + Value);
+	end;
+end
+
+-- Made this global
+return function(Content : string, Salt : string?) : string
+	-- Check that the content provided is valid.
+	assert(type(Content) == "string", "Argument #1 must be type\"string\".");
+
+	-- Apply salt if one is provided.
+	Content ..= if (type(Salt) == "string") then "_" .. Salt else "";
+
+	-- Process the data for further changes.
+	Content = PreProcess(Content, #Content);
+
+	-- Initalize a base hash.
+	local Base : {[number] : number} = {
+		0x6a09e667,
+		0xbb67ae85,
+		0x3c6ef372,
+		0xa54ff53a,
+		0x510e527f,
+		0x9b05688c,
+		0x1f83d9ab,
+		0x5be0cd19	
+	};
+
+	-- Iterate over the length of
+	-- the data in chunks of 64.
+	for Index : number = 1, #Content, 64 do
+
+		-- Digest the content with the base.
+		Digestblock(Content, Index, Base);
+	end;
+
+	-- Initalize a blank table to contain our hash.
+	local Hash : {[number] : string?} = {};
+
+	-- Iterate over each chunk in the "base hash".
+	for Index : number, Value : number in ipairs(Base) do
+
+		-- Convert the chunk into a string, the overwrite the current value.
+		Hash[Index] = ProcessNumber(Value, 4);
+	end;
+
+	-- Concat the results, then convert to a hexadecimal format.
+	return (string.gsub(table.concat(Hash), ".", function(Character : string) : string
+
+		-- Convert the character into a byte, then format as a hexadecimal pair.
+		return (string.format("%02x", string.byte(Character)));
+	end));
+end;]]></ProtectedString>
+					<int64 name="SourceAssetId">8309766798</int64>
+					<BinaryString name="Tags"></BinaryString>
+				</Properties>
+			</Item>
+			<Item class="ModuleScript" referent="RBXC20AAEC69CF740969913F075E763E7EA">
+				<Properties>
+					<BinaryString name="AttributesSerialize"></BinaryString>
+					<Content name="LinkedSource"><null></null></Content>
+					<string name="Name">EC25519</string>
+					<string name="ScriptGuid">{B560EBA7-29CD-445B-AC86-BFDE4F6839D6}</string>
+					<ProtectedString name="Source"><![CDATA[local bit = require(script.Bit);
+
+-- u8 * 32
+local t_9 = {9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+local function Carry25519(Output)
+	local c;
+	for Index : number = 1, 16 do
+		Output[Index] += 65536;
+		c = math.floor(Output[Index] / 65536);
+
+		if (Index < 16) then
+			Output[Index + 1] += (c - 1);
+		else
+			Output[1] += 38 * (c - 1);
+		end;
+
+		Output[Index] -= bit.lshift(c, 16);
+	end;
+end;
+
+local function Select25519(p, q, b)
+	local c = bit._not(b - 1);
+
+	if (c == 4294967295) then 
+		c = -1; 
+	end;
+
+	local t;
+	for Index : number = 1, 16 do
+		t = bit._and(c, bit.xor(p[Index], q[Index]));
+
+		p[Index] = bit.xor(p[Index], t);
+		q[Index] = bit.xor(q[Index], t);
+	end;
+end;
+
+local function Pack25519(o, n) -- out o[32], in n[16]
+	local m, t = {}, n;
+	local b;
+
+	Carry25519(t);
+	Carry25519(t);
+	Carry25519(t);
+
+	for _ = 1, 2 do
+		m[1] = t[1] - 0xffed;
+
+		for Index : number = 2, 15 do
+			m[Index] = t[Index] - 0xffff - bit._and(bit.rshift(m[Index - 1], 16), 1);
+			m[Index - 1] = bit._and(m[Index - 1], 0xffff);
+		end;
+
+		m[16] = t[16] - 0x7fff - bit._and(bit.rshift(m[15], 16), 1);
+		b = bit._and(bit.rshift(m[16], 16), 1);
+		m[15] = bit._and(m[15], 0xffff);
+
+		Select25519(t, m, 1 - b);
+	end;
+
+	for Index : number = 1, 16 do
+		o[2 * Index - 1] = bit._and(t[Index], 0xff);
+		o[2 * Index] = bit.rshift(t[Index], 8);
+	end;
+end;
+
+local function Unpack25519(o, n) -- out o[16], in n[32]
+	for Index : number = 1, 16 do
+		o[Index] = n[2 * Index - 1] + bit.lshift(n[2 * Index], 8);
+	end;
+	o[16] = bit._and(o[16], 0x7fff);
+end;
+
+local function Add(o, a, b)
+	for Index : number = 1, 16 do 
+		o[Index] = a[Index] + b[Index]; 
+	end;
+end;
+
+local function Subtract(o, a, b)
+	for Index : number = 1, 16 do 
+		o[Index] = a[Index] - b[Index]; 
+	end;
+end;
+
+local function Multiply(o, a, b) --mul  gf, gf -> gf
+	local t = {};
+	for Index : number = 1, 32 do 
+		t[Index] = 0;  
+	end;
+
+	for Index : number = 1, 16 do
+		for j = 1, 16 do
+			t[Index + j - 1] += a[Index] * b[j];
+		end;
+	end;
+
+	for Index : number = 1, 15 do 
+		t[Index] += 38 * t[Index + 16]; 
+	end;
+
+	for Index : number = 1, 16 do 
+		o[Index] = t[Index]; 
+	end;
+
+	Carry25519(o);
+	Carry25519(o);
+end;
+
+local function Square(Output, Input)
+	Multiply(Output, Input, Input);
+end;
+
+local function Inverse25519(Output, Input)
+	local Carry = {};
+	
+	for Index : number = 1, 16 do 
+		Carry[Index] = Input[Index]; 
+	end;
+
+	for Index : number = 253, 0, -1 do
+		Square(Carry, Carry);
+		if (Index ~= 2) and (Index ~= 4) then 
+			Multiply(Carry, Carry, Input); 
+		end;
+	end;
+
+	for Index : number = 1, 16 do 
+		Output[Index] = Carry[Index]; 
+	end;
+end;
+
+local t_121665 = {0xDB41, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+local function CryptographicScalarMultiplication(q, n, p) -- out q[], in n[], in p[]
+	local z, x, x16, x32 = n, {}, {}, {};
+	local a = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+	local b = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+	local c = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+	local d = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+	local e = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+	local f = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+	
+	z[32] = bit._or(bit._and(n[32], 127), 64);
+	z[1] = bit._and(z[1], 248);
+
+	Unpack25519(x, p);
+
+	for Index : number = 1, 16 do
+		b[Index] = x[Index];
+	end;
+
+	a[1], d[1] = 1, 1;
+
+	for i = 254, 0, -1 do
+		local r = bit._and(bit.rshift(z[bit.rshift(i, 3) + 1], bit._and(i, 7)), 1);
+
+		Select25519(a, b, r);
+		Select25519(c, d, r);
+
+		Add(e, a, c);
+		Subtract(a, a, c);
+		Add(c, b, d);
+		Subtract(b, b, d);
+
+		Square(d, e);
+		Square(f, a);
+
+		Multiply(a, c, a);
+		Multiply(c, b, e);
+
+		Add(e, a, c);
+		Subtract(a, a, c);
+
+		Square(b, a);
+		Subtract(c, d, f);
+
+		Multiply(a, c, t_121665);
+		Add(a, a, d);
+
+		Multiply(c, c, a);
+		Multiply(a, d, f);
+		Multiply(d, b, x);
+
+		Square(b, e);
+
+		Select25519(a, b, r);
+		Select25519(c, d, r);
+	end;
+
+	for Index : number = 1, 16 do
+		x[Index + 16] = a[Index];
+		x[Index + 32] = c[Index];
+		x[Index + 48] = b[Index];
+		x[Index + 64] = d[Index];
+	end;
+	
+	for Index : number = 1, #x do
+		if (Index > 16) then x16[Index - 16] = x[Index]; end;
+		if (Index > 32) then x32[Index - 32] = x[Index]; end;
+	end;
+
+	Inverse25519(x32, x32);
+	Multiply(x16, x16, x32);
+	Pack25519(q, x16);
+
+	return 0;
+end;
+
+local function CryptographicScalarMultiplicationBase(q, n) -- out q[], in n[]
+	return CryptographicScalarMultiplication(q, n, t_9);
+end;
+
+return ({
+	["ScalarMultiplication"] = CryptographicScalarMultiplication;
+	["ScalarMultiplicationBase"] = CryptographicScalarMultiplicationBase;
+});]]></ProtectedString>
+					<int64 name="SourceAssetId">-1</int64>
+					<BinaryString name="Tags"></BinaryString>
+				</Properties>
+				<Item class="ModuleScript" referent="RBX9503AB34F4DB453F8A11BD94869D8E5B">
+					<Properties>
+						<BinaryString name="AttributesSerialize"></BinaryString>
+						<Content name="LinkedSource"><null></null></Content>
+						<string name="Name">Bit</string>
+						<string name="ScriptGuid">{45E575A3-A9D9-4748-BF8F-15F41F7D788C}</string>
+						<ProtectedString name="Source"><![CDATA[-- Custom Bit32 library to fit Curve25519's functionality.
+
+function tb(n)
+	if(n < 0) then
+		return tb(bnot(math.abs(n)) + 1);
+	end;
+	local x, y = {}, 1;
+	while (n > 0) do
+		local z = n % 2;
+		x[y] = if z == 1 then 1 else 0;
+		n = (n - z) / 2;
+		y += 1;
+	end;
+	return x;
+end;
+
+function ttn(x)
+	local y, z = 0, 1;
+	for i = 1, table.getn(x) do
+		y += x[i] * z; 
+		z *= 2;
+	end;
+	return y;
+end;
+
+function ex(m, n)
+	local b, s = {}, {};
+	if (table.getn(m) > table.getn(n)) then
+		b, s = m, n; else b, s = n, m; 
+	end;
+	for i = table.getn(s) + 1, table.getn(b) do
+		s[i] = 0;
+	end;
+end;
+
+function op(m, n, c)
+	local x, y, z = tb(m), tb(n), {};
+	ex(x, y);
+	for i = 1, math.max(table.getn(x), table.getn(y)) do
+		z[i] = c(x[i], y[i]);
+	end;
+	return ttn(z);
+end;
+
+function bnot(n)
+	local x = tb(n);
+	for y = 1, math.max(table.getn(x), 32) do
+		x[y] = if x[y] == 1 then 0 else 1;
+	end;
+	return ttn(x);
+end;
+
+return ({
+	["_not"] = bnot;
+	["_and"] = function(m, n)
+		return op(m, n, function(x, y)
+			return (if x == 0 or y == 0 then 0 else 1);
+		end);
+	end;
+	["_or"] = function(m, n)
+		return op(m, n, function(x, y)
+			return (if x == 0 and y == 0 then 0 else 1);
+		end);
+	end;
+	["xor"] = function(m, n)
+		return op(m, n, function(x, y)
+			return (if x ~= y then 1 else 0);
+		end);
+	end;
+	["rshift"] = function(x, y)
+		return (math.floor(x / 2 ^ y));
+	end;
+	["lshift"] = function(x, y)
+		return (x * 2 ^ y);
+	end;
+});
+]]></ProtectedString>
+						<int64 name="SourceAssetId">-1</int64>
+						<BinaryString name="Tags"></BinaryString>
+					</Properties>
+				</Item>
+			</Item>
+			<Item class="ModuleScript" referent="RBX9BF1071BE9E34C25AFC9914EF666A6ED">
+				<Properties>
+					<BinaryString name="AttributesSerialize"></BinaryString>
+					<Content name="LinkedSource"><null></null></Content>
+					<string name="Name">KEY</string>
+					<string name="ScriptGuid">{ABC6E78B-4875-4B99-92A0-74FEB8EAFA25}</string>
+					<ProtectedString name="Source"><![CDATA[type Sequence = { [number] : number };
+
+return (function() : --[[ 32-Byte ]] Sequence
+	local Key : Sequence = {};
+	
+	for Index : number = 1, 32 do
+		Key[Index] = math.random(0, 510) % 255;
+	end;
+	
+	return (Key);
+end);]]></ProtectedString>
+					<int64 name="SourceAssetId">-1</int64>
+					<BinaryString name="Tags"></BinaryString>
+				</Properties>
+			</Item>
+		</Item>
+	</Item>
+</roblox>
