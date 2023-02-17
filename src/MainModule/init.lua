@@ -28,8 +28,12 @@ local function warn(...)
 	oWarn(":: ".. AppName .." ::", ...)
 end
 
-local function error(...)
-	oError(":: ".. AppName .." ::", ...)
+local function error(reason: any?, level: number?)
+	if level ~= nil and type(level) ~= "number" then
+		oError(string.format(":: %s :: bad argument #2 to 'error' (number expected, got %s)", AppName, type(level)), 2)
+	end
+
+	oError(":: ".. AppName .." ::"..tostring(reason), (level or 1) + 1)
 end
 
 local function print(...)
