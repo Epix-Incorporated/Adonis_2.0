@@ -4,10 +4,10 @@
     <a href="https://www.roblox.com/library/7510622625/">
         <img src="https://img.shields.io/static/v1?label=roblox&message=model&color=blue&logo=roblox&logoColor=white"/>
     </a>
-    <a href="https://github.com/Sceleratis/Adonis/blob/master/LICENSE">
+    <a href="https://github.com/Epix-Incorporated/Adonis/blob/master/LICENSE">
         <img src="https://img.shields.io/github/license/Sceleratis/Adonis"/>
     </a>
-    <a href="https://github.com/Sceleratis/Adonis/releases">
+    <a href="https://github.com/Epix-Incorporated/Adonis/releases">
         <img src="https://img.shields.io/github/v/release/Sceleratis/Adonis?label=version"/>
     </a>
     <a href="https://discord.gg/H5RvTP3">
@@ -20,7 +20,7 @@
 Adonis is a community-maintained server moderation and management system created for use on the Roblox platform.
 
 ## ⚠️ NOTICE
-This version of Adonis is a **WORK IN PROGRESS** and is missing many features. For the current and supported version, see the [Adonis 1.0 repository](https://github.com/Sceleratis/Adonis).
+This version of Adonis is a **WORK IN PROGRESS** and is missing many features. For the current and supported version, see the [Adonis 1.0 repository](https://github.com/Epix-Incorporated/Adonis).
 
 ⚠️ **DO NOT USE ADONIS 2.0 IN A PRODUCTION ENVIRONMENT! IT WILL NOT WORK.** ⚠️
 
@@ -36,16 +36,16 @@ If you get stuck, feel free to ask for assistance in our [Discord server](https:
 * Insert the model into Studio using the Toolbox into `ServerScriptService`
 
 ### Method 2: GitHub Releases
-* Download the `rbxm` file snapshot from the [latest release](https://github.com/Sceleratis/Adonis/releases/latest)
+* Download the `rbxm` file snapshot from the [latest release](https://github.com/Epix-Incorporated/Adonis/releases/latest)
 * Import the model file into Studio
-  * Note: By default, snapshots included in releases have <a href="#debug-mode">`DebugMode`</a> enabled.
+  * Note: By default, snapshots included in releases have [`DebugMode`](#debug-mode) enabled.
 
 ### Method 3: Filesystem
 * Download the repository to your computer's file system
 * Install and use a plugin like [Rojo](https://rojo.space/) to compile Adonis into a `rbxmx` file
   * If using Rojo, you can run `rojo build /path/to/adonis -o Adonis.rbxmx` to build a `rbxmx`
 * Import the compiled model file into Studio
-  * Note: By default, loaders compiled from the repository have <a href="#debug-mode">`DebugMode`</a> enabled. **This method compiles the _bleeding edge_ version of Adonis, which may be unstable.**
+  * Note: By default, loaders compiled from the repository have [`DebugMode`](#debug-mode) enabled. **This method compiles the _bleeding edge_ version of Adonis, which may be unstable.**
 
 ## 🛠️ Debug Mode
 The Adonis loader provides a `DebugMode` option which will load a local copy of the `MainModule` rather than fetching the latest version. This could be useful if you want to stay on a particular version of Adonis or want to maintain a custom version for your game. Debug mode expects the `MainModule` to share the same parent with the loader model (e.g. both should be in `ServerScriptService`). **By default, snapshots provided in  releases have `DebugMode` enabled.**
@@ -57,7 +57,7 @@ The Adonis loader provides a `DebugMode` option which will load a local copy of 
 ## 🔗 Links
 * Official Adonis Loader: <https://www.roblox.com/library/7510622625/Adonis-Loader>
 * Official MainModule: <https://www.roblox.com/library/7510592873/Adonis-MainModule>
-* Documentation: <https://github.com/Sceleratis/Adonis_2.0/wiki>
+* Documentation: <https://github.com/Epix-Incorporated/Adonis_2.0/wiki>
 * Discord Server: <https://discord.gg/H5RvTP3>
 
 ## ⭐ Contributing
@@ -67,4 +67,4 @@ The purpose of this repository is to allow others to contribute and make improve
 Read the contributing guide to get a better understanding of our development process and workflow, along with answers to common questions related to contributing to Adonis.
 
 ### ⚖️ License
-Adonis is available under the terms of [the MIT license](https://github.com/Sceleratis/Adonis/blob/master/LICENSE).
+Adonis is available under the terms of [the MIT license](https://github.com/Epix-Incorporated/Adonis/blob/master/LICENSE).
