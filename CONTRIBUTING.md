@@ -10,11 +10,11 @@ Anyone in the community may submit code reviews for PRs and make discussions on 
 
 ## Q: What can I contribute?
 
-**A:** Anything within reason! Contributions can be to Adonis itself or the wiki (or both!) As long as your addition or change is useful and doesn't break something, and makes sense (while not violating ROBLOX's rules) it will *probably* be merged. However, something may occasionally be deemed unneccessary or incomplete, at which point a comment will be made on the PR for you to respond or amend your code (or just so you know the maintainers' reasoning.)
+**A:** Anything within reason! Contributions can be to Adonis itself or the wiki (or both!) As long as your addition or change is useful and doesn't break something, and makes sense (while not violating Roblox's rules) it will *probably* be merged. However, something may occasionally be deemed unneccessary or incomplete, at which point a comment will be made on the PR for you to respond or amend your code (or just so you know the maintainers' reasoning.)
 
 ## Q: What *can't* I contribute?
 
-**A:** Anything that violates ROBLOX's rules (as in, anything that could get Adonis or games using Adonis in trouble) is not allowed for obvious reasons. Additionally, please do not submit any form of obfuscated code as they have no place in the open-source project that Adonis is.
+**A:** Anything that violates Roblox's rules (as in, anything that could get Adonis or games using Adonis in trouble) is not allowed for obvious reasons. Additionally, please do not submit any form of obfuscated code as they have no place in the open-source project that Adonis is.
 
 There is a very clear/obvious difference between unavoidably complex code and intentionally complicated code. Maintainers are certain to check all file changes before merging and can *usually* spot something abnormal quickly.
 
@@ -42,17 +42,17 @@ Also, try to double check any text for spelling issues. Some of us frequently ma
 
 **A:** After handling the merge, a maintainer will also add you to the credits list as "@GitHub YourGitHubUsernameHere" if it's your first contribution. If we forget to do this, and you notice, just us me know (via Discord or a comment on the PR itself) and we'll fix it.
 
-Once in a while after changes are merged, some quick testing will be done by a maintainer to make sure everything works correctly. Once that's done, the updated models will be published to ROBLOX by an automated process, after which all new servers will be running the latest version of Adonis.
+Once in a while after changes are merged, some quick testing will be done by a maintainer to make sure everything works correctly. Once that's done, the updated models will be published to Roblox by an automated process, after which all new servers will be running the latest version of Adonis.
 
 ## Q: How do I get the "GitHub Contributor" role and group rank?
 
-**A:** After your contribution is accepted, post your Discord & ROBLOX usernames into the discussion thread (<https://github.com/Sceleratis/Adonis/discussions/433>). You will be given the "GitHub Contributor" role in the Discord server and the "Contributors" rank in the ROBLOX group (Epix Incorporated) by a maintainer, assuming you are a member of the server and group respectively.
+**A:** After your contribution is accepted, post your Discord & Roblox usernames into the discussion thread (<https://github.com/Epix-Incorporated/Adonis/discussions/433>). You will be given the "GitHub Contributor" role in the Discord server and the "Contributors" rank in the Roblox group (Epix Incorporated) by a maintainer, assuming you are a member of the server and group respectively.
 
-ROBLOX group: https://www.roblox.com/groups/886423
+Roblox group: <https://www.roblox.com/groups/886423>
 
-Discord server: https://discord.com/invite/H5RvTP3
+Discord server: <https://discord.com/invite/H5RvTP3>
 
-<hr>
+---
 
 ### That's all, folks!
 
