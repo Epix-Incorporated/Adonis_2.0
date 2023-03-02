@@ -14,7 +14,9 @@
         <img src="https://img.shields.io/discord/81902207070380032?label=discord&logo=discord&logoColor=white"/>
     </a>
 </div>
-<hr/>
+
+---
+
 Adonis is a community-maintained server moderation and management system created for use on the Roblox platform.
 
 ## ⚠️ NOTICE
@@ -53,10 +55,10 @@ The Adonis loader provides a `DebugMode` option which will load a local copy of 
 * Change `DebugMode` at the end of the `data` table to the desired value (e.g. `DebugMode = false`)
 
 ## 🔗 Links
-* Official Adonis Loader: https://www.roblox.com/library/7510622625/Adonis-Loader
-* Official MainModule: https://www.roblox.com/library/7510592873/Adonis-MainModule
-* Documentation: https://github.com/Sceleratis/Adonis_2.0/wiki
-* Discord Server: https://discord.gg/H5RvTP3
+* Official Adonis Loader: <https://www.roblox.com/library/7510622625/Adonis-Loader>
+* Official MainModule: <https://www.roblox.com/library/7510592873/Adonis-MainModule>
+* Documentation: <https://github.com/Sceleratis/Adonis_2.0/wiki>
+* Discord Server: <https://discord.gg/H5RvTP3>
 
 ## ⭐ Contributing
 The purpose of this repository is to allow others to contribute and make improvements to Adonis. Even if you've never contributed on GitHub before, we would appreciate any contributions that you can provide.
@@ -65,4 +67,4 @@ The purpose of this repository is to allow others to contribute and make improve
 Read the contributing guide to get a better understanding of our development process and workflow, along with answers to common questions related to contributing to Adonis.
 
 ### ⚖️ License
-Adonis is available under the terms of the MIT license. Read more details about the license [here](https://github.com/Sceleratis/Adonis/blob/master/LICENSE).
+Adonis is available under the terms of [the MIT license](https://github.com/Sceleratis/Adonis/blob/master/LICENSE).
