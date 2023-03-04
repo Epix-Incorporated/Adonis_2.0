@@ -13,11 +13,27 @@
 --- @tag Core
 
 local oWarn = warn
+local oError = error
+local oPrint = print
 local Verbose = false
 
 --// Warn
 local function warn(...)
 	oWarn(":: PackageHandler ::", ...)
+end
+
+--// Error
+local function error(reason: any?, level: number?)
+	if level ~= nil and type(level) ~= "number" then
+		oError(string.format(":: %s :: bad argument #2 to 'error' (number expected, got %s)", AppName, type(level)), 2)
+	end
+
+	oError(":: PackageHandler :: "..tostring(reason), (level or 1) + 1)
+end
+
+--// Print
+local function print(...)
+	oPrint(":: PackageHandler ::", ...)
 end
 
 --// Warn, but for debugging situations (more verbose/spammy)
@@ -89,7 +105,7 @@ local function GetPackages(Packages: {Folder}, FindName: string?): {[string]: Fo
 
 	DebugWarn("GET PACKAGES CONTAINING", FindName)
 
-	for i, v in ipairs(Packages) do
+	for _, v in ipairs(Packages) do
 		DebugWarn("CHECK PACKAGE", v)
 
 		if v:IsA("Folder") and v:FindFirstChild("Metadata") and ((not FindName) or v:FindFirstChild(FindName)) then
@@ -120,7 +136,7 @@ end
 --- @return table -- Packages that were stripped.
 local function StripPackages(Packages: {Folder}, Remove: string)
 	local found = {}
-	for i,v in pairs(Packages) do
+	for _, v in pairs(Packages) do
 		local metadata = GetMetadata(v)
 		local pkgString = metadata.Name .. "==" .. metadata.Version
 
@@ -180,7 +196,7 @@ local function CheckDependencies(Packages: {[string]: Folder}, Package: Folder)
 
 	DebugWarn("Checking package depdencies", Package)
 	if dependencies then
-		for i,depString in pairs(dependencies) do
+		for _, depString in pairs(dependencies) do
 			debugLine()
 
 			local name = string.match(depString, "(.*)==") or depString
@@ -200,7 +216,7 @@ end
 
 --// Given an ordered table of packages, checks if any packages match PackageName and PackageVersion
 local function CheckResults(ResultList: {Folder}, PackageName: string, PackageVersion)
-	for i,package in ipairs(ResultList) do
+	for _, package in ipairs(ResultList) do
 		local metadata = GetMetadata(package)
 		if metadata.Name == PackageName and (not PackageVersion or metadata.Version == PackageVersion) then
 			return true
@@ -322,7 +338,7 @@ end
 	@return Tab
 ]=]
 local function InsertAtIndexGroup(Tab: {[any]: {[number]: any}}, Value: any, Index: any): {[any]: {[number]: any}}
-	if (Tab[Index] == nil or type(Tab[Index]) ~= "table") then
+	if Tab[Index] == nil or type(Tab[Index]) ~= "table" then
 		Tab[Index] = {}
 	end
 
@@ -383,15 +399,15 @@ local function LoadPackages(Packages: {[string]: Folder}, PackageType: string, .
 	end
 
 	--// Initialize packages
-	for i,group in pairs(initFuncs) do
-		for k,v in ipairs(group) do
-			DebugWarn("RUNNING FUNC IN RUNGROUP", i, "FOR PACKAGE", v.Package)
+	for k, group in pairs(initFuncs) do
+		for _, v in ipairs(group) do
+			DebugWarn("RUNNING FUNC IN RUNGROUP", k, "FOR PACKAGE", v.Package)
 			local ran, err = pcall(RunFunction, v.Function, ...)
 			if not ran then
 				warn("Error encountered while running Init function for package; Expand for details:", {
 					Package = v.Package;
 					PackageType = PackageType;
-					RunOrder = i;
+					RunOrder = k;
 					Error = tostring(err);
 				})
 			end
@@ -399,7 +415,7 @@ local function LoadPackages(Packages: {[string]: Folder}, PackageType: string, .
 	end
 end
 
-return table.freeze {
+return table.freeze({
 	InitPackage = InitPackage;
 	GetPackages = GetPackages;
 	StripPackages = StripPackages;
@@ -408,4 +424,4 @@ return table.freeze {
 	CheckDependencies = CheckDependencies;
 	GetOrderedPackageList = GetOrderedPackageList;
 	LoadPackages = LoadPackages;
-}
+})
