@@ -121,7 +121,7 @@ function Utilities.Queue(self, key: string, func, noYield)
 	local returnWaiter = noYield ~= true and self:Waiter();
 	local queue = Queues[key]
 	local tab = {
-		Time = os.time();
+		Time = os.clock();
 		Running = false;
 		Finished = false;
 		Function = func;
