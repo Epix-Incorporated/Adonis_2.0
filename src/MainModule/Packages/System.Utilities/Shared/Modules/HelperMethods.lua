@@ -38,14 +38,14 @@ function Utilities.RandomString(self, len: number, charset: string): string
 	charset = charset or __RANDOM_CHARSET
 
 	local charSetLen = string.len(charset)
-	local newStr = ""
+	local newStr = {}
 
 	for i = 1, len do
 		local rand = math.random(1, charSetLen)
-		newStr = newStr .. string.sub(charset, rand, rand)
+		table.insert(newStr, string.sub(charset, rand, rand))
 	end
 
-	return newStr
+	return table.concat(newStr)
 end
 
 --- Uses a bindable event to yield execution until the event is fired/released.
@@ -214,15 +214,15 @@ function Utilities.RateLimit(self, key: string, data: {})
 	local found = cache[key]
 
 	if found then
-		if tick() - found.Tick < (data.Timeout or found.Timeout) then
+		if os.clock() - found.Tick < (data.Timeout or found.Timeout) then
 			return true
 		else
-			found.Tick = tick()
+			found.Tick = os.clock()
 			return false
 		end
 	else
 		cache[key] = {
-			Tick = tick(),
+			Tick = os.clock(),
 			Timeout = data.Timeout or 0
 		}
 
@@ -251,7 +251,7 @@ function Utilities.EditInstance(self, object: Instance, properties: {[string]:an
 	if properties then
 		if typeof(properties) == "Instance" then
 			object.Parent = properties
-		elseif typeof(properties) == "table" then
+		elseif type(properties) == "table" then
 			local parent = properties.Parent
 			local events = properties.Events
 			local children = properties.Children
@@ -354,7 +354,8 @@ function Utilities.GetFormattedTime(self, optTime: number?, withDate: boolean?):
 	if self:IsServer() then
 		return tim:FormatUniversalTime(formatString, "en-gb") --// Always show UTC in 24 hour format
 	else
-		local locale = self.Services.Players.LocalPlayer.LocaleId
+		local accountLocale = self.Services.LocalizationService.RobloxLocaleId
+		local locale = (accountLocale ~= "en-us" and accountLocale ~= "en") and accountLocale or self.Services.LocalizationService.SystemLocaleId
 		return select(2, xpcall(function()
 			return tim:FormatLocalTime(formatString, locale) --// Show in player's local timezone and format
 		end, function()
@@ -428,7 +429,7 @@ end
 --- @param str string -- Input string
 --- @return string
 function Utilities.FormatStringForRichText(self, str: string): string
-	return str:gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;"):gsub("\"", "&quot;"):gsub("'", "&apos;")
+	return string.gsub(string.gsub(string.gsub(string.gsub(str, "&", "&amp;"), "<", "&lt;"), ">", "&gt;"), "\"", "&quot;", "'", "&apos;")
 end
 
 
@@ -438,7 +439,7 @@ end
 --- @param str string
 --- @return string
 function Utilities.Trim(self, str: string)
-	return string.match(str, "^%s*(.-)%s*$")
+	return string.match(str, "^%s*(.-)%s*$") or ""
 end
 
 
@@ -446,11 +447,11 @@ end
 --- @method ReplaceCharacters
 --- @within Utilities
 --- @param str string
---- @param chars {}
+--- @param chars {string}
 --- @param replaceWith string
 --- @return string
-function Utilities.ReplaceCharacters(self, str: string, chars: {}, replaceWith: string?)
-	for i, char in ipairs(chars) do
+function Utilities.ReplaceCharacters(self, str: string, chars: {string}, replaceWith: string?)
+	for _, char in ipairs(chars) do
 		str = string.gsub(str, char, replaceWith or "")
 	end
 	return str
@@ -1363,13 +1364,12 @@ end
 --- @param ... any
 --- @return string
 function Utilities.Serialize(self, ...: any?): string
-	local tupleSize = select("#", ...)
-	if tupleSize == 0 then
+	local result = ""
+	local packed = table.pack(...)
+
+	if packed.n == 0 then
 		return "void"
 	end
-
-	local result = ""
-	local packed = {...}
 
 	local BUILTIN_TABLES = {
 		[Axes] = "Axes",
@@ -1410,7 +1410,7 @@ function Utilities.Serialize(self, ...: any?): string
 		[shared] = "shared",
 		[_G] = "_G",
 	}
-	for i = 1, tupleSize do
+	for i = 1, packed.n do
 		local data = packed[i]
 		local dataType = typeof(data)
 
