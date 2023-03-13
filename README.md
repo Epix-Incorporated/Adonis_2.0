@@ -1,13 +1,15 @@
 <div align="center">
-    <img src="https://images-ext-2.discordapp.net/external/aIBRjVfZJAGn2awfso3GY3kadhMQlVupqLEwnKGD3OE/https/repository-images.githubusercontent.com/55325103/2bed6800-bfef-11eb-835b-99b981918623?width=300&height=260"/>
-    <div>&nbsp;</div>
 
-[![Roblox model](https://img.shields.io/static/v1?label=roblox&message=model&color=blue&logo=roblox&logoColor=white)](https://www.roblox.com/library/7510622625/)
-[![Roblox nightly](https://img.shields.io/badge/roblox-nightly-blueviolet?logo=roblox)](https://www.roblox.com/library/8612978896/)
-[![LICENSE](https://img.shields.io/github/license/Epix-Incorporated/Adonis_2.0)](https://github.com/Epix-Incorporated/Adonis_2.0/blob/master/LICENSE)
-[![releases](https://img.shields.io/github/v/release/Epix-Incorporated/Adonis_2.0?label=version)](https://github.com/Epix-Incorporated/Adonis_2.0/releases)
-[![Discord server](https://img.shields.io/discord/81902207070380032?label=discord&logo=discord&logoColor=white)](https://dvr.cx/discord)
-[![Lint](https://github.com/Epix-Incorporated/Adonis_2.0/workflows/lint/badge.svg)](https://github.com/Epix-Incorporated/Adonis_2.0/actions/workflows/lint.yml)
+![The Epix-Incorporated logo](https://images-ext-2.discordapp.net/external/aIBRjVfZJAGn2awfso3GY3kadhMQlVupqLEwnKGD3OE/https/repository-images.githubusercontent.com/55325103/2bed6800-bfef-11eb-835b-99b981918623?width=300&height=260")
+
+<div>&nbsp;</div>
+
+[![Roblox model](https://img.shields.io/static/v1?label=roblox&message=model&color=blue&logo=roblox&logoColor=white)](https://www.roblox.com/library/7510622625/ "The offical Adonis admin model.")
+[![Roblox nightly](https://img.shields.io/badge/roblox-nightly-blueviolet?logo=roblox)](https://www.roblox.com/library/8612978896/ "The beta testing source code modulescript.")
+[![LICENSE](https://img.shields.io/github/license/Epix-Incorporated/Adonis_2.0)](https://github.com/Epix-Incorporated/Adonis_2.0/blob/master/LICENSE "The legal LICENSE governing the usage of the admin system.")
+[![releases](https://img.shields.io/github/v/release/Epix-Incorporated/Adonis_2.0?label=version)](https://github.com/Epix-Incorporated/Adonis_2.0/releases "Downloadable versions of the admin system.")
+[![Discord server](https://img.shields.io/discord/81902207070380032?label=discord&logo=discord&logoColor=white)](https://dvr.cx/discord "A Discord server where people can discuss Adonis related stuff and talk.")
+[![Lint](https://github.com/Epix-Incorporated/Adonis_2.0/workflows/lint/badge.svg)](https://github.com/Epix-Incorporated/Adonis_2.0/actions/workflows/lint.yml "Allows to check if the code of the admin system is valid without errors.")
 
 </div>
 
