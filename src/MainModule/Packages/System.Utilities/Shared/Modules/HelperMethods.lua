@@ -341,6 +341,20 @@ function Utilities.GetTime(self): number
 end
 
 
+--- Returns the locale of the current user. For a server returns en-gb
+--- @method GetCurrentLocale
+--- @within Utilities
+--- @return string
+function Utilities.GetCurrentLocale(self): string
+	if self:IsClient() then
+		local accountLocale = self.Services.LocalizationService.RobloxLocaleId
+		return (accountLocale ~= "en-us" and accountLocale ~= "en") and accountLocale or self.Services.LocalizationService.SystemLocaleId
+	else
+		return "en-gb"
+	end
+end
+
+
 --- Returns a formatted time or datetime string.
 --- @method GetFormattedTime
 --- @within Utilities
@@ -354,10 +368,8 @@ function Utilities.GetFormattedTime(self, optTime: number?, withDate: boolean?):
 	if self:IsServer() then
 		return tim:FormatUniversalTime(formatString, "en-gb") --// Always show UTC in 24 hour format
 	else
-		local accountLocale = self.Services.LocalizationService.RobloxLocaleId
-		local locale = (accountLocale ~= "en-us" and accountLocale ~= "en") and accountLocale or self.Services.LocalizationService.SystemLocaleId
 		return select(2, xpcall(function()
-			return tim:FormatLocalTime(formatString, locale) --// Show in player's local timezone and format
+			return tim:FormatLocalTime(formatString, self:GetCurrentLocale()) --// Show in player's local timezone and format
 		end, function()
 			return tim:FormatLocalTime(formatString, "en-gb") --// Show UTC in 24 hour format because player's local timezone is not available in DateTimeLocaleConfigs
 		end))
@@ -497,17 +509,8 @@ end
 --- @param joiner string -- String inserted between joined strings
 --- @param ... string[] -- Strings to join
 --- @return string
-function Utilities.JoinStrings(self, joiner: string?, ...)
-	local result = nil
-	local strList = table.pack(...)
-	for i, str in ipairs(strList) do
-		if not result then
-			result = str
-		else
-			result ..= joiner .. str
-		end
-	end
-	return result or ""
+function Utilities.JoinStrings(self, joiner: string?, ...) -- // Should be deprecated and superseded by table.concat
+	return table.concat({...}, joiner)
 end
 
 
@@ -826,7 +829,9 @@ end
 --- @param noRecursive boolean -- If true, recursively checks all nested tables for equality
 --- @return boolean
 function Utilities.CheckTableEquality(self, tab1: {[any]:any}, tab2: {[any]:any}, noRecursive: boolean): boolean
-	if type(tab1) == "table" and type(tab2) == "table" and #tab1 == #tab2 then
+	if rawequal(tab1, tab2) then
+		return true
+	elseif type(tab1) == "table" and type(tab2) == "table" and #tab1 == #tab2 then
 		for index, value in pairs(tab1) do
 			local target = tab2[index]
 			if target and typeof(value) == typeof(target) then
@@ -843,6 +848,7 @@ function Utilities.CheckTableEquality(self, tab1: {[any]:any}, tab2: {[any]:any}
 				return false
 			end
 		end
+
 		return true
 	else
 		return false
@@ -856,11 +862,9 @@ end
 --- @param tab {} -- Table to insert subsequent table contents into
 --- @param ... {} -- Ordered tables whos contents will be inserted into the first table
 --- @return tab
-function Utilities.AddRange(self, tab, ...)
-	for i,t in ipairs(table.pack(...)) do
-		for k,v in ipairs(t) do
-			table.insert(tab, v)
-		end
+function Utilities.AddRange(self, tab, ...) -- // This should be deprecated and superseded by table.move
+	for _, v in ipairs(table.pack(...)) do
+		table.move(v, 1, #v, #tab + 1, tab)
 	end
 
 	return tab
