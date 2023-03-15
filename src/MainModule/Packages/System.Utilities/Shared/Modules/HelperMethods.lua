@@ -38,14 +38,14 @@ function Utilities.RandomString(self, len: number, charset: string): string
 	charset = charset or __RANDOM_CHARSET
 
 	local charSetLen = string.len(charset)
-	local newStr = ""
+	local newStr = {}
 
 	for i = 1, len do
 		local rand = math.random(1, charSetLen)
-		newStr = newStr .. string.sub(charset, rand, rand)
+		table.insert(newStr, string.sub(charset, rand, rand))
 	end
 
-	return newStr
+	return table.concat(newStr)
 end
 
 --- Uses a bindable event to yield execution until the event is fired/released.
@@ -121,7 +121,7 @@ function Utilities.Queue(self, key: string, func, noYield)
 	local returnWaiter = noYield ~= true and self:Waiter();
 	local queue = Queues[key]
 	local tab = {
-		Time = os.time();
+		Time = os.clock();
 		Running = false;
 		Finished = false;
 		Function = func;
@@ -214,15 +214,15 @@ function Utilities.RateLimit(self, key: string, data: {})
 	local found = cache[key]
 
 	if found then
-		if tick() - found.Tick < (data.Timeout or found.Timeout) then
+		if os.clock() - found.Tick < (data.Timeout or found.Timeout) then
 			return true
 		else
-			found.Tick = tick()
+			found.Tick = os.clock()
 			return false
 		end
 	else
 		cache[key] = {
-			Tick = tick(),
+			Tick = os.clock(),
 			Timeout = data.Timeout or 0
 		}
 
@@ -251,7 +251,7 @@ function Utilities.EditInstance(self, object: Instance, properties: {[string]:an
 	if properties then
 		if typeof(properties) == "Instance" then
 			object.Parent = properties
-		elseif typeof(properties) == "table" then
+		elseif type(properties) == "table" then
 			local parent = properties.Parent
 			local events = properties.Events
 			local children = properties.Children
@@ -341,6 +341,20 @@ function Utilities.GetTime(self): number
 end
 
 
+--- Returns the locale of the current user. For a server returns en-gb
+--- @method GetCurrentLocale
+--- @within Utilities
+--- @return string
+function Utilities.GetCurrentLocale(self): string
+	if self:IsClient() then
+		local accountLocale = self.Services.LocalizationService.RobloxLocaleId
+		return (accountLocale ~= "en-us" and accountLocale ~= "en") and accountLocale or self.Services.LocalizationService.SystemLocaleId
+	else
+		return "en-gb"
+	end
+end
+
+
 --- Returns a formatted time or datetime string.
 --- @method GetFormattedTime
 --- @within Utilities
@@ -354,9 +368,8 @@ function Utilities.GetFormattedTime(self, optTime: number?, withDate: boolean?):
 	if self:IsServer() then
 		return tim:FormatUniversalTime(formatString, "en-gb") --// Always show UTC in 24 hour format
 	else
-		local locale = self.Services.Players.LocalPlayer.LocaleId
 		return select(2, xpcall(function()
-			return tim:FormatLocalTime(formatString, locale) --// Show in player's local timezone and format
+			return tim:FormatLocalTime(formatString, self:GetCurrentLocale()) --// Show in player's local timezone and format
 		end, function()
 			return tim:FormatLocalTime(formatString, "en-gb") --// Show UTC in 24 hour format because player's local timezone is not available in DateTimeLocaleConfigs
 		end))
@@ -428,7 +441,7 @@ end
 --- @param str string -- Input string
 --- @return string
 function Utilities.FormatStringForRichText(self, str: string): string
-	return str:gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;"):gsub("\"", "&quot;"):gsub("'", "&apos;")
+	return string.gsub(string.gsub(string.gsub(string.gsub(str, "&", "&amp;"), "<", "&lt;"), ">", "&gt;"), "\"", "&quot;", "'", "&apos;")
 end
 
 
@@ -438,7 +451,7 @@ end
 --- @param str string
 --- @return string
 function Utilities.Trim(self, str: string)
-	return string.match(str, "^%s*(.-)%s*$")
+	return string.match(str, "^%s*(.-)%s*$") or ""
 end
 
 
@@ -446,11 +459,11 @@ end
 --- @method ReplaceCharacters
 --- @within Utilities
 --- @param str string
---- @param chars {}
+--- @param chars {string}
 --- @param replaceWith string
 --- @return string
-function Utilities.ReplaceCharacters(self, str: string, chars: {}, replaceWith: string?)
-	for i, char in ipairs(chars) do
+function Utilities.ReplaceCharacters(self, str: string, chars: {string}, replaceWith: string?)
+	for _, char in ipairs(chars) do
 		str = string.gsub(str, char, replaceWith or "")
 	end
 	return str
@@ -496,17 +509,8 @@ end
 --- @param joiner string -- String inserted between joined strings
 --- @param ... string[] -- Strings to join
 --- @return string
-function Utilities.JoinStrings(self, joiner: string?, ...)
-	local result = nil
-	local strList = table.pack(...)
-	for i, str in ipairs(strList) do
-		if not result then
-			result = str
-		else
-			result ..= joiner .. str
-		end
-	end
-	return result or ""
+function Utilities.JoinStrings(self, joiner: string?, ...) -- // Should be deprecated and superseded by table.concat
+	return table.concat({...}, joiner)
 end
 
 
@@ -825,7 +829,9 @@ end
 --- @param noRecursive boolean -- If true, recursively checks all nested tables for equality
 --- @return boolean
 function Utilities.CheckTableEquality(self, tab1: {[any]:any}, tab2: {[any]:any}, noRecursive: boolean): boolean
-	if type(tab1) == "table" and type(tab2) == "table" and #tab1 == #tab2 then
+	if rawequal(tab1, tab2) then
+		return true
+	elseif type(tab1) == "table" and type(tab2) == "table" and #tab1 == #tab2 then
 		for index, value in pairs(tab1) do
 			local target = tab2[index]
 			if target and typeof(value) == typeof(target) then
@@ -842,6 +848,7 @@ function Utilities.CheckTableEquality(self, tab1: {[any]:any}, tab2: {[any]:any}
 				return false
 			end
 		end
+
 		return true
 	else
 		return false
@@ -855,11 +862,9 @@ end
 --- @param tab {} -- Table to insert subsequent table contents into
 --- @param ... {} -- Ordered tables whos contents will be inserted into the first table
 --- @return tab
-function Utilities.AddRange(self, tab, ...)
-	for i,t in ipairs(table.pack(...)) do
-		for k,v in ipairs(t) do
-			table.insert(tab, v)
-		end
+function Utilities.AddRange(self, tab, ...) -- // This should be deprecated and superseded by table.move
+	for _, v in ipairs(table.pack(...)) do
+		table.move(v, 1, #v, #tab + 1, tab)
 	end
 
 	return tab
@@ -1363,13 +1368,12 @@ end
 --- @param ... any
 --- @return string
 function Utilities.Serialize(self, ...: any?): string
-	local tupleSize = select("#", ...)
-	if tupleSize == 0 then
+	local result = ""
+	local packed = table.pack(...)
+
+	if packed.n == 0 then
 		return "void"
 	end
-
-	local result = ""
-	local packed = {...}
 
 	local BUILTIN_TABLES = {
 		[Axes] = "Axes",
@@ -1410,7 +1414,7 @@ function Utilities.Serialize(self, ...: any?): string
 		[shared] = "shared",
 		[_G] = "_G",
 	}
-	for i = 1, tupleSize do
+	for i = 1, packed.n do
 		local data = packed[i]
 		local dataType = typeof(data)
 
