@@ -1,5 +1,4 @@
 std = "roblox"
-ignore_pattern = 
 
 [rules]
 #if_same_then_else = "allow"
