@@ -33,7 +33,7 @@ local function error(reason: any?, level: number?)
 		oError(string.format(":: %s :: bad argument #2 to 'error' (number expected, got %s)", AppName, type(level)), 2)
 	end
 
-	oError(":: ".. AppName .." ::"..tostring(reason), (level or 1) + 1)
+	oError(":: ".. AppName .." :: "..tostring(reason), (level or 1) + 1)
 end
 
 local function print(...)
@@ -52,6 +52,7 @@ local function addRange(tab, ...)
 			table.insert(tab, v)
 		end
 	end
+
 	return tab
 end
 
@@ -93,6 +94,7 @@ return function(Loader: {}, Settings: {}, Packages: Folder)
 	if Settings.DisabledPackages and table.getn(Settings.DisabledPackages) > 0 then
 		for i, package in ipairs(Root.Packages) do
 			local metadata = PackageHandler.GetMetadata(package)
+
 			for _, disabled in ipairs(Settings.DisabledPackages) do
 				if metadata.Name == disabled or metadata.Name .. "==" .. metadata.Version == disabled then
 					table.remove(Root.Packages, i)
@@ -109,7 +111,7 @@ return function(Loader: {}, Settings: {}, Packages: Folder)
 	PackageHandler.LoadPackages(Packages, "Server", Root, Packages)
 
 	--// Loading complete
-	warn("Loading complete :: Elapsed:", os.clock() - start)
+	print("Loading complete :: Elapsed:", os.clock() - start)
 
 	return true
 end
