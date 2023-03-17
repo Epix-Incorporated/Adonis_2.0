@@ -73,12 +73,16 @@ local DeclareCommands = {
 			local args = data.Arguments
 			local parsed = data.ParsedArguments
 
-			warn("This is server only! The client cannot see any of this or the command's definition, other than the clientside portion defined in a client module.", {
-				Player = plr,
-				Args = args,
-				Parsed = parsed,
-				Data = data
-			})
+			warn(
+				"This is server only! The client cannot see any of this or the command's definition, other than the clientside portion defined in a client module.",
+				string.format(
+					"Player: %s, Args: %s, Parsed: %s, Data: %s",
+					tostring(plr),
+					tostring(args),
+					tostring(parsed),
+					tostring(data)
+				)
+			)
 		end,
 	};
 
@@ -120,12 +124,16 @@ local DeclareCommands = {
 			local args = data.Arguments
 			local parsed = data.ParsedArguments
 
-			warn("This is server only! Client can never see this code or any command details unless explicitly requested via Remote.", {
-				Player = plr,
-				Args = args,
-				Parsed = parsed,
-				Data = data
-			})
+			warn(
+				"This is server only! Client can never see this code or any command details unless explicitly requested via Remote.",
+				string.format(
+					"Player: %s, Args: %s, Parsed: %s, Data: %s",
+					tostring(plr),
+					tostring(args),
+					tostring(parsed),
+					tostring(data)
+				)
+			)
 		end,
 	};
 }
