@@ -84,10 +84,14 @@ local DeclareCommands = {
 				warn("Got Argument", i, "of type", type(v), ":", v)
 			end 
 
-			warn("Success!", {
-				Player = plr,
-				Args = args,
-				Data = data
+			warn(
+				"Success!",
+				string.format(
+					"Player: %s, Args: %s, Data: %s",
+					tostring(plr),
+					tostring(args),
+					tostring(data)
+				)
 			})
 
 			warn("SEND TO CLIENT SIDE TEST")
