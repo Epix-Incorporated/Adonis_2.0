@@ -1,3 +1,4 @@
+--# selene: allow(global_usage)
 --[[
 
 	Description: Various uncategorized utility methods.
