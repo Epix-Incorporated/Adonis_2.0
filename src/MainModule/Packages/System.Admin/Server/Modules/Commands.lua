@@ -94,7 +94,7 @@ local Commands = {
 	ArgumentParsers = {
 		["players"] = function(data: {[string]: any}, cmdArg: string, argText: string)
 			local players = Root.Admin:GetPlayers(data, argText)
-			if table.getn(players) > 0 then
+			if #players > 0 then
 				return {
 					Success = true,
 					Result = players
