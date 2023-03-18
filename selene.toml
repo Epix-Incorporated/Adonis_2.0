@@ -1,9 +1,9 @@
 std = "roblox"
 
 [rules]
-#if_same_then_else = "allow"
 multiple_statements = "allow" # I'm not sure if this should be allowed or disallowed??
 unused_variable = "allow"
+shadowing = "allow"
 
 [config]
 unused_variable = { ignore_pattern = "^(_|self$|i$)" }
