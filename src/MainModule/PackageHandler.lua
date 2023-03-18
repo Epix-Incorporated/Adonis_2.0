@@ -25,7 +25,7 @@ end
 --// Error
 local function error(reason: any?, level: number?)
 	if level ~= nil and type(level) ~= "number" then
-		oError(string.format(":: %s :: bad argument #2 to 'error' (number expected, got %s)", AppName, type(level)), 2)
+		oError(string.format(":: PackageHandler :: bad argument #2 to 'error' (number expected, got %s)", type(level)), 2)
 	end
 
 	oError(":: PackageHandler :: "..tostring(reason), (level or 1) + 1)
