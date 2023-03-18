@@ -441,7 +441,7 @@ end
 --- @param str string -- Input string
 --- @return string
 function Utilities.FormatStringForRichText(self, str: string): string
-	return string.gsub(string.gsub(string.gsub(string.gsub(str, "&", "&amp;"), "<", "&lt;"), ">", "&gt;"), "\"", "&quot;", "'", "&apos;")
+	return string.gsub(string.gsub(string.gsub(string.gsub(str, "&", "&amp;"), "<", "&lt;"), ">", "&gt;"), "\"", "&quot;"), "'", "&apos;")
 end
 
 
@@ -451,7 +451,7 @@ end
 --- @param str string
 --- @return string
 function Utilities.Trim(self, str: string)
-	return string.match(str, "^%s*(.-)%s*$") or ""
+	return string.match(str, "^%s*(.-)%s*$")
 end
 
 
@@ -519,9 +519,9 @@ end
 --- @within Utilities
 --- @param str string -- Input string
 --- @param key string -- Key
---- @param cache {}? -- Optional cache table used to speed up future calls by storing inputs used to generate outputs
+--- @param cache {[string]: {[string]: string}}? -- Optional cache table used to speed up future calls by storing inputs used to generate outputs
 --- @return string
-function Utilities.Encrypt(self, str: string, key: string, cache: {}?): string
+function Utilities.Encrypt(self, str: string, key: string, cache: {[string]: {[string]: string}}?): string
 	cache = cache or Cache.Encrypt
 
 	if not key or not str then
@@ -529,16 +529,12 @@ function Utilities.Encrypt(self, str: string, key: string, cache: {}?): string
 	elseif cache[key] and cache[key][str] then
 		return cache[key][str]
 	else
-		local byte = string.byte
-		local sub = string.sub
-		local char = string.char
-
 		local keyCache = cache[key] or {}
 		local endStr = {}
 
 		for i = 1, #str do
 			local keyPos = (i % #key) + 1
-			endStr[i] = char(((byte(sub(str, i, i)) + byte(sub(key, keyPos, keyPos)))%126) + 1)
+			endStr[i] = string.char(((string.byte(string.sub(str, i, i)) + string.byte(string.sub(key, keyPos, keyPos)))%126) + 1)
 		end
 
 		endStr = table.concat(endStr)
@@ -555,9 +551,9 @@ end
 --- @within Utilities
 --- @param str string
 --- @param key string
---- @param cache {}?
+--- @param cache {[string]: {[string]: string}}?
 --- @return string
-function Utilities.Decrypt(self, str: string, key: string, cache: {}?): string
+function Utilities.Decrypt(self, str: string, key: string, cache: {[string]: {[string]: string}}?): string
 	cache = cache or Cache.Decrypt
 
 	if not key or not str then
@@ -566,14 +562,11 @@ function Utilities.Decrypt(self, str: string, key: string, cache: {}?): string
 		return cache[key][str]
 	else
 		local keyCache = cache[key] or {}
-		local byte = string.byte
-		local sub = string.sub
-		local char = string.char
 		local endStr = {}
 
 		for i = 1, #str do
 			local keyPos = (i % #key)+1
-			endStr[i] = char(((byte(sub(str, i, i)) - byte(sub(key, keyPos, keyPos)))%126) - 1)
+			endStr[i] = string.char(((string.byte(string.sub(str, i, i)) - string.byte(string.sub(key, keyPos, keyPos)))%126) - 1)
 		end
 
 		endStr = table.concat(endStr)
@@ -647,7 +640,7 @@ end
 	@param indexList {[int]: any}
 ]=]
 function Utilities.NullifyIndexList(self, tab: {[any]: any}, indexList: {[int]: any})
-	for i,index in ipairs(indexList) do
+	for _, index in ipairs(indexList) do
 		tab[index] = nil
 	end
 end
@@ -682,7 +675,7 @@ end
 --- @return {int: {}}
 function Utilities.Batchify(self, tab, size)
 	local batches = {}
-	for b = 1, table.getn(tab), size do
+	for b = 1, #tab, size do
 		local batch = {}
 		for i = b, b + size-1 do
 			local item = tab[i]
@@ -771,7 +764,7 @@ function Utilities.NewProxy(self, meta: {})
 	local newProxy = newproxy(true)
 	local metatable = getmetatable(newProxy)
 	metatable.__metatable = false
-	for i,v in pairs(meta) do metatable[i] = v end
+	for k, v in pairs(meta) do metatable[k] = v end
 	return newProxy
 end
 
@@ -832,8 +825,8 @@ function Utilities.CheckTableEquality(self, tab1: {[any]:any}, tab2: {[any]:any}
 	if rawequal(tab1, tab2) then
 		return true
 	elseif type(tab1) == "table" and type(tab2) == "table" and #tab1 == #tab2 then
-		for index, value in pairs(tab1) do
-			local target = tab2[index]
+		for key, value in pairs(tab1) do
+			local target = tab2[key]
 			if target and typeof(value) == typeof(target) then
 				if type(value) == "table" then
 					if not noRecursive and not self:CheckTableEquality(value, target, noRecursive) then
@@ -891,8 +884,8 @@ end
 --- @param ... {} -- Tables to merge into the first table; Each subsequent table overwrites keys set by previous tables
 --- @return tab
 function Utilities.MergeTables(self, tab, ...)
-	for i,t in ipairs(table.pack(...)) do
-		for k,v in pairs(t) do
+	for _, t in ipairs({...}) do
+		for k, v in pairs(t) do
 			tab[k] = v
 		end
 	end
@@ -910,9 +903,9 @@ end
 function Utilities.FullTableClone(self, tab: {[any]: any}): {[any]: any}
 	local clone = table.clone(tab)
 
-	for i,v in pairs(clone) do
+	for k, v in pairs(clone) do
 		if type(v) == "table" then
-			clone[i] = self:FullTableClone(v)
+			clone[k] = self:FullTableClone(v)
 		end
 	end
 
@@ -948,8 +941,8 @@ end
 --- @return number
 function Utilities.CountTable(tab: {[any]:any}, excludeNumIndices: boolean?): number
 	local n = 0
-	for i, v in pairs(tab) do
-		if not excludeNumIndices or type(i) ~= "number" then
+	for k, _ in pairs(tab) do
+		if not excludeNumIndices or type(k) ~= "number" then
 			n += 1
 		end
 	end
@@ -990,12 +983,12 @@ function Utilities.GetTableValueByPath(self, table: {[any]:any}, tableAncestry: 
 	local indexNames = if type(tableAncestry) == "table" then tableAncestry else self:SplitString(tableAncestry, splitChar or '.', true)
 	local curTable = table
 
-	for i,index in ipairs(indexNames) do
-		local val = curTable[index]
+	for i, indexName in ipairs(indexNames) do
+		local val = curTable[indexName]
 		if i == #indexNames then
 			return {
 				Table = curTable,
-				Index = index,
+				Index = indexName,
 				Value = val,
 			}
 		elseif type(val) == "table" then
@@ -1015,7 +1008,7 @@ end
 	@return bool
 ]=]
 function Utilities.Any(self, tab: {[any]: any}): boolean
-	for i,v in pairs(tab) do
+	for _, _ in pairs(tab) do
 		return true
 	end
 	return false
@@ -1030,8 +1023,8 @@ end
 	@return boolean
 ]=]
 function Utilities.IsOrderedTable(self, tab: {[any]: any}): boolean
-	for i,v in pairs(tab) do
-		if type(i) ~= "number" then
+	for k, _ in pairs(tab) do
+		if type(k) ~= "number" then
 			return false
 		end
 	end
@@ -1061,7 +1054,7 @@ function Utilities.GetTablePaths(self, tab: {[any]: any}, foundPaths: {[int]: Ta
 	local curPath = curPath or {}
 	local foundPaths = foundPaths or {}
 
-	for index,value in pairs(tab) do
+	for index, value in pairs(tab) do
 		local tPath = table.clone(curPath)
 		table.insert(tPath, index)
 		if type(value) == "table" and self:Any(value) then
@@ -1085,7 +1078,7 @@ end
 ]=]
 function Utilities.FlattenPaths(self, paths: {[int]: TablePath}, split: string): {[string]: any}
 	local results = {}
-	for i,path in ipairs(paths) do
+	for _, path in ipairs(paths) do
 		local pathStr = self:FlattenPath(path.Path, split)
 		results[pathStr] = path.Value
 	end
@@ -1103,7 +1096,7 @@ end
 ]=]
 function Utilities.FlattenPath(self, path: {[int]: string}, split: string): string
 	local pathStr = ""
-	for k,index in ipairs(path) do
+	for _, index in ipairs(path) do
 		pathStr = pathStr .. split .. tostring(index)
 	end
 	return pathStr
@@ -1131,14 +1124,14 @@ function Utilities.CheckPath(self, tab: {[any]: any}, path: {[int]: string})
 	local partialPath = {}
 	local lastValue = nil;
 	local cur = tab
-	for i,index in ipairs(path) do
+	for i, index in ipairs(path) do
 		local value = cur[index]
 
 		if value ~= nil then
 			lastValue = value
 			table.insert(partialPath, index)
 
-			if i == table.getn(path) then
+			if i == #path then
 				return {
 					HasFullPath = true,
 					PartialPath = partialPath,
@@ -1175,7 +1168,7 @@ end
 ]=]
 function Utilities.EnsurePath(self, tab: {[any]: any}, path: {[int]: string}, noCreate: boolean): {[any]: any}|nil
 	local cur = tab
-	for i,index in ipairs(path) do
+	for i, index in ipairs(path) do
 		local val = cur[index]
 		if i == #path then
 			return cur
@@ -1237,7 +1230,7 @@ function Utilities.TableDiff(self, dest: {[any]: any}, source: {[any]: any}): {[
 	local results = {}
 
 	--// Find things the Source has that Destination does not
-	for i,path in pairs(sourcePaths) do
+	for _, path in pairs(sourcePaths) do
 		local flat = self:FlattenPath(path.Path, "\\")
 		local isOrdered = type(path.Path[#path.Path]) == "number"
 		if not self:CheckEquality(flatDestPaths[flat], path.Value) then
@@ -1251,14 +1244,14 @@ function Utilities.TableDiff(self, dest: {[any]: any}, source: {[any]: any}): {[
 	end
 
 	--// Find things that Destination has that Source does not
-	for i,path in pairs(destPaths) do
+	for _, path in pairs(destPaths) do
 		local flat = self:FlattenPath(path.Path, "\\")
 		local isOrdered = type(path.Path[#path.Path]) == "number"
 		if not self:CheckEquality(flatSourcePaths[flat], path.Value) then
 			local found = false
 
 			if not isOrdered then
-				for i,v in ipairs(results) do
+				for _, v in ipairs(results) do
 					if v.Flat == flat then
 						found = true
 						break
@@ -1289,7 +1282,7 @@ end
 	@param diff {[int]: TableDiffResult}
 ]=]
 function Utilities.MergeDiff(self, tab: {[any]: any}, diff: {[int]: TableDiffResult})
-	for i,change in ipairs(diff) do
+	for _, change in ipairs(diff) do
 		if change.Mode == "SET" then
 			local dest = self:EnsurePath(tab, change.Path)
 			if type(dest) == "table" then
@@ -1300,7 +1293,7 @@ function Utilities.MergeDiff(self, tab: {[any]: any}, diff: {[int]: TableDiffRes
 			local dest = self:EnsurePath(tab, change.Path)
 			if type(dest) == "table" then
 				local found = false
-				for k,v in pairs(dest) do
+				for _, v in pairs(dest) do
 					if self:CheckEquality(v, change.Value) then
 						found = true
 						break
@@ -1313,7 +1306,7 @@ function Utilities.MergeDiff(self, tab: {[any]: any}, diff: {[int]: TableDiffRes
 		elseif change.Mode == "REMOVE" then
 			local dest = self:EnsurePath(tab, change.Path, true)
 			if dest then
-				for k,v in pairs(dest) do
+				for k, v in pairs(dest) do
 					if self:CheckEquality(v, change.Value) then
 						table.remove(dest, k)
 					end
@@ -1446,12 +1439,12 @@ function Utilities.Serialize(self, ...: any?): string
 				else tostring(data)) .. (isPrimitive and "" or ")")
 		end
 
-		if i < tupleSize then
+		if i < packed.n then
 			result ..= ", "
 		end
 	end
 
-	return if tupleSize > 1 then "("..result..")" else result
+	return if packed.n > 1 then "("..result..")" else result
 end
 
 
