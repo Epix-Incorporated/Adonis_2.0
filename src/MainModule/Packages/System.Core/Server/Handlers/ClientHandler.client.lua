@@ -1,3 +1,4 @@
+--# selene: allow(incorrect_standard_library_use)
 --[[
 
 	Description: Responsible for initializing client-side packages
