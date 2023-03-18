@@ -109,11 +109,7 @@ local globalEnv: dictionary = {
 table.freeze(globalEnv)
 
 return function()
-	local env: dictionary = {}
-
-	for k: string, v: any in pairs(globalEnv) do
-		env[k] = v
-	end
+	local env: dictionary = table.clone(globalEnv)
 
 	env._ENV = env :: dictionary
 
