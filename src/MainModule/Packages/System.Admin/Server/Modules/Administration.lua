@@ -56,9 +56,9 @@ local Admin = {
 			Finder = function(data, text, matched)
 				local player = Service.Players:FindFirstChild(matched)
 
-				if not player and data.SpoofPlayers then
-					--// Spoof player
-				end
+				--if not player and data.SpoofPlayers then
+				--	--// Spoof player
+				--end
 
 				return { player }
 			end
@@ -80,9 +80,9 @@ local Admin = {
 					end
 				end
 
-				if #found == 0 and data.SpoofPlayers then
-					--// Spoof player
-				end
+				--if #found == 0 and data.SpoofPlayers then
+				--	--// Spoof player
+				--end
 
 				return found
 			end
@@ -152,8 +152,9 @@ end
 --- @within Server.Admin
 --- @param data {} -- Data table containing properties/methods to automatically add to the new spoof object
 function Admin.NewSpoofObject(self, data: {})
-	local spoofObject = Instance.new("Folder", data and data.Properties)
+	local spoofObject = Instance.new("Folder")
 	local wrapped = Utilities:Wrap(spoofObject)
+	spoofObject.Parent = data and data.Properties
 
 	if data and data.Special then
 		for ind,val in pairs(data.Special) do
