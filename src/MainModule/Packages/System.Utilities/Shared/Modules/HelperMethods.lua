@@ -441,7 +441,7 @@ end
 --- @param str string -- Input string
 --- @return string
 function Utilities.FormatStringForRichText(self, str: string): string
-	return string.gsub(string.gsub(string.gsub(string.gsub(str, "&", "&amp;"), "<", "&lt;"), ">", "&gt;"), "\"", "&quot;"), "'", "&apos;")
+	return string.gsub(string.gsub(string.gsub(string.gsub(string.gsub(str, "&", "&amp;"), "<", "&lt;"), ">", "&gt;"), "\"", "&quot;"), "'", "&apos;")
 end
 
 
