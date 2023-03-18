@@ -43,9 +43,9 @@ local Remote = {}
 	@param data {[string]: any}
 ]=]
 function UI.SetDefaultPlayerData(self, player: Player, data: {[string]: any})
-	if data then
-		--data.CurrentTheme = data.CurrentTheme or Root.Settings.Theme
-	end
+	--if data then
+	--	--data.CurrentTheme = data.CurrentTheme or Root.Settings.Theme
+	--end
 end
 
 --// Remote methods
