@@ -124,6 +124,7 @@ local function GetPackages(Packages: {Folder}, FindName: string?): {[string]: Fo
 			end
 		end
 	end
+
 	return found
 end
 
@@ -243,7 +244,7 @@ local Resolve; Resolve = function(Packages: {[string]: Folder}, ResultList: {Fol
 
 		chain[pkgString] = true
 
-		for i,depString in pairs(dependencies) do
+		for _, depString in pairs(dependencies) do
 			debugLine()
 			DebugWarn("DEPENDENCY: ", depString)
 
@@ -285,7 +286,7 @@ local function GetOrderedPackageList(Packages: {[string]: Folder}): {Folder}
 	debugLine()
 	DebugWarn("GETTING ORDERED PACKAGE LIST", Packages)
 
-	for i,v in pairs(Packages) do
+	for _, v in pairs(Packages) do
 		DebugWarn("RESOLVE PACKAGE: ", v)
 		Resolve(Packages, ResultList, v)
 		debugLine()
@@ -363,7 +364,7 @@ local function LoadPackages(Packages: {[string]: Folder}, PackageType: string, .
 	DebugWarn("GOT ORDERED LIST", ordered)
 
 	--// Load all packages
-	for i, package in pairs(ordered) do
+	for _, package in pairs(ordered) do
 		if CheckDependencies(loadedPackages, package) then
 			DebugWarn("LOAD PACKAGE", package)
 			local ran, res = pcall(InitPackage, package, PackageType, ...)
@@ -380,7 +381,7 @@ local function LoadPackages(Packages: {[string]: Folder}, PackageType: string, .
 				loadedPackages[pkgString] = package
 
 				for groupPos, funcGroup in pairs(res) do
-					if (type(funcGroup) == "table" and funcGroup.Function and funcGroup.RunOrder) then
+					if type(funcGroup) == "table" and funcGroup.Function and funcGroup.RunOrder then
 						InsertAtIndexGroup(initFuncs, {
 							Package = package,
 							Function = funcGroup.Function
