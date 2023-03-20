@@ -681,7 +681,7 @@ return {
 		local objNameValue = Package.Shared.EventObjectName
 		local sharedKeyValue = Package.Shared.SharedKey
 
-		objNameValue.Value = Utilities:RandomString()
+		objNameValue.Value = cRoot.Services.HttpService:GenerateGUID(false)
 		sharedKeyValue.Value = Utilities:RandomString()
 
 		Remote.EventObjectsName = objNameValue.Value
