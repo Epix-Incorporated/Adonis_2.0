@@ -2,12 +2,12 @@
 	<Meta name="ExplicitAutoJoints">true</Meta>
 	<External>null</External>
 	<External>nil</External>
-	<Item class="ModuleScript" referent="RBX7FF75A324E6F4B7AA58420B842202219">
+	<Item class="ModuleScript" referent="RBXD3A35DFD70B448F98DC63FA79C9E333E">
 		<Properties>
 			<BinaryString name="AttributesSerialize"></BinaryString>
 			<Content name="LinkedSource"><null></null></Content>
 			<string name="Name">Cryptography</string>
-			<string name="ScriptGuid">{69DC804B-9C7E-4D9A-879F-49695A350117}</string>
+			<string name="ScriptGuid">{F89638D6-0FC0-408A-A3A0-0BFDE5DEAA32}</string>
 			<ProtectedString name="Source"><![CDATA[--[[::--
 
 WARNING!!!.. THIS PLUGIN IS USED INTERALLY BY THE FRAMEWORK FOR SECURITY PURPOSES.
@@ -150,12 +150,12 @@ return (Package);]]></ProtectedString>
 			<int64 name="SourceAssetId">-1</int64>
 			<BinaryString name="Tags"></BinaryString>
 		</Properties>
-		<Item class="ModuleScript" referent="RBX1459D4DBFA044CD1A74DB272D21AD476">
+		<Item class="ModuleScript" referent="RBXF3060DCAE530410CA4EAADDE1849A82B">
 			<Properties>
 				<BinaryString name="AttributesSerialize"></BinaryString>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">RSA</string>
-				<string name="ScriptGuid">{1981C6C0-F411-4B92-B1FC-C46F7DC3B101}</string>
+				<string name="ScriptGuid">{0BADADC5-0705-46A2-B83F-CFA9531ADCED}</string>
 				<ProtectedString name="Source"><![CDATA[--[[::
 
 Copyright (C) 2022, Luc Rodriguez (Aliases : Shambi, StyledDev).
@@ -1271,12 +1271,12 @@ return (RSA);]]></ProtectedString>
 				<int64 name="SourceAssetId">-1</int64>
 				<BinaryString name="Tags"></BinaryString>
 			</Properties>
-			<Item class="ModuleScript" referent="RBXD3D051354F6B4F33A2B6992B3D2FF072">
+			<Item class="ModuleScript" referent="RBXF21C8B9C9A8B44BEA4490CF31193CCF9">
 				<Properties>
 					<BinaryString name="AttributesSerialize"></BinaryString>
 					<Content name="LinkedSource"><null></null></Content>
 					<string name="Name">Precompiled</string>
-					<string name="ScriptGuid">{288D9A90-AA3D-4ED2-93A0-C094A8535E41}</string>
+					<string name="ScriptGuid">{08D323D8-02BC-4604-910D-D28B01973FC6}</string>
 					<ProtectedString name="Source"><![CDATA[--[[::
 
 Copyright (C) 2022, Luc Rodriguez (Aliases : Shambi, StyledDev).
@@ -1383,12 +1383,12 @@ return ({[[
 					<BinaryString name="Tags"></BinaryString>
 				</Properties>
 			</Item>
-			<Item class="ModuleScript" referent="RBX3A7D19DE547C461AA2FC438CF6B3938C">
+			<Item class="ModuleScript" referent="RBX6D9FB84A55F048148FEF9AFE15FE61E1">
 				<Properties>
 					<BinaryString name="AttributesSerialize"></BinaryString>
 					<Content name="LinkedSource"><null></null></Content>
 					<string name="Name">Bytes</string>
-					<string name="ScriptGuid">{D1A55407-B364-4191-AA20-502BD696BF09}</string>
+					<string name="ScriptGuid">{BAE86A77-197E-4F82-AD8B-B77DF60CE327}</string>
 					<ProtectedString name="Source"><![CDATA[--[[::
 
 Copyright (C) 2022, Luc Rodriguez (Aliases : Shambi, StyledDev).
@@ -1442,12 +1442,12 @@ return ({
 				</Properties>
 			</Item>
 		</Item>
-		<Item class="ModuleScript" referent="RBXF40405ADA5D546C883F95BC68A1CD0E9">
+		<Item class="ModuleScript" referent="RBXD72762B284AE46C6BE56613721B5A5C5">
 			<Properties>
 				<BinaryString name="AttributesSerialize"></BinaryString>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">Sha256</string>
-				<string name="ScriptGuid">{E55BFC35-90BA-4D55-96A3-C8A609BCFE70}</string>
+				<string name="ScriptGuid">{2333352D-EB8B-4765-A39F-FD791851D557}</string>
 				<ProtectedString name="Source"><![CDATA[--[[::
 
 Copyright (C) 2021, Luc Rodriguez (Aliases : Shambi, StyledDev).
@@ -1669,12 +1669,12 @@ end);]]></ProtectedString>
 				<int64 name="SourceAssetId">-1</int64>
 				<BinaryString name="Tags"></BinaryString>
 			</Properties>
-			<Item class="ModuleScript" referent="RBX9D326CFF5504423FAAC77CDDF8EEA3C8">
+			<Item class="ModuleScript" referent="RBX7224C58E26104A9BAFB7E50934B3A2A2">
 				<Properties>
 					<BinaryString name="AttributesSerialize"></BinaryString>
 					<Content name="LinkedSource"><null></null></Content>
 					<string name="Name">Permutations</string>
-					<string name="ScriptGuid">{B960FDD3-F226-4D80-AF02-95A82A6B9224}</string>
+					<string name="ScriptGuid">{9BE7C951-70F8-4A36-9BB1-F2B0C90E3852}</string>
 					<ProtectedString name="Source"><![CDATA[-- WARNING : This array contains very sensitive information, making changes can & will 
 -- effect the integrity of the module that requires it.
 
@@ -1703,12 +1703,12 @@ return ({
 				</Properties>
 			</Item>
 		</Item>
-		<Item class="ModuleScript" referent="RBXFB4E251DAD90448499D80552AEDDAC79">
+		<Item class="ModuleScript" referent="RBX85B4C41668634250AA2BC8AC2A19E7F3">
 			<Properties>
 				<BinaryString name="AttributesSerialize"></BinaryString>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">AES</string>
-				<string name="ScriptGuid">{C0B24259-6AD1-48CA-8476-77F16B641F85}</string>
+				<string name="ScriptGuid">{C5549101-0C97-4D96-8030-4900919D9F9F}</string>
 				<ProtectedString name="Source"><![CDATA[--[[::
 
 Copyright (C) 2022, Luc Rodriguez (Aliases : Shambi, StyledDev).
@@ -1978,12 +1978,12 @@ return (Module);]]></ProtectedString>
 				<int64 name="SourceAssetId">-1</int64>
 				<BinaryString name="Tags"></BinaryString>
 			</Properties>
-			<Item class="ModuleScript" referent="RBX5C636E402FFD4BC290690F2F305B1F25">
+			<Item class="ModuleScript" referent="RBX43E7AED15BB0408F9070456035477C4A">
 				<Properties>
 					<BinaryString name="AttributesSerialize"></BinaryString>
 					<Content name="LinkedSource"><null></null></Content>
 					<string name="Name">Datasets</string>
-					<string name="ScriptGuid">{7CD648C0-9639-4778-87B2-675B077DEC03}</string>
+					<string name="ScriptGuid">{774DEA1F-5151-4DA8-BE09-F25827B3139A}</string>
 					<ProtectedString name="Source"><![CDATA[-- WARNING : These array's contain very sensitive information, making changes can & will 
 -- effect the integrity of the module that requires it.
 
@@ -2166,12 +2166,12 @@ return ({
 				</Properties>
 			</Item>
 		</Item>
-		<Item class="ModuleScript" referent="RBXFFCC87AC01AC4B23B67AEC1AFCE159B0">
+		<Item class="ModuleScript" referent="RBXA61BA48B29DA448AAB46068615B23E7B">
 			<Properties>
 				<BinaryString name="AttributesSerialize"></BinaryString>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">Deflate</string>
-				<string name="ScriptGuid">{10288CC9-1699-45BD-8CE1-A3C46D58280B}</string>
+				<string name="ScriptGuid">{6E04073C-57B2-40B8-B20E-48495F65FA74}</string>
 				<ProtectedString name="Source"><![CDATA[--[[::
 
 Copyright (C) 2022, Luc Rodriguez (Aliases : Shambi, StyledDev).
@@ -4376,12 +4376,12 @@ return L_1_]]></ProtectedString>
 				<BinaryString name="Tags"></BinaryString>
 			</Properties>
 		</Item>
-		<Item class="ModuleScript" referent="RBXFBDBC0D33C9741EA94D2FB38ADC50385">
+		<Item class="ModuleScript" referent="RBXC099BB2AC9574A4BBDC195C42ABF7402">
 			<Properties>
 				<BinaryString name="AttributesSerialize">AQAAAAoAAABBc3NpZ25EYXRhAwA=</BinaryString>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">Base64</string>
-				<string name="ScriptGuid">{2FF212AE-DD9D-4A8E-8A74-AA4C8B335D3B}</string>
+				<string name="ScriptGuid">{A878C0E8-4CD2-4B5B-9776-1A58332D311E}</string>
 				<ProtectedString name="Source"><![CDATA[--[[::
 
 Copyright (C) 2021, Luc Rodriguez (Aliases : Shambi, StyledDev).
@@ -4421,67 +4421,137 @@ local Base64 : Dictionary<any?> = {
 
 --// Plugin Methods.
 
-function Base64:Encode(Data : string) : string
-	local InputType : string = type(Data);
-	assert(InputType == "string", string.format("Expected type \"string\" for argument #1 of \"Base64:Decode()\". Recieved type \"%s\".", InputType));
-	
-	return (string.gsub(string.gsub(Data, '.', function(Character : string) : string
-		local Result : string, Byte : number = '', string.byte(Character)
+-- Thanks to Tiffany352 for this base64 implementation!
 
-		for Index : number = 8, 1, -1 do
-			Result ..= if (bit32.band(Byte, math.pow(2, Index) - 1) - bit32.band(Byte, math.pow(2, Index - 1) - 1) > 0) then '1' else '0';
-		end;
+function Base64.Encode(str: string): string
+	local nOut = 0
+	local alphabet = Base64.Dictionary
+	local strLen = string.len(str)
+	local out = table.create(math.ceil(strLen / 0.75))
 
-		return (Result);
+	-- 3 octets become 4 hextets
+	for i = 1, strLen - 2, 3 do
+		local b1, b2, b3 = string.byte(str, i, i + 3)
+		local word = b3 + b2 * 256 + b1 * 256 * 256
 
-	end) .. '0000', "%d%d%d?%d?%d?%d?", function(Character : string) : string
-		if (#Character < 6) then 
-			return ('');
-		end;
+		local h4 = word % 64 + 1
+		word = math.floor(word / 64)
+		local h3 = word % 64 + 1
+		word = math.floor(word / 64)
+		local h2 = word % 64 + 1
+		word = math.floor(word / 64)
+		local h1 = word % 64 + 1
 
-		local Counter : number = 0;
+		out[nOut + 1] = string.sub(alphabet, h1, h1)
+		out[nOut + 2] = string.sub(alphabet, h2, h2)
+		out[nOut + 3] = string.sub(alphabet, h3, h3)
+		out[nOut + 4] = string.sub(alphabet, h4, h4)
+		nOut += 4
+	end
 
-		for Index : number = 1, 6 do
-			Counter += if (string.sub(Character, Index, Index) == '1') then math.pow(2, 6 - Index) else 0;
-		end;
+	local remainder = strLen % 3
 
-		Counter += 1;
+	if remainder == 2 then
+		-- 16 input bits -> 3 hextets (2 full, 1 partial)
+		local b1, b2 = string.byte(str, -2, -1)
+		-- partial is 4 bits long, leaving 2 bits of zero padding ->
+		-- offset = 4
+		local word = b2 * 4 + b1 * 4 * 256
 
-		return (string.sub(self.Dictionary, Counter, Counter));
-	end) .. ({ '', '==', '=' })[#Data % 3 + 1]);
-end;
+		local h3 = word % 64 + 1
+		word = math.floor(word / 64)
+		local h2 = word % 64 + 1
+		word = math.floor(word / 64)
+		local h1 = word % 64 + 1
 
-function Base64:Decode(Data : string) : string
-	local InputType : string = type(Data);
-	assert(InputType == "string", string.format("Expected type \"string\" for argument #1 of \"Base64:Decode()\". Recieved type \"%s\".", InputType));
-	
-	return (string.gsub(string.gsub(string.gsub(Data, '[^' .. self.Dictionary .. '=]', ''), '.', function(Character : string) : string
-		if (Character == '=') then
-			return ('');
-		end;
+		out[nOut + 1] = string.sub(alphabet, h1, h1)
+		out[nOut + 2] = string.sub(alphabet, h2, h2)
+		out[nOut + 3] = string.sub(alphabet, h3, h3)
+		out[nOut + 4] = "="
+	elseif remainder == 1 then
+		-- 8 input bits -> 2 hextets (2 full, 1 partial)
+		local b1 = string.byte(str, -1, -1)
+		-- partial is 2 bits long, leaving 4 bits of zero padding ->
+		-- offset = 16
+		local word = b1 * 16
 
-		local Result : string, Format : number = '', string.find(self.Dictionary, Character) - 1;
+		local h2 = word % 64 + 1
+		word = math.floor(word / 64)
+		local h1 = word % 64 + 1
 
-		for Index : number = 6, 1, -1 do
-			Result ..= if (bit32.band(Format, math.pow(2, Index) - 1) - bit32.band(Format, math.pow(2, Index - 1) - 1) > 0) then '1' else '0';
-		end;
+		out[nOut + 1] = string.sub(alphabet, h1, h1)
+		out[nOut + 2] = string.sub(alphabet, h2, h2)
+		out[nOut + 3] = "="
+		out[nOut + 4] = "="
+	end
+	-- if the remainder is 0, then no work is needed
 
-		return (Result);
+	return table.concat(out, "")
+end
 
-	end), "%d%d%d?%d?%d?%d?%d?%d?", function(Pair : string) : string
-		if (#Pair ~= 8) then
-			return ('');
-		end;
+function Base64.Decode(str:string): string
+	local nOut = 0
+	local alphabet = Base64.Dictionary
+	local strLen = string.len(str)
+	local out = table.create(math.ceil(strLen * 0.75))
+	local acc = 0
+	local nAcc = 0
 
-		local Counter : number = 0;
+	local alphabetLut = {}
+	for i = 1, string.len(alphabet) do
+		alphabetLut[string.sub(alphabet, i, i)] = i - 1
+	end
 
-		for Index : number = 1, 8 do
-			Counter += if (string.sub(Pair, Index, Index) == '1') then math.pow(2, 7 - Index) else 0;
-		end;
+	-- 4 hextets become 3 octets
+	for i = 1, strLen do
+		local ch = string.sub(str, i, i)
+		local byte = alphabetLut[ch]
+		if byte then
+			acc = acc * 64 + byte
+			nAcc += 1
+		end
 
-		return (string.char(Counter));
-	end));
-end;
+		if nAcc == 4 then
+			local b3 = acc % 256
+			acc = math.floor(acc / 256)
+			local b2 = acc % 256
+			acc = math.floor(acc / 256)
+			local b1 = acc % 256
+
+			out[nOut + 1] = string.char(b1)
+			out[nOut + 2] = string.char(b2)
+			out[nOut + 3] = string.char(b3)
+			nOut += 3
+			nAcc = 0
+			acc = 0
+		end
+	end
+
+	if nAcc == 3 then
+		-- 3 hextets -> 16 bit output
+		acc *= 64
+		acc = math.floor(acc / 256)
+		local b2 = acc % 256
+		acc = math.floor(acc / 256)
+		local b1 = acc % 256
+
+		out[nOut + 1] = string.char(b1)
+		out[nOut + 2] = string.char(b2)
+	elseif nAcc == 2 then
+		-- 2 hextets -> 8 bit output
+		acc *= 64
+		acc = math.floor(acc / 256)
+		acc *= 64
+		acc = math.floor(acc / 256)
+		local b1 = acc % 256
+
+		out[nOut + 1] = string.char(b1)
+	elseif nAcc == 1 then
+		error("Base64 has invalid length")
+	end
+
+	return table.concat(out, "")
+end
 
 --// Plugin Finalization.
 
@@ -4490,12 +4560,12 @@ return (Base64);]]></ProtectedString>
 				<BinaryString name="Tags"></BinaryString>
 			</Properties>
 		</Item>
-		<Item class="ModuleScript" referent="RBX0BCD57C51B64463D8022EA0EBAB88F10">
+		<Item class="ModuleScript" referent="RBX14AB0EBC9D4F4E54B7ADF40161ABFDE7">
 			<Properties>
 				<BinaryString name="AttributesSerialize"></BinaryString>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">Curve25519</string>
-				<string name="ScriptGuid">{968C0B2F-FE34-4D3E-9136-04A2380B7448}</string>
+				<string name="ScriptGuid">{CE944F90-1821-40BE-8F7B-3AF447480A32}</string>
 				<ProtectedString name="Source"><![CDATA[--// Type Definitions //--
 
 type Array<Type> = {[number] : Type};
@@ -4562,12 +4632,12 @@ return (Curve25519);]]></ProtectedString>
 				<int64 name="SourceAssetId">-1</int64>
 				<BinaryString name="Tags"></BinaryString>
 			</Properties>
-			<Item class="ModuleScript" referent="RBX414A1A1342FF435A89230C58FFF4E0F3">
+			<Item class="ModuleScript" referent="RBX01DA1178291945B1AB7586B5C23B6D45">
 				<Properties>
 					<BinaryString name="AttributesSerialize"></BinaryString>
 					<Content name="LinkedSource"><null></null></Content>
 					<string name="Name">SHA256</string>
-					<string name="ScriptGuid">{AE3991A2-DA9D-4A85-9A3C-6DB2EED1F900}</string>
+					<string name="ScriptGuid">{01462FBB-4FF2-4B9F-BCF8-42A3827686B8}</string>
 					<ProtectedString name="Source"><![CDATA[--[[::
 
 Copyright (C) 2021, Luc Rodriguez (Aliases : Shambi, StyledDev).
@@ -4798,12 +4868,12 @@ end;]]></ProtectedString>
 					<BinaryString name="Tags"></BinaryString>
 				</Properties>
 			</Item>
-			<Item class="ModuleScript" referent="RBXC20AAEC69CF740969913F075E763E7EA">
+			<Item class="ModuleScript" referent="RBX751747D9CEA24C308F763ABD91ABD4E5">
 				<Properties>
 					<BinaryString name="AttributesSerialize"></BinaryString>
 					<Content name="LinkedSource"><null></null></Content>
 					<string name="Name">EC25519</string>
-					<string name="ScriptGuid">{B560EBA7-29CD-445B-AC86-BFDE4F6839D6}</string>
+					<string name="ScriptGuid">{9E34163B-7677-4F0B-B93B-C6C0DF105434}</string>
 					<ProtectedString name="Source"><![CDATA[local bit = require(script.Bit);
 
 -- u8 * 32
@@ -5024,12 +5094,12 @@ return ({
 					<int64 name="SourceAssetId">-1</int64>
 					<BinaryString name="Tags"></BinaryString>
 				</Properties>
-				<Item class="ModuleScript" referent="RBX9503AB34F4DB453F8A11BD94869D8E5B">
+				<Item class="ModuleScript" referent="RBX2C28A4591C1543039FAE0A217AC9A88B">
 					<Properties>
 						<BinaryString name="AttributesSerialize"></BinaryString>
 						<Content name="LinkedSource"><null></null></Content>
 						<string name="Name">Bit</string>
-						<string name="ScriptGuid">{45E575A3-A9D9-4748-BF8F-15F41F7D788C}</string>
+						<string name="ScriptGuid">{C085A633-F52E-4F0D-A033-A5D3E97156D8}</string>
 						<ProtectedString name="Source"><![CDATA[-- Custom Bit32 library to fit Curve25519's functionality.
 
 function tb(n)
@@ -5112,12 +5182,12 @@ return ({
 					</Properties>
 				</Item>
 			</Item>
-			<Item class="ModuleScript" referent="RBX9BF1071BE9E34C25AFC9914EF666A6ED">
+			<Item class="ModuleScript" referent="RBXB8BF2298F54E45C6B7B438CE7F153773">
 				<Properties>
 					<BinaryString name="AttributesSerialize"></BinaryString>
 					<Content name="LinkedSource"><null></null></Content>
 					<string name="Name">KEY</string>
-					<string name="ScriptGuid">{ABC6E78B-4875-4B99-92A0-74FEB8EAFA25}</string>
+					<string name="ScriptGuid">{9E821061-B1B1-45DB-AB89-B49DEE1E273B}</string>
 					<ProtectedString name="Source"><![CDATA[type Sequence = { [number] : number };
 
 return (function() : --[[ 32-Byte ]] Sequence
