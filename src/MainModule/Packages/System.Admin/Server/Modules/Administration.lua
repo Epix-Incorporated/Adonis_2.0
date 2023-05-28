@@ -56,9 +56,9 @@ local Admin = {
 			Finder = function(data, text, matched)
 				local player = Service.Players:FindFirstChild(matched)
 
-				if not player and data.SpoofPlayers then
-					--// Spoof player
-				end
+				--if not player and data.SpoofPlayers then
+				--	--// Spoof player
+				--end
 
 				return { player }
 			end
@@ -72,7 +72,7 @@ local Admin = {
 				local userId = tonumber(matched)
 
 				if userId then
-					for i,player in ipairs(Service.Players:GetPlayers()) do
+					for _, player in ipairs(Service.Players:GetPlayers()) do
 						if player.UserId == userId then
 							table.insert(found, player)
 							break;
@@ -80,9 +80,9 @@ local Admin = {
 					end
 				end
 
-				if #found == 0 and data.SpoofPlayers then
-					--// Spoof player
-				end
+				--if #found == 0 and data.SpoofPlayers then
+				--	--// Spoof player
+				--end
 
 				return found
 			end
@@ -96,7 +96,7 @@ local Admin = {
 				local found = {}
 
 				--// Usernames first
-				for i,player in ipairs(Service.Players:GetPlayers()) do
+				for _, player in ipairs(Service.Players:GetPlayers()) do
 					if string.sub(string.lower(player.Name), 1, #text) == string.lower(text) then
 						table.insert(found, player)
 					end
@@ -104,7 +104,7 @@ local Admin = {
 
 				--// If no username matches, then displaynames
 				if #found == 0 then
-					for i,player in ipairs(Service.Players:GetPlayers()) do
+					for _, player in ipairs(Service.Players:GetPlayers()) do
 						if string.sub(string.lower(player.DisplayName), 1, #text) == string.lower(text) then
 							table.insert(found, player)
 						end
@@ -132,9 +132,9 @@ function Admin.GetPlayers(self, data: {}, text: string)
 	else
 		local foundPlayers = {}
 		local subArgs = Utilities:SplitString(text, ',', true)
-		for i,matchThis in ipairs(subArgs) do
+		for _, matchThis in ipairs(subArgs) do
 			for ind, finderData in pairs(self.PlayerFinders) do
-				if (not data.Safe or (data.Safe and finderData.Safe)) then
+				if not data.Safe or (data.Safe and finderData.Safe) then
 					local matched = string.match(matchThis, finderData.Regex)
 					if matched then
 						Utilities:AddRange(foundPlayers, finderData.Finder(data, text, matched))
@@ -152,8 +152,9 @@ end
 --- @within Server.Admin
 --- @param data {} -- Data table containing properties/methods to automatically add to the new spoof object
 function Admin.NewSpoofObject(self, data: {})
-	local spoofObject = Instance.new("Folder", data and data.Properties)
+	local spoofObject = Instance.new("Folder")
 	local wrapped = Utilities:Wrap(spoofObject)
+	spoofObject.Parent = data and data.Properties
 
 	if data and data.Special then
 		for ind,val in pairs(data.Special) do

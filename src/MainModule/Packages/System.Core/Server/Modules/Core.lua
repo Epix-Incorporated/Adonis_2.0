@@ -292,7 +292,7 @@ end
 local function PlayerRemoved(p)
 	local data = Core:GetPlayerData(p)
 	Utilities.Events.RemovingPlayerData:Fire(p, data)
-	wait(0.5);
+	task.wait(0.5);
 	Core.PlayerData:SetData(p.UserId, nil)
 	Root.Logging:AddLog("Connections", "%s left", p.Name);
 end

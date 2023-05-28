@@ -91,7 +91,7 @@ return function(Loader: {}, Settings: {}, Packages: Folder)
 	addRange(Root.Packages, script.Packages:GetChildren(), Packages:GetChildren())
 
 	--// Remove disabled packages
-	if Settings.DisabledPackages and table.getn(Settings.DisabledPackages) > 0 then
+	if Settings.DisabledPackages and #Settings.DisabledPackages > 0 then
 		for i, package in ipairs(Root.Packages) do
 			local metadata = PackageHandler.GetMetadata(package)
 

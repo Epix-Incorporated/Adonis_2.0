@@ -323,9 +323,9 @@ return {
 		Root.PersistentData = setmetatable({}, {
 			__index = function(self, ind)
 				local gotData = persistentData:GetData(ind)
-				if not gotData then
-
-				end
+				--if not gotData then
+				--	
+				--end
 			end,
 
 			__newindex = function(self, ind, value)

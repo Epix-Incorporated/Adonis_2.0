@@ -1,4 +1,5 @@
 --!strict
+--# selene: allow(global_usage)
 --[[
 	Description: Makes a virtual environment to replace the legacy function environment for running code
 	Author: github@ccuser44
@@ -48,7 +49,7 @@ local globalEnv: dictionary = {
 	xpcall = xpcall,
 	warn = warn,
 	gcinfo = gcinfo,
-	--_G = _G,
+	_G = _G,
 	_VERSION = _VERSION,
 
 	-- // Roblox globals
@@ -59,7 +60,7 @@ local globalEnv: dictionary = {
 	require = require,
 	game = game,
 	workspace = workspace,
-	--shared = shared,
+	shared = shared,
 
 	-- // Deprecated Roblox globals (Please don't use, use the alternative instead)
 	delay = task.delay,-- Use task.delay instead
@@ -109,11 +110,7 @@ local globalEnv: dictionary = {
 table.freeze(globalEnv)
 
 return function()
-	local env: dictionary = {}
-
-	for k: string, v: any in pairs(globalEnv) do
-		env[k] = v
-	end
+	local env: dictionary = table.clone(globalEnv)
 
 	env._ENV = env :: dictionary
 
