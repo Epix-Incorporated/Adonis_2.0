@@ -50,15 +50,6 @@ If you get stuck, feel free to ask for assistance in our [Discord server](https:
 3. Import the compiled model file into Studio
   * Note: By default, loaders compiled from the repository have [`DebugMode`](#debug-mode) enabled. **This method compiles the *bleeding edge* version of Adonis, which may be unstable.**
 
-## 🛠️ Debug Mode {#debug-mode}
-
-The Adonis loader provides a `DebugMode` option which will load a local copy of the `MainModule` rather than fetching the latest version. This could be useful if you want to stay on a particular version of Adonis or want to maintain a custom version for your game. Debug mode expects the `MainModule` to share the same parent with the loader model (e.g. both should be in `ServerScriptService`). **By default, snapshots provided in  releases have `DebugMode` enabled.**
-
-### Toggling debug mode {#toggling-debug-mode}
-
-1. Open `Adonis_Loader` > `Loader` > `Loader`
-2. Change `DebugMode` at the end of the `data` table to the desired value (e.g. `DebugMode = false`)
-
 ## 🔗 Links {#links}
 
 * Official Adonis Loader: <https://www.roblox.com/library/7510622625/Adonis-Loader>
